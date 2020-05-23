@@ -39,6 +39,8 @@
             this.lblPitchValue = new System.Windows.Forms.Label();
             this.lblPitch = new System.Windows.Forms.Label();
             this.btnSpeak = new System.Windows.Forms.Button();
+            this.button1 = new System.Windows.Forms.Button();
+            this.lblButtonStatus = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.slSpeed)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.slPitch)).BeginInit();
             this.SuspendLayout();
@@ -155,11 +157,34 @@
             this.btnSpeak.UseVisualStyleBackColor = false;
             this.btnSpeak.Click += new System.EventHandler(this.btnSpeak_Click);
             // 
+            // button1
+            // 
+            this.button1.Location = new System.Drawing.Point(15, 425);
+            this.button1.Name = "button1";
+            this.button1.Size = new System.Drawing.Size(75, 23);
+            this.button1.TabIndex = 11;
+            this.button1.Text = "Simulate";
+            this.button1.UseVisualStyleBackColor = true;
+            this.button1.Visible = false;
+            this.button1.Click += new System.EventHandler(this.button1_Click);
+            // 
+            // lblButtonStatus
+            // 
+            this.lblButtonStatus.BackColor = System.Drawing.SystemColors.ControlDark;
+            this.lblButtonStatus.Location = new System.Drawing.Point(464, 408);
+            this.lblButtonStatus.Name = "lblButtonStatus";
+            this.lblButtonStatus.Size = new System.Drawing.Size(141, 40);
+            this.lblButtonStatus.TabIndex = 12;
+            this.lblButtonStatus.Text = "Inititing...";
+            this.lblButtonStatus.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            // 
             // Form2
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(809, 461);
+            this.Controls.Add(this.lblButtonStatus);
+            this.Controls.Add(this.button1);
             this.Controls.Add(this.btnSpeak);
             this.Controls.Add(this.lblPitch);
             this.Controls.Add(this.lblPitchValue);
@@ -198,5 +223,7 @@
         private System.Windows.Forms.Label lblPitchValue;
         private System.Windows.Forms.Label lblPitch;
         private System.Windows.Forms.Button btnSpeak;
+        private System.Windows.Forms.Button button1;
+        private System.Windows.Forms.Label lblButtonStatus;
     }
 }

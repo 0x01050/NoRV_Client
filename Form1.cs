@@ -38,6 +38,25 @@ namespace NoRV
 
             Form2 form = new Form2(InfoList);
             form.ShowDialog();
+            ButtonOff();
+        }
+
+        private void ButtonOff()
+        {
+            StringBuilder DeviceName = new StringBuilder(Delcom.MAXDEVICENAMELEN);
+            if (Delcom.DelcomGetNthDevice(0, 0, DeviceName) == 0)
+            {
+                return;
+            }
+            uint deviceHandle = Delcom.DelcomOpenDevice(DeviceName, 0);
+            if (deviceHandle == 0)
+            {
+                return;
+            }
+            const int ledColor = Delcom.GREENLED;
+            Delcom.DelcomLEDControl(deviceHandle, ledColor, Delcom.LEDON);
+            Delcom.DelcomLEDPower(deviceHandle, ledColor, 0);
+            Delcom.DelcomCloseDevice(deviceHandle);
         }
 
         private void Validate(object sender, EventArgs e)
@@ -60,6 +79,11 @@ namespace NoRV
                 }
             }
             btnNext.Enabled = true;
+        }
+
+        private void Form1_Load(object sender, EventArgs e)
+        {
+            ButtonOff();
         }
     }
 }

@@ -197,7 +197,9 @@
             this.Controls.Add(this.lblText);
             this.Controls.Add(this.txtSource);
             this.MaximizeBox = false;
+            this.MaximumSize = new System.Drawing.Size(825, 500);
             this.MinimizeBox = false;
+            this.MinimumSize = new System.Drawing.Size(825, 500);
             this.Name = "Form2";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "NoRV TTS - Step 2";

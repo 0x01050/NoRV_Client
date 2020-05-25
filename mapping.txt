@@ -1,0 +1,1 @@
+Your NoRV Machine ID,MachineID;Enter Name of Witness,Witness;Type of Witness,Template;Case Name,CaseName;You Represent,Counsel;Address of Deposition,Address;Time zone where the witness will be,TimeZone;Videographer (LEAVE BLANK- INTERNAL USE ONLY),Videographer;Commission (LEAVE BLANK- INTERNAL USE ONLY),Commission

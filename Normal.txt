@@ -1,0 +1,17 @@
+We are on the record. On #Date#, The time is now #Time#.
+
+Participants should be aware that this proceeding is being recorded and, as such, all conversations held in this room shall be recorded.
+Private conversations and/or attorney/client interactions should be held outside the presence of the NORV remote interface.
+
+Counsel conducting the deposition must announce the on and off the record times as well as the time the deposition concludes.
+
+This is the video recorded deposition of #Witness# being taken by counsel for the  #Counsel#.
+In the matter of: #CaseName#
+This Deposition is being taking at #Address#.
+
+My name is #Videographer# a Notarized remote legal video technician on behalf of NoRV located at 1333 El Camino Real, Burlingame, ca.
+My Commission number for the record is #Commission#.
+
+I am not related to any party in this action nor am I financially interested in the outcome.
+
+Would all present please identify yourselves for the record after which the reporter will identify themselves for the record and swear in the witness

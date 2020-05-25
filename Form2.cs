@@ -50,12 +50,12 @@ namespace NoRV
                 this.InfoList = InfoList;
 
                 Dictionary<string, int> tzAbbrev = new Dictionary<string, int>() {
-                    {"PDT (GMT -7)", -7},
-                    {"EDT (GMT -4)", -4},
-                    {"CDT (GMT -5)", -5},
-                    {"MDT (GMT -6)", -6},
-                    {"ADT (GMT -8)", -8},
-                    {"HAST (GMT -10)", -10}
+                    {"Pacific Time (PDT)", -7},
+                    {"Eastern Time (EDT)", -4},
+                    {"Central Time (CDT)", -5},
+                    {"Mountain Time (MDT)", -6},
+                    {"Alaska Time (ADT)", -8},
+                    {"Hawaii-Aleutian Standard Time (HAST)", -10}
                 };
 
                 if(this.InfoList.ContainsKey("TimeZone"))
@@ -75,7 +75,12 @@ namespace NoRV
         private void Form2_Load(object sender, EventArgs e)
         {
 
-            string template = File.ReadAllText("template.txt");
+            string template = "Normal";
+            if (this.InfoList.ContainsKey("Template"))
+            {
+                template = this.InfoList["Template"];
+            }
+            template = File.ReadAllText(template + ".txt");
             foreach (var info in this.InfoList)
             {
                 template = template.Replace("#" + info.Key + "#", info.Value);
@@ -120,14 +125,14 @@ namespace NoRV
             if (Delcom.DelcomGetNthDevice(0, 0, DeviceName) == 0)
             {
                 lblButtonStatus.Text = "No button";
-                MessageBox.Show("No button found, you can control with the button on the screen.", "NoRV", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                //MessageBox.Show("No button found, you can control with the button on the screen.", "NoRV", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 return;
             }
             deviceHandle = Delcom.DelcomOpenDevice(DeviceName, 0);
             if (deviceHandle == 0)
             {
                 lblButtonStatus.Text = "Can not open button";
-                MessageBox.Show("Button open failed, you can control with the button on the screen.", "NoRV", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                //MessageBox.Show("Button open failed, you can control with the button on the screen.", "NoRV", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 return;
             }
 
@@ -356,7 +361,7 @@ namespace NoRV
                 DateTime tzNow = DateTime.UtcNow.AddHours(offset);
                 SpeechSynthesizer speech = new SpeechSynthesizer();
                 string announce = File.ReadAllText("announce.txt");
-                speech.SpeakAsync(announce + tzNow.ToString(" h: mm tt"));
+                speech.SpeakAsync(announce + tzNow.ToString(" h:mm tt"));
                 speech.SpeakCompleted += Speech_SpeakCompleted;
             }));
         }
@@ -453,11 +458,13 @@ namespace NoRV
                     return;
                 foreach (Process obs in obs64)
                 {
-                    SetForegroundWindow(obs.MainWindowHandle);
-                    SendKeys.Send("^R");
+                    if (obs.MainWindowHandle != (IntPtr)0)
+                    {
+                        SetForegroundWindow(obs.MainWindowHandle);
+                        Thread.Sleep(100);
+                        SendKeys.Send("^R");
+                    }
                 }
-                Thread.Sleep(100);
-                Activate();
             }));
         }
         private void StopOBS()
@@ -469,11 +476,13 @@ namespace NoRV
                     return;
                 foreach (Process obs in obs64)
                 {
-                    SetForegroundWindow(obs.MainWindowHandle);
-                    SendKeys.Send("^S");
+                    if(obs.MainWindowHandle != (IntPtr)0)
+                    {
+                        SetForegroundWindow(obs.MainWindowHandle);
+                        Thread.Sleep(100);
+                        SendKeys.Send("^S");
+                    }
                 }
-                Thread.Sleep(100);
-                Activate();
             }));
         }
         [DllImport("user32.dll")]

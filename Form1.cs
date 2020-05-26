@@ -115,7 +115,6 @@ namespace NoRV
         private void Form1_Load(object sender, EventArgs e)
         {
             txtNoRVMachineID.Text = L.v();
-            Clipboard.SetText(txtNoRVMachineID.Text);
             ButtonOff();
             new Thread(new ThreadStart(LoadAppointments)).Start();
         }

@@ -194,15 +194,23 @@ namespace NoRV
         {
             while (true)
             {
-                Thread.Sleep(100);
+                Thread.Sleep(30);
+
                 if (deviceHandle == 0)
                     continue;
+
                 int btnStat = Delcom.DelcomGetButtonStatus(deviceHandle);
-                if (buttonStatus == 1 && btnStat == 0)
+
+                if (btnStat == 1) buttonStatus++;
+                if (btnStat == 0) buttonStatus--;
+
+                if (buttonStatus == 2)
                 {
                     ButtonClicked();
                 }
-                buttonStatus = btnStat;
+
+                if (buttonStatus > 2) buttonStatus = 2;
+                if (buttonStatus < 0) buttonStatus = 0;
             }
         }
         private int recordStatus = 0; // 0: before record, 1: during record

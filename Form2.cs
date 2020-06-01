@@ -95,7 +95,7 @@ namespace NoRV
                 MessageBox.Show("No available voice", "NoRV", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 this.Close();
             }
-            cbVoice.SelectedIndex = 2;
+            cbVoice.SelectedIndex = 1;
 
             DoInitialize();
         }
@@ -145,6 +145,7 @@ namespace NoRV
         {
             DateTime buttonPressed = DateTime.Now;
             bool isPressed = false;
+            bool longPressClicked = false;
             while (true)
             {
                 bool pressed = ButtonManager.getInstance().checkButtonPressed();
@@ -153,18 +154,25 @@ namespace NoRV
                 else
                     buttonStatus--;
 
-                if (buttonStatus == 2)
+                if (isPressed && buttonStatus > 2 && !longPressClicked)
+                {
+                    TimeSpan elapse = DateTime.Now - buttonPressed;
+                    if (elapse.TotalSeconds > 3)
+                    {
+                        longPressClicked = true;
+                        ButtonClicked(true);
+                    }
+                }
+                if (!isPressed && buttonStatus == 2)
                 {
                     isPressed = true;
                     buttonPressed = DateTime.Now;
                 }
                 if (isPressed && buttonStatus == 0)
                 {
-                    TimeSpan elapse = DateTime.Now - buttonPressed;
-                    if (elapse.TotalSeconds > 3)
-                        ButtonClicked(true);
-                    else
-                        ButtonClicked();
+                    isPressed = false;
+                    longPressClicked = false;
+                    ButtonClicked();
                 }
 
                 if (buttonStatus > 2)
@@ -182,7 +190,17 @@ namespace NoRV
                 return;
             }
 
-            if (status == STATUS_WAIT)
+            if (longPress)
+            {
+                if(status != STATUS_WAIT)
+                {
+                    btnSpeak.Invoke(new Action(() =>
+                    {
+                        btnSpeak.PerformClick();
+                    }));
+                }
+            }
+            else if (status == STATUS_WAIT)
             {
                 TimeSpan elapse = DateTime.Now - lastButtonClicked;
                 if (elapse.TotalSeconds > 10)
@@ -199,13 +217,6 @@ namespace NoRV
                         btnSpeak.PerformClick();
                     }));
                 }
-            }
-            else if (longPress)
-            {
-                btnSpeak.Invoke(new Action(() =>
-                {
-                    btnSpeak.PerformClick();
-                }));
             }
             else if (status == STATUS_RECORD)
             {
@@ -407,7 +418,8 @@ namespace NoRV
             DateTime tzNow = DateTime.UtcNow.AddHours(tzOffset);
             SynthesisInput input = new SynthesisInput
             {
-                Text = voiceText.Replace(this.lastTime, tzNow.ToString("h:mm tt"))
+                //Text = voiceText.Replace(this.lastTime, tzNow.ToString("h:mm tt"))
+                Text="Simple Google TTS"
             };
             VoiceSelectionParams voice = new VoiceSelectionParams
             {

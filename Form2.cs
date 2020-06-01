@@ -381,6 +381,7 @@ namespace NoRV
                 };
             });
             OBSManager.PauseOBSRecording();
+            startLEDFlash();
         }
         private void UnpauseRecording()
         {
@@ -398,6 +399,7 @@ namespace NoRV
                 };
             });
             OBSManager.UnpauseOBSRecording();
+            solidLED();
         }
 
         private void GenerateGoogleTTS()

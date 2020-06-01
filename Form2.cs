@@ -418,8 +418,7 @@ namespace NoRV
             DateTime tzNow = DateTime.UtcNow.AddHours(tzOffset);
             SynthesisInput input = new SynthesisInput
             {
-                //Text = voiceText.Replace(this.lastTime, tzNow.ToString("h:mm tt"))
-                Text="Simple Google TTS"
+                Text = voiceText.Replace(this.lastTime, tzNow.ToString("h:mm tt"))
             };
             VoiceSelectionParams voice = new VoiceSelectionParams
             {

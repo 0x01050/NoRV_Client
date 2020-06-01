@@ -39,12 +39,12 @@ namespace NoRV
             {
                 if ((string)item.Attribute("Key") == "MachineID")
                 {
-                    _machineIDKey = (string)item.Attribute("Value");
+                    _machineIDKey = (string)item.Attribute("Name");
                 }
                 else
                 {
                     _keyList.Add((string)item.Attribute("Key"));
-                    _nameList.Add((string)item.Attribute("Value"));
+                    _nameList.Add((string)item.Attribute("Name"));
                 }
             }
         }

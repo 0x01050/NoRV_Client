@@ -1,0 +1,64 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<AppConfig>
+  <OBS>
+    <Config Key="ProcessName" Value="obs64" />
+    <Config Key="StartHotkey" Value="^R" />  
+    <Config Key="StopHotkey" Value="^S" />  
+    <Config Key="PauseHotkey" Value="^P" />  
+    <Config Key="UnpauseHotkey" Value="^U" />  
+    <Config Key="DefaultVolume" Value="65" />  
+  </OBS>
+  
+  <Keywords>
+    <Keyword Key="MachineID" Name="Your NoRV Machine ID" />
+    <Keyword Key="Witness" Name="Enter Name of Witness" />
+    <Keyword Key="Template" Name="Type of Witness" />
+    <Keyword Key="CaseName" Name="Case Name" />
+    <Keyword Key="Counsel" Name="You Represent" />
+    <Keyword Key="Address" Name="Address of Deposition" />
+    <Keyword Key="TimeZone" Name="Time zone where the witness will be" />
+    <Keyword Key="Videographer" Name="Videographer (LEAVE BLANK- INTERNAL USE ONLY)" />
+    <Keyword Key="Commission" Name="Commission (LEAVE BLANK- INTERNAL USE ONLY)" />
+  </Keywords>
+  
+  <Templates>
+    <Template Type="Personal">
+      We are on the record. On #Date#, The time is now #Time#.
+
+      Participants should be aware that this proceeding is being recorded and, as such, all conversations held in this room shall be recorded.
+      Private conversations and/or attorney/client interactions should be held outside the presence of the NORV remote interface.
+
+      Counsel conducting the deposition must announce the on and off the record times as well as the time the deposition concludes.
+
+      This is the video recorded deposition of #Witness# being taken by counsel for the  #Counsel#.
+      In the matter of: #CaseName#
+      This Deposition is being taking at #Address#.
+
+      My name is #Videographer# a Notarized remote legal video technician on behalf of NoRV located at 1333 El Camino Real, Burlingame, ca.
+      My Commission number for the record is #Commission#.
+
+      I am not related to any party in this action nor am I financially interested in the outcome.
+
+      Would all present please identify yourselves for the record after which the reporter will identify themselves for the record and swear in the witness.
+    </Template>
+    <Template Type="30B6">
+      We are on the record. On #Date#, The time is now #Time#.
+
+      Participants should be aware that this proceeding is being recorded and, as such, all conversations held in this room shall be recorded.
+      Private conversations and/or attorney/client interactions should be held outside the presence of the NORV remote interface.
+
+      Counsel conducting the deposition must announce the on and off the record times as well as the time the deposition concludes.
+
+      This is the video recorded deposition of #Witness# being taken by counsel for the  #Counsel#.
+      In the matter of: #CaseName#
+      This Deposition is being taking at #Address#.
+
+      My name is #Videographer# a Notarized remote legal video technician on behalf of NoRV located at 1333 El Camino Real, Burlingame, ca.
+      My Commission number for the record is #Commission#.
+
+      I am not related to any party in this action nor am I financially interested in the outcome.
+
+      Would all present please identify yourselves for the record after which the reporter will identify themselves for the record and swear in the witness.
+    </Template>
+  </Templates>
+</AppConfig>

@@ -1,44 +1,71 @@
-﻿using Newtonsoft.Json;
+﻿using AudioSwitcher.AudioApi.CoreAudio;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Diagnostics;
-using System.Drawing;
-using System.IO;
 using System.Linq;
-using System.Net;
-using System.Net.Http;
-using System.Security.AccessControl;
-using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace NoRV
 {
     public partial class Form1 : Form
     {
+        private Thread loadThread = null;
+        private Thread volumeThread = null;
         public Form1()
         {
             InitializeComponent();
         }
+
+        private void Form1_Load(object sender, EventArgs e)
+        {
+            txtNoRVMachineID.Text = L.v();
+            ButtonManager.getInstance().turnOffLED();
+
+            startLoadThread();
+            startVolumeThread();
+        }
+
+        private void Form1_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            stopLoadThread();
+            stopVolumeThread();
+        }
+
+        private void startLoadThread()
+        {
+            stopLoadThread();
+            loadThread = new Thread(new ThreadStart(LoadAppointments));
+            loadThread.Start();
+        }
+        private void stopLoadThread()
+        {
+            if (loadThread != null)
+            {
+                loadThread.Abort();
+                loadThread = null;
+            }
+        }
+        private void startVolumeThread()
+        {
+            stopVolumeThread();
+            volumeThread = new Thread(new ThreadStart(VolumeCheck));
+            volumeThread.Start();
+        }
+        private void stopVolumeThread()
+        {
+            if (volumeThread != null)
+            {
+                volumeThread.Abort();
+                volumeThread = null;
+            }
+        }
+
         private void btnNext_Click(object sender, EventArgs e)
         {
             while(true)
             {
-                bool bFound = false;
-                Process[] obs64 = Process.GetProcessesByName("obs64");
-                foreach (Process obs in obs64)
-                {
-                    if(obs.MainWindowHandle != (IntPtr)0)
-                    {
-                        bFound = true;
-                        break;
-                    }
-                }
-                if(!bFound)
+                if(!OBSManager.CheckOBSRunning())
                 {
                     if(MessageBox.Show("Check if OBS is running please", "Warning", MessageBoxButtons.OKCancel) == DialogResult.Cancel)
                     {
@@ -50,6 +77,7 @@ namespace NoRV
                     break;
                 }
             }
+
             Dictionary<string, string> InfoList = new Dictionary<string, string>();
             foreach (ComboBox cb in this.Controls.OfType<ComboBox>())
             {
@@ -67,27 +95,11 @@ namespace NoRV
                 }
             }
 
+            stopLoadThread();
             Form2 form = new Form2(InfoList);
             form.ShowDialog();
-            ButtonOff();
-        }
-
-        private void ButtonOff()
-        {
-            StringBuilder DeviceName = new StringBuilder(Delcom.MAXDEVICENAMELEN);
-            if (Delcom.DelcomGetNthDevice(0, 0, DeviceName) == 0)
-            {
-                return;
-            }
-            uint deviceHandle = Delcom.DelcomOpenDevice(DeviceName, 0);
-            if (deviceHandle == 0)
-            {
-                return;
-            }
-            const int ledColor = Delcom.GREENLED;
-            Delcom.DelcomLEDControl(deviceHandle, ledColor, Delcom.LEDON);
-            Delcom.DelcomLEDPower(deviceHandle, ledColor, 0);
-            Delcom.DelcomCloseDevice(deviceHandle);
+            startLoadThread();
+            ButtonManager.getInstance().turnOffLED();
         }
 
         private void Validate(object sender, EventArgs e)
@@ -112,13 +124,6 @@ namespace NoRV
             btnNext.Enabled = true;
         }
 
-        private void Form1_Load(object sender, EventArgs e)
-        {
-            txtNoRVMachineID.Text = L.v();
-            ButtonOff();
-            new Thread(new ThreadStart(LoadAppointments)).Start();
-        }
-
         private void ClearFields()
         {
             foreach (ComboBox cb in this.Controls.OfType<ComboBox>())
@@ -138,6 +143,7 @@ namespace NoRV
 
         private void btnLoad_Click(object sender, EventArgs e)
         {
+            stopLoadThread();
             Form3 form = new Form3();
             if(form.ShowDialog() == DialogResult.OK)
             {
@@ -149,6 +155,7 @@ namespace NoRV
                     
                 }
             }
+            startLoadThread();
         }
 
         private void SetInfo(JObject appointItem)
@@ -162,46 +169,47 @@ namespace NoRV
                     {
                         dynamic[] infos = ((JArray)info.values).ToArray<dynamic>();
 
-                        string mapping = File.ReadAllText("mapping.txt");
-                        string[] keyMaps = mapping.Split(new char[] { ';' });
+                        string[] keyList = Config.getInstance().getKeyList();
                         foreach (dynamic oneInfo in infos)
                         {
                             if (oneInfo.value != null && oneInfo.name != null)
                             {
-                                foreach (string key in keyMaps)
+                                for(int idx = 0; idx < keyList.Length; idx ++)
                                 {
-                                    string[] names = key.Split(new char[] { ',' });
-                                    if (names.Length == 2 && names[0] == oneInfo.name.ToString())
+                                    string key = keyList[idx];
+                                    string name = Config.getInstance().getPairName(idx);
+
+                                    if (key == oneInfo.name.ToString())
                                     {
-                                        if (names[1] == "Witness")
+                                        if (name == "Witness")
                                         {
                                             Witness.Text = oneInfo.value;
                                         }
-                                        if (names[1] == "Template")
+                                        if (name== "Template")
                                         {
                                             Template.SelectedItem = oneInfo.value.ToString().Trim();
                                         }
-                                        if (names[1] == "CaseName")
+                                        if (name == "CaseName")
                                         {
                                             CaseName.Text = oneInfo.value;
                                         }
-                                        if (names[1] == "Counsel")
+                                        if (name == "Counsel")
                                         {
                                             Counsel.SelectedItem = oneInfo.value.ToString().Trim();
                                         }
-                                        if (names[1] == "Address")
+                                        if (name == "Address")
                                         {
                                             Address.Text = oneInfo.value;
                                         }
-                                        if (names[1] == "TimeZone")
+                                        if (name == "TimeZone")
                                         {
                                             TimeZone.SelectedItem = oneInfo.value.ToString().Trim();
                                         }
-                                        if (names[1] == "Videographer")
+                                        if (name == "Videographer")
                                         {
                                             Videographer.Text = oneInfo.value;
                                         }
-                                        if (names[1] == "Commission")
+                                        if (name == "Commission")
                                         {
                                             Commission.Text = oneInfo.value;
                                         }
@@ -216,100 +224,57 @@ namespace NoRV
 
         private void LoadAppointments()
         {
+            int sleepTime = 10 * 10000;
+            while (true)
+            {
+                sleepTime = 10 * 10000;
+                try
+                {
+                    List<JObject> jobs = JobManager.getJobs();
+                    if(jobs.Count > 0)
+                    {
+                        SetInfo(jobs[0]);
+                        btnNext.Invoke(new Action(() =>
+                        {
+                            btnNext.PerformClick();
+                        }));
+                        sleepTime = 30 * 10000;
+                    }
+                }
+                catch(ThreadAbortException)
+                {
+                    return;
+                }
+                catch(Exception)
+                {
+                }
+                Thread.Sleep(sleepTime);
+            }
+        }
+
+        private void VolumeCheck()
+        {
+            int sleepTime = 1 * 1000;
             while (true)
             {
                 try
                 {
-                    var httpClient = new HttpClient()
+                    CoreAudioDevice defaultPlaybackDevice = new CoreAudioController().DefaultPlaybackDevice;
+                    double vol = defaultPlaybackDevice.Volume;
+                    if(vol != Config.getInstance().getDefaultVolume())
                     {
-                        Timeout = new TimeSpan(0, 0, 5)
-                    };
-                    httpClient.DefaultRequestHeaders.Add("ContentType", "application/json");
-                    var apiKeyPwd = Encoding.UTF8.GetBytes("19487502:30fce42b9991bbd32cea500a49c7d3b9");
-                    string basicAuth = Convert.ToBase64String(apiKeyPwd);
-                    httpClient.DefaultRequestHeaders.Add("Authorization", "Basic " + basicAuth);
-
-                    var method = new HttpMethod("GET");
-                    string now = DateTime.Now.ToString("yyyy-MM-dd");
-                    HttpResponseMessage response = httpClient.GetAsync("https://acuityscheduling.com/api/v1/appointments?direction=ASC&minDate=" + now + "&maxDate=" + now).Result;
-                    if (response.StatusCode == HttpStatusCode.OK)
-                    {
-                        string content = response.Content.ReadAsStringAsync().Result;
-                        object respObj = JsonConvert.DeserializeObject(content);
-                        if (respObj is JArray respArray)
-                        {
-                            JObject item = null;
-
-                            string mapping = File.ReadAllText("mapping.txt");
-                            string[] keyMaps = mapping.Split(new char[] { ';' });
-                            string machineIDKey = "";
-                            foreach (string key in keyMaps)
-                            {
-                                string[] names = key.Split(new char[] { ',' });
-                                if (names.Length == 2 && names[1] == "MachineID")
-                                    machineIDKey = names[0];
-                            }
-                            foreach (JObject appointItem in respArray)
-                            {
-                                if (appointItem.ContainsKey("datetime"))
-                                {
-                                    string datetime = appointItem.GetValue("datetime").ToString();
-                                    string NoRVID = "";
-
-                                    if (appointItem.ContainsKey("forms") && appointItem.GetValue("forms") is JArray forms && forms.Count > 0)
-                                    {
-                                        dynamic info = forms.ToArray<dynamic>()[0];
-                                        if (info.values != null && info.values is JArray)
-                                        {
-                                            dynamic[] infos = ((JArray)info.values).ToArray<dynamic>();
-                                            foreach (dynamic oneInfo in infos)
-                                            {
-                                                if (oneInfo.value != null && oneInfo.name != null)
-                                                {
-                                                    if (oneInfo.name == machineIDKey)
-                                                    {
-                                                        NoRVID = oneInfo.value;
-                                                        break;
-                                                    }
-                                                }
-                                            }
-                                        }
-                                    }
-                                    if (NoRVID == L.v())
-                                    {
-                                        if (item != null)
-                                        {
-                                            return;
-                                        }
-                                        item = appointItem;
-                                    }
-                                }
-                            }
-
-                            if (item != null)
-                            {
-                                Invoke(new Action(() =>
-                                {
-                                    SetInfo(item);
-                                    btnNext.PerformClick();
-                                }));
-                                return;
-                            }
-
-                            if (item == null)
-                            {
-                                return;
-                            }
-                        }
+                        defaultPlaybackDevice.Volume = Config.getInstance().getDefaultVolume();
                     }
-                    else
-                    {
-                    }
+                }
+                catch (ThreadAbortException)
+                {
+                    return;
                 }
                 catch (Exception)
                 {
+
                 }
-                Thread.Sleep(10000);
+                Thread.Sleep(sleepTime);
             }
         }
     }

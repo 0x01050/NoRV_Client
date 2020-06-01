@@ -1,32 +1,19 @@
 ﻿using Google.Apis.Auth.OAuth2;
 using Google.Cloud.TextToSpeech.V1;
-using Google.Protobuf.WellKnownTypes;
 using Grpc.Auth;
 using Grpc.Core;
 using NAudio.Wave;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Diagnostics;
-using System.Drawing;
-using System.Drawing.Text;
 using System.IO;
-using System.Linq;
-using System.Media;
-using System.Runtime.InteropServices;
 using System.Speech.Synthesis;
-using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace NoRV
 {
     public partial class Form2 : Form
     {
-
-
         private GoogleCredential googleCredential;
         private Channel channel;
         private TextToSpeechClient client;
@@ -36,9 +23,8 @@ namespace NoRV
         private string voiceText = "";
         private double speed = 1.0;
         private double pitch = 0.0;
-        private string status = "stop";
         private string lastTime = "#Time#";
-        private int offset = 0;
+        private int tzOffset = 0;
 
         IWavePlayer waveOutDevice = null;
         AudioFileReader audioFileReader = null;
@@ -62,8 +48,8 @@ namespace NoRV
                 {
                     string tz = this.InfoList["TimeZone"];
                     this.InfoList.Remove("TimeZone");
-                    offset = tzAbbrev[tz];
-                    DateTime tzNow = DateTime.UtcNow.AddHours(offset);
+                    tzOffset = tzAbbrev[tz];
+                    DateTime tzNow = DateTime.UtcNow.AddHours(tzOffset);
                     this.InfoList.Add("Date", tzNow.ToString("MMM dd, yyyy"));
                     this.InfoList.Add("Time", this.lastTime = tzNow.ToString("h:mm tt"));
                 }
@@ -80,7 +66,8 @@ namespace NoRV
             {
                 template = this.InfoList["Template"];
             }
-            template = File.ReadAllText(template + ".txt");
+            template = Config.getInstance().getTemplate(template);
+            
             foreach (var info in this.InfoList)
             {
                 template = template.Replace("#" + info.Key + "#", info.Value);
@@ -108,199 +95,146 @@ namespace NoRV
                 MessageBox.Show("No available voice", "NoRV", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 this.Close();
             }
-            cbVoice.SelectedIndex = 1;
+            cbVoice.SelectedIndex = 2;
 
-            DeviceOpen();
+            DoInitialize();
+        }
+        private void Form2_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            DisposeAudioPlayer();
+            OBSManager.StopOBSRecording();
+            stopButtonCheck();
+            stopLEDFlash();
         }
 
-        private Thread buttonCheckThread = null;
-        private uint deviceHandle = 0;
-        private int ledColor = Delcom.GREENLED;
-        private int buttonStatus = 0; // 0: Released, 1: Pressed
-        private int ledStatus = 0; // 0: Off, 1: On, 2: Flash Off, 3: Flash On
+
+        private static string STATUS_WAIT = "WAIT";
+        private string STATUS_RECORD = "RECORD";
+        private string STATUS_PAUSE = "PAUSE";
+
+        private bool ignoreInput = false;
+        private string status = STATUS_WAIT;
+
         private DateTime lastButtonClicked;
-        private void DeviceOpen()
+        private Thread buttonCheckThread = null;
+        int buttonStatus = 0;
+        private Thread ledFlashThread = null;
+        private void DoInitialize()
         {
-            StringBuilder DeviceName = new StringBuilder(Delcom.MAXDEVICENAMELEN);
-            if (Delcom.DelcomGetNthDevice(0, 0, DeviceName) == 0)
-            {
-                lblButtonStatus.Text = "No button";
-                //MessageBox.Show("No button found, you can control with the button on the screen.", "NoRV", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                return;
-            }
-            deviceHandle = Delcom.DelcomOpenDevice(DeviceName, 0);
-            if (deviceHandle == 0)
-            {
-                lblButtonStatus.Text = "Can not open button";
-                //MessageBox.Show("Button open failed, you can control with the button on the screen.", "NoRV", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                return;
-            }
-
-            lblButtonStatus.Text = "Initiated";
-            Delcom.DelcomLEDControl(deviceHandle, ledColor, Delcom.LEDON);
-            LEDFlash();
-
+            lblButtonStatus.Text = ButtonManager.getInstance().getButtonStatus();
             lastButtonClicked = DateTime.Now.AddSeconds(-15);
+            startButtonCheck();
+            startLEDFlash();
+        }
+
+        private void startButtonCheck()
+        {
+            stopButtonCheck();
             buttonCheckThread = new Thread(new ThreadStart(ButtonCheckProcedure));
             buttonCheckThread.Start();
         }
-        private Thread ledFlashThread = null;
-        private void LEDFlash()
+        private void stopButtonCheck()
         {
-            DestroyLEDFlashThread();
-            ledStatus = 2;
-            ledFlashThread = new Thread(new ThreadStart(LEDFlashProcedure));
-            ledFlashThread.Start();
-        }
-        private void LEDOn()
-        {
-            Delcom.DelcomLEDPower(deviceHandle, ledColor, 100);
-        }
-        private void LEDOff()
-        {
-            Delcom.DelcomLEDPower(deviceHandle, ledColor, 0);
-
-        }
-        private void DestroyLEDFlashThread()
-        {
-            if (ledFlashThread != null)
+            if(buttonCheckThread != null)
             {
-                ledFlashThread.Abort();
-                ledFlashThread = null;
+                buttonCheckThread.Abort();
+                buttonCheckThread = null;
             }
         }
-        private void LEDFlashProcedure()
-        {
-            while (true)
-            {
-                Thread.Sleep(1000);
-                if (deviceHandle == 0)
-                    continue;
-                if (ledStatus < 2)
-                    continue;
-                ledStatus = 5 - ledStatus;
-                if (ledStatus == 2)
-                {
-                    LEDOff();
-                }
-                if (ledStatus == 3)
-                {
-                    LEDOn();
-                }
-            }
-        }
-
         private void ButtonCheckProcedure()
         {
+            DateTime buttonPressed = DateTime.Now;
+            bool isPressed = false;
             while (true)
             {
-                Thread.Sleep(30);
-
-                if (deviceHandle == 0)
-                    continue;
-
-                int btnStat = Delcom.DelcomGetButtonStatus(deviceHandle);
-
-                if (btnStat == 1) buttonStatus++;
-                if (btnStat == 0) buttonStatus--;
+                bool pressed = ButtonManager.getInstance().checkButtonPressed();
+                if (pressed)
+                    buttonStatus++;
+                else
+                    buttonStatus--;
 
                 if (buttonStatus == 2)
                 {
-                    ButtonClicked();
+                    isPressed = true;
+                    buttonPressed = DateTime.Now;
+                }
+                if (isPressed && buttonStatus == 0)
+                {
+                    TimeSpan elapse = DateTime.Now - buttonPressed;
+                    if (elapse.TotalSeconds > 3)
+                        ButtonClicked(true);
+                    else
+                        ButtonClicked();
                 }
 
-                if (buttonStatus > 2) buttonStatus = 2;
-                if (buttonStatus < 0) buttonStatus = 0;
+                if (buttonStatus > 2)
+                    buttonStatus = 2;
+                if (buttonStatus < 0)
+                    buttonStatus = 0;
+                
+                Thread.Sleep(30);
             }
         }
-        private int recordStatus = 0; // 0: before record, 1: during record
-        private void ButtonClicked()
+        private void ButtonClicked(bool longPress = false)
         {
-            if(status != "stop")
+            if(ignoreInput)
             {
                 return;
             }
 
-            DateTime now = DateTime.Now;
-            TimeSpan span = now - lastButtonClicked;
-            if(span.TotalSeconds > 10)
+            if (status == STATUS_WAIT)
             {
-                if(recordStatus == 0)
+                TimeSpan elapse = DateTime.Now - lastButtonClicked;
+                if (elapse.TotalSeconds > 10)
                 {
-                    this.Invoke(new Action(() =>
+                    PlayMP3("Audios/StartAudio.mp3", (s, e) =>
                     {
-                        status = "instruction";
-                        DisposeAudioPlayer();
-                        waveOutDevice = new WaveOut();
-                        audioFileReader = new AudioFileReader("Audio_1.mp3");
-                        waveOutDevice.Init(audioFileReader);
-                        waveOutDevice.Play();
-                        waveOutDevice.PlaybackStopped += InstructionStop;
-                    }));
+                        lastButtonClicked = DateTime.Now;
+                    });
                 }
-                if(recordStatus == 1)
+                else
                 {
-                    this.Invoke(new Action(() =>
+                    btnSpeak.Invoke(new Action(() =>
                     {
-                        status = "instruction";
-                        DisposeAudioPlayer();
-                        waveOutDevice = new WaveOut();
-                        audioFileReader = new AudioFileReader("Audio_2.mp3");
-                        waveOutDevice.Init(audioFileReader);
-                        waveOutDevice.Play();
-                        waveOutDevice.PlaybackStopped += InstructionStop;
+                        btnSpeak.PerformClick();
                     }));
                 }
             }
-            else
+            else if (longPress)
             {
-                DisposeAudioPlayer();
-                ScreenButtonClick();
+                btnSpeak.Invoke(new Action(() =>
+                {
+                    btnSpeak.PerformClick();
+                }));
+            }
+            else if (status == STATUS_RECORD)
+            {
+                PauseRecording();
+            }
+            else if(status == STATUS_PAUSE)
+            {
+                UnpauseRecording();
             }
         }
-
-        private void InstructionStop(object sender = null, EventArgs e = null)
+        private void PlayMP3(string mp3File, EventHandler<StoppedEventArgs> stopHandler = null)
         {
+            DisposeAudioPlayer();
             this.Invoke(new Action(() =>
             {
-                status = "stop";
-                lastButtonClicked = DateTime.Now;
-            }));
-        }
-
-        private void slSpeed_ValueChanged(object sender, EventArgs e)
-        {
-            this.speed = slSpeed.Value / 10.0;
-            lblSpeedValue.Text = String.Format("{0:N2}", this.speed);
-        }
-
-        private void slPitch_ValueChanged(object sender, EventArgs e)
-        {
-            this.pitch = slPitch.Value / 10.0;
-            lblPitchValue.Text = String.Format("{0:N2}", this.pitch);
-        }
-
-        private void Play()
-        {
-            this.Invoke(new Action(() =>
-            {
-                btnSpeak.Image = Properties.Resources.stop;
-                btnSpeak.Text = "STOP IT";
-                status = "speak";
-                recordStatus = 1;
-                ledStatus = 1;
-
-                StartOBS();
-                LEDOn();
-                Thread.Sleep(2000);
-                sound();
-
-                DisposeAudioPlayer();
+                ignoreInput = true;
                 waveOutDevice = new WaveOut();
-                audioFileReader = new AudioFileReader("tts.mp3");
+                audioFileReader = new AudioFileReader(mp3File);
                 waveOutDevice.Init(audioFileReader);
                 waveOutDevice.Play();
-                waveOutDevice.PlaybackStopped += Stop;
+                waveOutDevice.PlaybackStopped += (s, e) =>
+                {
+                    DisposeAudioPlayer();
+                    ignoreInput = false;
+                };
+                if (stopHandler != null)
+                {
+                    waveOutDevice.PlaybackStopped += stopHandler;
+                }
             }));
         }
         private void DisposeAudioPlayer()
@@ -324,178 +258,176 @@ namespace NoRV
             }));
         }
 
-        private void Stop(object sender = null, EventArgs e = null)
+
+
+        private void startLEDFlash()
         {
-            this.Invoke(new Action(() =>
-            {
-                status = "stop";
-
-                DisposeAudioPlayer();
-
-                File.Delete("tts.mp3");
-            }));
+            stopLEDFlash();
+            ledFlashThread = new Thread(new ThreadStart(LEDFlashProcedure));
+            ledFlashThread.Start();
         }
+        private void stopLEDFlash()
+        {
+            if (ledFlashThread != null)
+            {
+                ledFlashThread.Abort();
+                ledFlashThread = null;
+            }
+        }
+        private void LEDFlashProcedure()
+        {
+            bool ledStatus = true;
+            while (true)
+            {
+                Thread.Sleep(1000);
+                if(ledStatus)
+                {
+                    ButtonManager.getInstance().turnOnLED();
+                }
+                else
+                {
+                    ButtonManager.getInstance().turnOffLED();
+                }
+                ledStatus = !ledStatus;
+            }
+        }
+        private void solidLED()
+        {
+            stopLEDFlash();
+            ButtonManager.getInstance().turnOnLED();
+        }
+
+
+        private void slSpeed_ValueChanged(object sender, EventArgs e)
+        {
+            this.speed = slSpeed.Value / 10.0;
+            lblSpeedValue.Text = String.Format("{0:N2}", this.speed);
+        }
+
+        private void slPitch_ValueChanged(object sender, EventArgs e)
+        {
+            this.pitch = slPitch.Value / 10.0;
+            lblPitchValue.Text = String.Format("{0:N2}", this.pitch);
+        }
+
 
         private void btnSpeak_Click(object sender, EventArgs e)
         {
-
-            this.Invoke(new Action(() =>
+            if(ignoreInput)
             {
-                ScreenButtonClick();
-            }));
-        }
-        private void ScreenButtonClick()
-        {
-            lastButtonClicked = DateTime.Now.AddSeconds(-15);
-            if (status == "stop")
+                return;
+            }
+            if(status == STATUS_WAIT)
             {
-                if(recordStatus == 0)
-                {
-                    Play();
-                }
-                else if(recordStatus == 1)
-                {
-                    StopRecord();
-                }
+                StartRecording();
+            }
+            else if(status == STATUS_RECORD || status == STATUS_PAUSE)
+            {
+                StopRecording();
             }
         }
-        private void StopRecord()
+        private void StartRecording()
         {
-            this.Invoke(new Action(() =>
-            {
-                status = "finalize";
-                DisposeAudioPlayer();
+            status = STATUS_RECORD;
+            ignoreInput = true;
 
-                DateTime tzNow = DateTime.UtcNow.AddHours(offset);
+            Application.UseWaitCursor = true;
+
+            btnSpeak.Image = Properties.Resources.stop;
+            btnSpeak.Text = "STOP IT";
+
+            OBSManager.StartOBSRecording();
+            solidLED();
+            Thread.Sleep(2000);
+
+            Application.UseWaitCursor = false;
+
+            GenerateGoogleTTS();
+            PlayMP3("tts.mp3", (s, e) =>
+            {
+                File.Delete("tts.mp3");
+            });
+        }
+        private void StopRecording()
+        {
+            status = STATUS_WAIT;
+            PlayMP3("Audios/StopAudio.mp3", (s, e) =>
+            {
+                ignoreInput = true;
+                DateTime tzNow = DateTime.UtcNow.AddHours(tzOffset);
                 SpeechSynthesizer speech = new SpeechSynthesizer();
-                string announce = File.ReadAllText("announce.txt");
-                speech.SpeakAsync(announce + tzNow.ToString(" h:mm tt"));
-                speech.SpeakCompleted += Speech_SpeakCompleted;
-            }));
+                speech.SpeakAsync("The time is" + tzNow.ToString(" h:mm tt"));
+                speech.SpeakCompleted += (ss, ee) =>
+                {
+                    btnSpeak.Image = Properties.Resources.play;
+                    btnSpeak.Text = "SPEAK IT";
+                    Close();
+                };
+            });
+        }
+        private void PauseRecording()
+        {
+            status = STATUS_PAUSE;
+            PlayMP3("Audios/PauseAudio.mp3", (s, e) =>
+            {
+                ignoreInput = true;
+                DisposeAudioPlayer();
+                DateTime tzNow = DateTime.UtcNow.AddHours(tzOffset);
+                SpeechSynthesizer speech = new SpeechSynthesizer();
+                speech.SpeakAsync("The time is" + tzNow.ToString(" h:mm tt"));
+                speech.SpeakCompleted += (ss, ee) =>
+                {
+                    ignoreInput = false;
+                };
+            });
+            OBSManager.PauseOBSRecording();
+        }
+        private void UnpauseRecording()
+        {
+            status = STATUS_RECORD;
+            PlayMP3("Audios/UnpauseAudio.mp3", (s, e) =>
+            {
+                ignoreInput = true;
+                DisposeAudioPlayer();
+                DateTime tzNow = DateTime.UtcNow.AddHours(tzOffset);
+                SpeechSynthesizer speech = new SpeechSynthesizer();
+                speech.SpeakAsync("The time is" + tzNow.ToString(" h:mm tt"));
+                speech.SpeakCompleted += (ss, ee) =>
+                {
+                    ignoreInput = false;
+                };
+            });
+            OBSManager.UnpauseOBSRecording();
         }
 
-        private void Speech_SpeakCompleted(object sender, SpeakCompletedEventArgs e)
+        private void GenerateGoogleTTS()
         {
-            this.Invoke(new Action(() =>
+            DateTime tzNow = DateTime.UtcNow.AddHours(tzOffset);
+            SynthesisInput input = new SynthesisInput
             {
-                btnSpeak.Image = Properties.Resources.play;
-                btnSpeak.Text = "SPEAK IT";
-                recordStatus = 0;
-                status = "stop";
-                StopOBS();
-                Close();
-            }));
-        }
-
-        private void sound()
-        {
-            this.Invoke(new Action(() =>
+                Text = voiceText.Replace(this.lastTime, tzNow.ToString("h:mm tt"))
+            };
+            VoiceSelectionParams voice = new VoiceSelectionParams
             {
-
-                DateTime tzNow = DateTime.UtcNow.AddHours(offset);
-
-                // Set the text input to be synthesized.
-                SynthesisInput input = new SynthesisInput
-                {
-                    Text = voiceText.Replace(this.lastTime, tzNow.ToString("h:mm tt"))
-                    //Text = "Simple Text.Simple Text.Simple Text."
-                };
-
-                // Build the voice request, select the language code ("en-US"),
-                // and the SSML voice gender ("neutral").
-                VoiceSelectionParams voice = new VoiceSelectionParams
-                {
-                    LanguageCode = "en-US",
-                    Name = cbVoice.SelectedItem.ToString()
-                };
-
-                // Select the type of audio file you want returned.
-                AudioConfig config = new AudioConfig
-                {
-                    AudioEncoding = AudioEncoding.Mp3,
-                    Pitch = pitch,
-                    SpeakingRate = speed
-                };
-
-                // Perform the Text-to-Speech request, passing the text input
-                // with the selected voice parameters and audio file type
-                var response = client.SynthesizeSpeech(new SynthesizeSpeechRequest
-                {
-                    Input = input,
-                    Voice = voice,
-                    AudioConfig = config
-                });
-
-                // Write the binary AudioContent of the response to an MP3 file.
-                using (Stream output = File.Create("tts.mp3"))
-                {
-                    response.AudioContent.WriteTo(output);
-                }
-            }));
-        }
-
-        private void Form2_FormClosing(object sender, FormClosingEventArgs e)
-        {
-            Stop();
-            StopOBS();
-            DestroyLEDFlashThread();
-            if (buttonCheckThread != null)
+                LanguageCode = "en-US",
+                Name = cbVoice.SelectedItem.ToString()
+            };
+            AudioConfig config = new AudioConfig
             {
-                buttonCheckThread.Abort();
-                buttonCheckThread = null;
-            }
-            if (deviceHandle != 0)
+                AudioEncoding = AudioEncoding.Mp3,
+                Pitch = pitch,
+                SpeakingRate = speed
+            };
+            var response = client.SynthesizeSpeech(new SynthesizeSpeechRequest
             {
-                LEDOff();
-                Delcom.DelcomCloseDevice(deviceHandle);
+                Input = input,
+                Voice = voice,
+                AudioConfig = config
+            });
+            using (Stream output = File.Create("tts.mp3"))
+            {
+                response.AudioContent.WriteTo(output);
             }
         }
-
-        private void button1_Click(object sender, EventArgs e)
-        {
-            ButtonClicked();
-        }
-
-        private void StartOBS()
-        {
-            this.Invoke(new Action(() =>
-            {
-
-                Process[] obs64 = Process.GetProcessesByName("obs64");
-                if (obs64.Length == 0)
-                    return;
-                foreach (Process obs in obs64)
-                {
-                    if (obs.MainWindowHandle != (IntPtr)0)
-                    {
-                        SetForegroundWindow(obs.MainWindowHandle);
-                        Thread.Sleep(100);
-                        SendKeys.Send("^R");
-                    }
-                }
-            }));
-        }
-        private void StopOBS()
-        {
-            this.Invoke(new Action(() =>
-            {
-                Process[] obs64 = Process.GetProcessesByName("obs64");
-                if (obs64.Length == 0)
-                    return;
-                foreach (Process obs in obs64)
-                {
-                    if(obs.MainWindowHandle != (IntPtr)0)
-                    {
-                        SetForegroundWindow(obs.MainWindowHandle);
-                        Thread.Sleep(100);
-                        SendKeys.Send("^S");
-                    }
-                }
-            }));
-        }
-        [DllImport("user32.dll")]
-        static extern bool SetForegroundWindow(IntPtr hWnd);
-        [DllImport("user32.dll")]
-        private static extern int ShowWindow(IntPtr hWnd, int nCmdShow);
     }
 }

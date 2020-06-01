@@ -179,37 +179,37 @@ namespace NoRV
                                     string key = keyList[idx];
                                     string name = Config.getInstance().getPairName(idx);
 
-                                    if (key == oneInfo.name.ToString())
+                                    if (name == oneInfo.name.ToString())
                                     {
-                                        if (name == "Witness")
+                                        if (key == "Witness")
                                         {
                                             Witness.Text = oneInfo.value;
                                         }
-                                        if (name== "Template")
+                                        if (key == "Template")
                                         {
                                             Template.SelectedItem = oneInfo.value.ToString().Trim();
                                         }
-                                        if (name == "CaseName")
+                                        if (key == "CaseName")
                                         {
                                             CaseName.Text = oneInfo.value;
                                         }
-                                        if (name == "Counsel")
+                                        if (key == "Counsel")
                                         {
                                             Counsel.SelectedItem = oneInfo.value.ToString().Trim();
                                         }
-                                        if (name == "Address")
+                                        if (key == "Address")
                                         {
                                             Address.Text = oneInfo.value;
                                         }
-                                        if (name == "TimeZone")
+                                        if (key == "TimeZone")
                                         {
                                             TimeZone.SelectedItem = oneInfo.value.ToString().Trim();
                                         }
-                                        if (name == "Videographer")
+                                        if (key == "Videographer")
                                         {
                                             Videographer.Text = oneInfo.value;
                                         }
-                                        if (name == "Commission")
+                                        if (key == "Commission")
                                         {
                                             Commission.Text = oneInfo.value;
                                         }

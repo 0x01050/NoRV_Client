@@ -179,37 +179,37 @@ namespace NoRV
                                     string key = keyList[idx];
                                     string name = Config.getInstance().getPairName(idx);
 
-                                    if (key == oneInfo.name.ToString())
+                                    if (name == oneInfo.name.ToString())
                                     {
-                                        if (name == "Witness")
+                                        if (key == "Witness")
                                         {
                                             Witness.Text = oneInfo.value;
                                         }
-                                        if (name== "Template")
+                                        if (key == "Template")
                                         {
                                             Template.SelectedItem = oneInfo.value.ToString().Trim();
                                         }
-                                        if (name == "CaseName")
+                                        if (key == "CaseName")
                                         {
                                             CaseName.Text = oneInfo.value;
                                         }
-                                        if (name == "Counsel")
+                                        if (key == "Counsel")
                                         {
                                             Counsel.SelectedItem = oneInfo.value.ToString().Trim();
                                         }
-                                        if (name == "Address")
+                                        if (key == "Address")
                                         {
                                             Address.Text = oneInfo.value;
                                         }
-                                        if (name == "TimeZone")
+                                        if (key == "TimeZone")
                                         {
                                             TimeZone.SelectedItem = oneInfo.value.ToString().Trim();
                                         }
-                                        if (name == "Videographer")
+                                        if (key == "Videographer")
                                         {
                                             Videographer.Text = oneInfo.value;
                                         }
-                                        if (name == "Commission")
+                                        if (key == "Commission")
                                         {
                                             Commission.Text = oneInfo.value;
                                         }
@@ -224,10 +224,10 @@ namespace NoRV
 
         private void LoadAppointments()
         {
-            int sleepTime = 10 * 10000;
+            int sleepTime = 10 * 1000;
             while (true)
             {
-                sleepTime = 10 * 10000;
+                sleepTime = 10 * 1000;
                 try
                 {
                     List<JObject> jobs = JobManager.getJobs();
@@ -238,8 +238,8 @@ namespace NoRV
                         {
                             btnNext.PerformClick();
                         }));
-                        sleepTime = 30 * 10000;
                     }
+                    sleepTime = 30 * 1000;
                 }
                 catch(ThreadAbortException)
                 {

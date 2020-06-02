@@ -1,6 +1,6 @@
 ﻿namespace NoRV
 {
-    partial class Form2
+    partial class MainScreen
     {
         /// <summary>
         /// Required designer variable.
@@ -427,7 +427,7 @@
             this.btnSpeak.UseVisualStyleBackColor = false;
             this.btnSpeak.Click += new System.EventHandler(this.btnSpeak_Click);
             // 
-            // Form2
+            // MainScreen
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
@@ -436,12 +436,12 @@
             this.MaximizeBox = false;
             this.MinimizeBox = false;
             this.MinimumSize = new System.Drawing.Size(500, 400);
-            this.Name = "Form2";
+            this.Name = "MainScreen";
             this.Padding = new System.Windows.Forms.Padding(20);
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "NoRV TTS - Step 2";
-            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.Form2_FormClosing);
-            this.Load += new System.EventHandler(this.Form2_Load);
+            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.MainScreen_FormClosing);
+            this.Load += new System.EventHandler(this.MainScreen_Load);
             ((System.ComponentModel.ISupportInitialize)(this.slSpeed)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.slPitch)).EndInit();
             this.mainSplitter.Panel1.ResumeLayout(false);

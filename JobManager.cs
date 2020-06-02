@@ -5,17 +5,20 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Security.Cryptography.X509Certificates;
 using System.Text;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace NoRV
 {
     class JobManager
     {
-        public static List<JObject> getJobs()
+        public List<JObject> getJobs()
         {
             List<JObject> _jobs = new List<JObject>();
-            var httpClient = new HttpClient()
+
+            var httpClient = new HttpClient(new HttpClientHandler() { UseDefaultCredentials = true })
             {
                 Timeout = new TimeSpan(0, 0, 5)
             };
@@ -23,8 +26,8 @@ namespace NoRV
             var apiKeyPwd = Encoding.UTF8.GetBytes("19487502:30fce42b9991bbd32cea500a49c7d3b9");
             string basicAuth = Convert.ToBase64String(apiKeyPwd);
             httpClient.DefaultRequestHeaders.Add("Authorization", "Basic " + basicAuth);
+            ServicePointManager.ServerCertificateValidationCallback = delegate { return true; };
 
-            var method = new HttpMethod("GET");
             string now = DateTime.Now.ToString("yyyy-MM-dd");
             HttpResponseMessage response = httpClient.GetAsync("https://acuityscheduling.com/api/v1/appointments?direction=ASC&minDate=" + now + "&maxDate=" + now).Result;
             if (response.StatusCode == HttpStatusCode.OK)

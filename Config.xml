@@ -1,12 +1,17 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <AppConfig>
+  <Global>
+    <Item Key="DefaultVolume" Value="65" />
+    <Item Key="AnnounceTime" Value="" />
+    <Item Key="FlashPeriod" Value="1000" />
+  </Global>
+
   <OBS>
     <Config Key="ProcessName" Value="obs64" />
-    <Config Key="StartHotkey" Value="^R" />  
-    <Config Key="StopHotkey" Value="^S" />  
-    <Config Key="PauseHotkey" Value="^P" />  
-    <Config Key="UnpauseHotkey" Value="^U" />  
-    <Config Key="DefaultVolume" Value="65" />  
+    <Config Key="StartHotkey" Value="^R" />
+    <Config Key="StopHotkey" Value="^S" />
+    <Config Key="PauseHotkey" Value="^P" />
+    <Config Key="UnpauseHotkey" Value="^U" />
   </OBS>
   
   <Keywords>

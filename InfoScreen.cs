@@ -4,20 +4,21 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace NoRV
 {
-    public partial class Form1 : Form
+    public partial class InfoScreen : Form
     {
         private Thread loadThread = null;
         private Thread volumeThread = null;
-        public Form1()
+        public InfoScreen()
         {
             InitializeComponent();
         }
 
-        private void Form1_Load(object sender, EventArgs e)
+        private void InfoScreen_Load(object sender, EventArgs e)
         {
             txtNoRVMachineID.Text = L.v();
             ButtonManager.getInstance().turnOffLED();
@@ -26,7 +27,7 @@ namespace NoRV
             startVolumeThread();
         }
 
-        private void Form1_FormClosing(object sender, FormClosingEventArgs e)
+        private void InfoScreen_FormClosing(object sender, FormClosingEventArgs e)
         {
             stopLoadThread();
             stopVolumeThread();
@@ -61,8 +62,11 @@ namespace NoRV
             }
         }
 
+        private string clickSource = "";
         private void btnNext_Click(object sender, EventArgs e)
         {
+            string source = clickSource;
+            clickSource = "";
             while(true)
             {
                 if(!OBSManager.CheckOBSRunning())
@@ -96,10 +100,9 @@ namespace NoRV
             }
 
             stopLoadThread();
-            Form2 form = new Form2(InfoList);
+            MainScreen form = new MainScreen(InfoList, source);
             form.ShowDialog();
             startLoadThread();
-            ButtonManager.getInstance().turnOffLED();
         }
 
         private void Validate(object sender, EventArgs e)
@@ -144,7 +147,7 @@ namespace NoRV
         private void btnLoad_Click(object sender, EventArgs e)
         {
             stopLoadThread();
-            Form3 form = new Form3();
+            LoadScreen form = new LoadScreen();
             if(form.ShowDialog() == DialogResult.OK)
             {
                 if(form.selectedIdx >= 0 && form.selectedIdx < form.appointList.Count)
@@ -156,6 +159,33 @@ namespace NoRV
                 }
             }
             startLoadThread();
+        }
+
+        private void selectJob(List<JObject> _jobs)
+        {
+            Invoke(new Action(() =>
+            {
+                JObject[] jobs = _jobs.ToArray();
+                stopLoadThread();
+                SelectScreen form = new SelectScreen(jobs);
+                if (form.ShowDialog() == DialogResult.OK)
+                {
+                    if (form.selectedIdx >= 0 && form.selectedIdx < jobs.Length)
+                    {
+                        ClearFields();
+                        JObject appointItem = jobs[form.selectedIdx];
+                        SetInfo(appointItem);
+                        if (!btnNext.Enabled)
+                            ButtonManager.getInstance().turnOffLED();
+                        else
+                        {
+                            clickSource = "SelectScreen";
+                            btnNext.PerformClick();
+                        }
+                    }
+                }
+                startLoadThread();
+            }));
         }
 
         private void SetInfo(JObject appointItem)
@@ -230,8 +260,8 @@ namespace NoRV
                 sleepTime = 10 * 10000;
                 try
                 {
-                    List<JObject> jobs = JobManager.getJobs();
-                    if(jobs.Count > 0)
+                    List<JObject> jobs = new JobManager().getJobs();
+                    if (jobs.Count == 1)
                     {
                         SetInfo(jobs[0]);
                         btnNext.Invoke(new Action(() =>
@@ -240,30 +270,32 @@ namespace NoRV
                         }));
                         sleepTime = 30 * 10000;
                     }
+                    if (jobs.Count > 1)
+                    {
+                        selectJob(jobs);
+                    }
                 }
-                catch(ThreadAbortException)
-                {
-                    return;
-                }
-                catch(Exception)
-                {
-                }
+                catch (ThreadAbortException) { return; }
+                catch (Exception) { }
                 Thread.Sleep(sleepTime);
             }
         }
 
-        private void VolumeCheck()
+        private async void VolumeCheck()
         {
             int sleepTime = 1 * 1000;
+            CoreAudioController controller = new CoreAudioController();
             while (true)
             {
                 try
                 {
-                    CoreAudioDevice defaultPlaybackDevice = new CoreAudioController().DefaultPlaybackDevice;
-                    double vol = defaultPlaybackDevice.Volume;
-                    if(vol != Config.getInstance().getDefaultVolume())
+                    if(controller.DefaultPlaybackDevice != null)
                     {
-                        defaultPlaybackDevice.Volume = Config.getInstance().getDefaultVolume();
+                        double vol = controller.DefaultPlaybackDevice.Volume;
+                        if (vol != Config.getInstance().getDefaultVolume())
+                        {
+                            await controller.DefaultPlaybackDevice.SetVolumeAsync(Config.getInstance().getDefaultVolume());
+                        }
                     }
                 }
                 catch (ThreadAbortException)

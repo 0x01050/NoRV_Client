@@ -12,7 +12,7 @@ using System.Windows.Forms;
 
 namespace NoRV
 {
-    public partial class Form2 : Form
+    public partial class MainScreen : Form
     {
         private GoogleCredential googleCredential;
         private Channel channel;
@@ -25,11 +25,12 @@ namespace NoRV
         private double pitch = 0.0;
         private string lastTime = "#Time#";
         private int tzOffset = 0;
+        private string source = "";
 
         IWavePlayer waveOutDevice = null;
         AudioFileReader audioFileReader = null;
 
-        public Form2(Dictionary<string, string> InfoList = null)
+        public MainScreen(Dictionary<string, string> InfoList = null, string source = "")
         {
             if(InfoList != null)
             {
@@ -40,6 +41,7 @@ namespace NoRV
                     {"Eastern Time (EDT)", -4},
                     {"Central Time (CDT)", -5},
                     {"Mountain Time (MDT)", -6},
+                    {"Mountain Standard Time (MST)", -7},
                     {"Alaska Time (ADT)", -8},
                     {"Hawaii-Aleutian Standard Time (HAST)", -10}
                 };
@@ -48,17 +50,17 @@ namespace NoRV
                 {
                     string tz = this.InfoList["TimeZone"];
                     this.InfoList.Remove("TimeZone");
-                    tzOffset = tzAbbrev[tz];
+                    WebServer.tzOffset = tzOffset = tzAbbrev[tz];
                     DateTime tzNow = DateTime.UtcNow.AddHours(tzOffset);
                     this.InfoList.Add("Date", tzNow.ToString("MMM dd, yyyy"));
                     this.InfoList.Add("Time", this.lastTime = tzNow.ToString("h:mm tt"));
                 }
             }
-
+            this.source = source;
             InitializeComponent();
         }
 
-        private void Form2_Load(object sender, EventArgs e)
+        private void MainScreen_Load(object sender, EventArgs e)
         {
 
             string template = "Normal";
@@ -73,12 +75,27 @@ namespace NoRV
                 template = template.Replace("#" + info.Key + "#", info.Value);
             }
             txtSource.Text = this.voiceText = template;
+            
+            InitGoogleCredential();
+            
+            DoInitialize();
+        }
+        private void MainScreen_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            DisposeAudioPlayer();
+            OBSManager.StopOBSRecording();
+            stopButtonCheck();
+            stopLEDFlash();
+            ButtonManager.getInstance().turnOffLED();
+        }
 
+        private void InitGoogleCredential()
+        {
             using (Stream m = new FileStream("NoRV TTS-c4a3e2c55a4f.json", FileMode.Open))
-                this.googleCredential = GoogleCredential.FromStream(m);
-            this.channel = new Channel(TextToSpeechClient.DefaultEndpoint.Host,
+                googleCredential = GoogleCredential.FromStream(m);
+            channel = new Channel(TextToSpeechClient.DefaultEndpoint.Host,
                 googleCredential.ToChannelCredentials());
-            this.client = TextToSpeechClient.Create(channel);
+            client = TextToSpeechClient.Create(channel);
 
             ListVoicesRequest voiceReq = new ListVoicesRequest { LanguageCode = "en-US" };
             ListVoicesResponse voiceResp = this.client.ListVoices(voiceReq);
@@ -90,21 +107,12 @@ namespace NoRV
                 }
             }
 
-            if(cbVoice.Items.Count <= 0)
+            if (cbVoice.Items.Count <= 0)
             {
                 MessageBox.Show("No available voice", "NoRV", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 this.Close();
             }
             cbVoice.SelectedIndex = 1;
-
-            DoInitialize();
-        }
-        private void Form2_FormClosing(object sender, FormClosingEventArgs e)
-        {
-            DisposeAudioPlayer();
-            OBSManager.StopOBSRecording();
-            stopButtonCheck();
-            stopLEDFlash();
         }
 
 
@@ -117,7 +125,6 @@ namespace NoRV
 
         private DateTime lastButtonClicked;
         private Thread buttonCheckThread = null;
-        int buttonStatus = 0;
         private Thread ledFlashThread = null;
         private void DoInitialize()
         {
@@ -125,6 +132,11 @@ namespace NoRV
             lastButtonClicked = DateTime.Now.AddSeconds(-15);
             startButtonCheck();
             startLEDFlash();
+
+            if(source == "SelectScreen")
+            {
+                ButtonClicked();
+            }
         }
 
         private void startButtonCheck()
@@ -146,6 +158,8 @@ namespace NoRV
             DateTime buttonPressed = DateTime.Now;
             bool isPressed = false;
             bool longPressClicked = false;
+            int buttonStatus = 0;
+            int threshold = Config.getInstance().getButtonClickThreshold();
             while (true)
             {
                 bool pressed = ButtonManager.getInstance().checkButtonPressed();
@@ -154,7 +168,7 @@ namespace NoRV
                 else
                     buttonStatus--;
 
-                if (isPressed && buttonStatus > 2 && !longPressClicked)
+                if (isPressed && buttonStatus > threshold && !longPressClicked)
                 {
                     TimeSpan elapse = DateTime.Now - buttonPressed;
                     if (elapse.TotalSeconds > 3)
@@ -163,7 +177,7 @@ namespace NoRV
                         ButtonClicked(true);
                     }
                 }
-                if (!isPressed && buttonStatus == 2)
+                if (!isPressed && buttonStatus == threshold)
                 {
                     isPressed = true;
                     buttonPressed = DateTime.Now;
@@ -175,8 +189,8 @@ namespace NoRV
                     ButtonClicked();
                 }
 
-                if (buttonStatus > 2)
-                    buttonStatus = 2;
+                if (buttonStatus > threshold)
+                    buttonStatus = threshold;
                 if (buttonStatus < 0)
                     buttonStatus = 0;
                 
@@ -290,7 +304,7 @@ namespace NoRV
             bool ledStatus = true;
             while (true)
             {
-                Thread.Sleep(1000);
+                Thread.Sleep(Config.getInstance().getFlashPeriod());
                 if(ledStatus)
                 {
                     ButtonManager.getInstance().turnOnLED();
@@ -367,7 +381,7 @@ namespace NoRV
                 ignoreInput = true;
                 DateTime tzNow = DateTime.UtcNow.AddHours(tzOffset);
                 SpeechSynthesizer speech = new SpeechSynthesizer();
-                speech.SpeakAsync("The time is" + tzNow.ToString(" h:mm tt"));
+                speech.SpeakAsync(Config.getInstance().getAnnounceTime() + tzNow.ToString(" h:mm tt"));
                 speech.SpeakCompleted += (ss, ee) =>
                 {
                     btnSpeak.Image = Properties.Resources.play;
@@ -385,32 +399,34 @@ namespace NoRV
                 DisposeAudioPlayer();
                 DateTime tzNow = DateTime.UtcNow.AddHours(tzOffset);
                 SpeechSynthesizer speech = new SpeechSynthesizer();
-                speech.SpeakAsync("The time is" + tzNow.ToString(" h:mm tt"));
+                speech.SpeakAsync(Config.getInstance().getAnnounceTime() + tzNow.ToString(" h:mm tt"));
                 speech.SpeakCompleted += (ss, ee) =>
                 {
                     ignoreInput = false;
+                    Thread.Sleep(1000);
+                    OBSManager.PauseOBSRecording();
+                    startLEDFlash();
                 };
             });
-            OBSManager.PauseOBSRecording();
-            startLEDFlash();
         }
         private void UnpauseRecording()
         {
             status = STATUS_RECORD;
+            OBSManager.UnpauseOBSRecording();
+            solidLED();
+            Thread.Sleep(1000);
             PlayMP3("Audios/UnpauseAudio.mp3", (s, e) =>
             {
                 ignoreInput = true;
                 DisposeAudioPlayer();
                 DateTime tzNow = DateTime.UtcNow.AddHours(tzOffset);
                 SpeechSynthesizer speech = new SpeechSynthesizer();
-                speech.SpeakAsync("The time is" + tzNow.ToString(" h:mm tt"));
+                speech.SpeakAsync(Config.getInstance().getAnnounceTime() + tzNow.ToString(" h:mm tt"));
                 speech.SpeakCompleted += (ss, ee) =>
                 {
                     ignoreInput = false;
                 };
             });
-            OBSManager.UnpauseOBSRecording();
-            solidLED();
         }
 
         private void GenerateGoogleTTS()

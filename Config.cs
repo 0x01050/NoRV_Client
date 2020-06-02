@@ -22,7 +22,7 @@ namespace NoRV
         Config()
         {
             LoadMappingConfig();
-            LoadVolumeConfig();
+            LoadGlobalConfig();
             LoadOBSConfig();
         }
 
@@ -64,22 +64,47 @@ namespace NoRV
         }
 
 
-        // Volume Config
+        // Global Config
+        private int _buttonClickThreshold = 3;
         private int _defaultVolume = 65;
-        private void LoadVolumeConfig()
+        private string _announceTime = "";
+        private int _flashPeriod = 1000;
+        private void LoadGlobalConfig()
         {
             var xml = XDocument.Load(@"Config.xml");
-            var query = from c in xml.Root.Descendants("Config")
-                        where (string)c.Attribute("Key") == "DefaultVolume"
-                        select (int)c.Attribute("Value");
+            var query = from c in xml.Root.Descendants("Item")
+                        select c;
             foreach (var item in query)
             {
-                _defaultVolume = item;
+                switch ((string)item.Attribute("Key"))
+                {
+                    case "DefaultVolume":
+                        _defaultVolume = (int)item.Attribute("Value");
+                        break;
+                    case "AnnounceTime":
+                        _announceTime = (string)item.Attribute("Value");
+                        break;
+                    case "FlashPeriod":
+                        _flashPeriod = (int)item.Attribute("Value");
+                        break;
+                }
             }
+        }
+        public int getButtonClickThreshold()
+        {
+            return _buttonClickThreshold;
         }
         public int getDefaultVolume()
         {
             return _defaultVolume;
+        }
+        public string getAnnounceTime()
+        {
+            return _announceTime;
+        }
+        public int getFlashPeriod()
+        {
+            return _flashPeriod;
         }
 
 
@@ -93,7 +118,6 @@ namespace NoRV
         {
             var xml = XDocument.Load(@"Config.xml");
             var query = from c in xml.Root.Descendants("Config")
-                        where (string)c.Attribute("Key") != "DefaultVolume"
                         select c;
             foreach (var item in query)
             {

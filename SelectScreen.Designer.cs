@@ -1,6 +1,6 @@
 ﻿namespace NoRV
 {
-    partial class Form3
+    partial class SelectScreen
     {
         /// <summary>
         /// Required designer variable.
@@ -84,7 +84,7 @@
             this.splitter.SplitterDistance = 32;
             this.splitter.TabIndex = 2;
             // 
-            // Form3
+            // SelectScreen
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
@@ -92,11 +92,11 @@
             this.Controls.Add(this.splitter);
             this.MaximizeBox = false;
             this.MinimizeBox = false;
-            this.Name = "Form3";
+            this.Name = "SelectScreen";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
-            this.Text = "NoRV TTS - Load Appointments";
-            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.Form3_FormClosing);
-            this.Load += new System.EventHandler(this.Form3_Load);
+            this.Text = "NoRV TTS - Select Appointments";
+            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.SelectScreen_FormClosing);
+            this.Load += new System.EventHandler(this.SelectScreen_Load);
             ((System.ComponentModel.ISupportInitialize)(this.picLoading)).EndInit();
             this.splitter.Panel1.ResumeLayout(false);
             this.splitter.Panel2.ResumeLayout(false);

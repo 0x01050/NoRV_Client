@@ -1,6 +1,6 @@
 ﻿namespace NoRV
 {
-    partial class Form1
+    partial class InfoScreen
     {
         /// <summary>
         /// Required designer variable.
@@ -245,7 +245,7 @@
             this.txtNoRVMachineID.TabIndex = 0;
             this.txtNoRVMachineID.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
             // 
-            // Form1
+            // InfoScreen
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
@@ -275,12 +275,12 @@
             this.MaximumSize = new System.Drawing.Size(500, 300);
             this.MinimizeBox = false;
             this.MinimumSize = new System.Drawing.Size(500, 300);
-            this.Name = "Form1";
+            this.Name = "InfoScreen";
             this.Padding = new System.Windows.Forms.Padding(25);
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "NoRV TTS - Step 1";
-            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.Form1_FormClosing);
-            this.Load += new System.EventHandler(this.Form1_Load);
+            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.InfoScreen_FormClosing);
+            this.Load += new System.EventHandler(this.InfoScreen_Load);
             this.ResumeLayout(false);
             this.PerformLayout();
 

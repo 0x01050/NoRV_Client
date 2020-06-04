@@ -66,9 +66,13 @@ namespace NoRV
 
         // Global Config
         private int _buttonClickThreshold = 3;
-        private int _defaultVolume = 65;
+        private int _defaultVolume = 50;
         private string _announceTime = "";
         private int _flashPeriod = 1000;
+        private string _logPath = "";
+        private int _alertInterval = 300;
+        private int _alertVolume = 25;
+        private string _startTemplate = "";
         private void LoadGlobalConfig()
         {
             var xml = XDocument.Load(@"Config.xml");
@@ -86,6 +90,18 @@ namespace NoRV
                         break;
                     case "FlashPeriod":
                         _flashPeriod = (int)item.Attribute("Value");
+                        break;
+                    case "LogPath":
+                        _logPath = (string)item.Attribute("Value");
+                        break;
+                    case "BreakAlertInterval":
+                        _alertInterval = (int)item.Attribute("Value");
+                        break;
+                    case "BreakAlertVolume":
+                        _alertVolume = (int)item.Attribute("Value");
+                        break;
+                    case "StartAudioTemplate":
+                        _startTemplate = (string)item.Attribute("Value");
                         break;
                 }
             }
@@ -105,6 +121,22 @@ namespace NoRV
         public int getFlashPeriod()
         {
             return _flashPeriod;
+        }
+        public string getLogPath()
+        {
+            return _logPath;
+        }
+        public int getAlertInterval()
+        {
+            return _alertInterval;
+        }
+        public int getAlertVolume()
+        {
+            return _alertVolume;
+        }
+        public string getStartTempate()
+        {
+            return _startTemplate;
         }
 
 

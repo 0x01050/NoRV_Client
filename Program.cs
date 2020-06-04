@@ -19,6 +19,9 @@ namespace NoRV
 
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
+
+            if (!OBSManager.CheckOBSRunning())
+                Application.Run(new WaitScreen());
             Application.Run(new InfoScreen());
         }
     }

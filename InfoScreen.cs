@@ -254,10 +254,10 @@ namespace NoRV
 
         private void LoadAppointments()
         {
-            int sleepTime = 10 * 10000;
+            int sleepTime = 10 * 1000;
             while (true)
             {
-                sleepTime = 10 * 10000;
+                sleepTime = 10 * 1000;
                 try
                 {
                     List<JObject> jobs = new JobManager().getJobs();
@@ -268,7 +268,7 @@ namespace NoRV
                         {
                             btnNext.PerformClick();
                         }));
-                        sleepTime = 30 * 10000;
+                        sleepTime = 30 * 1000;
                     }
                     if (jobs.Count > 1)
                     {

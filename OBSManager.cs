@@ -12,73 +12,43 @@ namespace NoRV
 {
     class OBSManager
     {
-        private static IntPtr noWindow = (IntPtr)0;
-        private static IntPtr getOBSMainWindow()
-        {
-            Process[] obs64 = Process.GetProcessesByName(Config.getInstance().getOBSProcessName());
-            foreach (Process obs in obs64)
-            {
-                if (obs.MainWindowHandle != (IntPtr)0)
-                {
-                    return obs.MainWindowHandle;
-                }
-            }
-            return noWindow;
-        }
         public static bool CheckOBSRunning()
         {
-            return (getOBSMainWindow() != noWindow);
+            Process[] obs64 = Process.GetProcessesByName(Config.getInstance().getOBSProcessName());
+            return obs64.Length > 0;
         }
 
         public static void StartOBSRecording()
         {
-            if(!CheckOBSRunning())
-            {
-                return;
-            }
-            IntPtr mainWindow = getOBSMainWindow();
-            SetForegroundWindow(mainWindow);
-            Thread.Sleep(30);
-            SendKeys.SendWait(Config.getInstance().getOBSHotkey("start"));
+            SendHotkey(Config.getInstance().getOBSHotkey("start"));
         }
-
         public static void StopOBSRecording()
         {
-            if (!CheckOBSRunning())
-            {
-                return;
-            }
-            IntPtr mainWindow = getOBSMainWindow();
-            SetForegroundWindow(mainWindow);
-            Thread.Sleep(30);
-            SendKeys.SendWait(Config.getInstance().getOBSHotkey("stop"));
+            SendHotkey(Config.getInstance().getOBSHotkey("stop"));
         }
-
         public static void PauseOBSRecording()
         {
-            if (!CheckOBSRunning())
-            {
-                return;
-            }
-            IntPtr mainWindow = getOBSMainWindow();
-            SetForegroundWindow(mainWindow);
-            Thread.Sleep(30);
-            SendKeys.SendWait(Config.getInstance().getOBSHotkey("pause"));
+            SendHotkey(Config.getInstance().getOBSHotkey("pause"));
         }
-
         public static void UnpauseOBSRecording()
         {
-            if (!CheckOBSRunning())
-            {
-                return;
-            }
-            IntPtr mainWindow = getOBSMainWindow();
-            SetForegroundWindow(mainWindow);
-            Thread.Sleep(30);
-            SendKeys.SendWait(Config.getInstance().getOBSHotkey("unpause"));
+            SendHotkey(Config.getInstance().getOBSHotkey("unpause"));
         }
 
         [DllImport("user32.dll")]
-        static extern bool SetForegroundWindow(IntPtr hWnd);
+        static extern void keybd_event(byte bVk, byte bScan, int dwFlags, int dwExtraInfo);
+        private static void SendHotkey(string hotkey)
+        {
+            hotkey = hotkey.ToUpper();
+            if (hotkey.Length > 0 && hotkey[0] >= 'A' && hotkey[0] <= 'Z')
+            {
+                int vk = hotkey[0] - 'A';
+                keybd_event(0x11, 0, 0, 0);
+                keybd_event((byte)(0x41 + vk), 0, 0, 0);
+                Thread.Sleep(75);
+                keybd_event(0x11, 0, 2, 0);
+                keybd_event((byte)(0x41 + vk), 0, 2, 0);
+            }
+        }
     }
 }

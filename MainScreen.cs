@@ -17,7 +17,7 @@ namespace NoRV
         private GoogleCredential googleCredential;
         private Channel channel;
         private TextToSpeechClient client;
-        
+
         private Dictionary<string, string> InfoList = new Dictionary<string, string>();
 
         private string voiceText = "";
@@ -32,7 +32,7 @@ namespace NoRV
 
         public MainScreen(Dictionary<string, string> InfoList = null, string source = "")
         {
-            if(InfoList != null)
+            if (InfoList != null)
             {
                 this.InfoList = InfoList;
 
@@ -46,7 +46,7 @@ namespace NoRV
                     {"Hawaii-Aleutian Standard Time (HAST)", -10}
                 };
 
-                if(this.InfoList.ContainsKey("TimeZone"))
+                if (this.InfoList.ContainsKey("TimeZone"))
                 {
                     string tz = this.InfoList["TimeZone"];
                     this.InfoList.Remove("TimeZone");
@@ -62,6 +62,7 @@ namespace NoRV
 
         private void MainScreen_Load(object sender, EventArgs e)
         {
+            Application.UseWaitCursor = true;
 
             string template = "Normal";
             if (this.InfoList.ContainsKey("Template"))
@@ -69,16 +70,18 @@ namespace NoRV
                 template = this.InfoList["Template"];
             }
             template = Config.getInstance().getTemplate(template);
-            
+
             foreach (var info in this.InfoList)
             {
                 template = template.Replace("#" + info.Key + "#", info.Value);
             }
             txtSource.Text = this.voiceText = template;
-            
+
             InitGoogleCredential();
-            
+            LogInit();
+
             DoInitialize();
+            Application.UseWaitCursor = false;
         }
         private void MainScreen_FormClosing(object sender, FormClosingEventArgs e)
         {
@@ -86,7 +89,55 @@ namespace NoRV
             OBSManager.StopOBSRecording();
             stopButtonCheck();
             stopLEDFlash();
+            stopKillerThread();
+            stopAlertThread();
             ButtonManager.getInstance().turnOffLED();
+
+            InsertLog("End");
+            SaveLog();
+        }
+
+        private string logFile = "";
+        private List<string> logs = new List<string>();
+        private string lastLog = "";
+        private DateTime lastLogTime = DateTime.Now;
+        private int totalSeconds = 0;
+        private void LogInit()
+        {
+            string witness = "", type = "", date = "";
+            if (InfoList.ContainsKey("Witness"))
+                witness = InfoList["Witness"];
+            if (InfoList.ContainsKey("Template"))
+                type = InfoList["Template"];
+            if (InfoList.ContainsKey("Date"))
+                date = InfoList["Date"];
+            logFile = witness + " - " + date;
+            logs.Add(witness + ". " + date);
+            logs.Add("");
+            GenerateStartAudio(witness, type);
+        }
+        private void SaveLog()
+        {
+            logs.Add(String.Format("total running time = {0}:{1}", totalSeconds / 60, totalSeconds % 60));
+            logs.Add(String.Format("total breaks = {0}", logs.Count - 3));
+            File.WriteAllLines(Config.getInstance().getLogPath() + logFile + ".txt", logs);
+        }
+        private void InsertLog(string type)
+        {
+            DateTime now = DateTime.UtcNow.AddHours(tzOffset);
+
+            if (type == "Start" || type == "On")
+            {
+                lastLog = type + now.ToString(": h:mmtt");
+                lastLogTime = DateTime.Now;
+            }
+            if (type == "Off" || type == "End")
+            {
+                TimeSpan elapse = DateTime.Now - lastLogTime;
+                lastLog += " - " + type + now.ToString(": h:mmtt") + String.Format(" = {0} minutes on record", (int)elapse.TotalMinutes);
+                totalSeconds += (int)elapse.TotalSeconds;
+                logs.Add(lastLog);
+            }
         }
 
         private void InitGoogleCredential()
@@ -133,7 +184,7 @@ namespace NoRV
             startButtonCheck();
             startLEDFlash();
 
-            if(source == "SelectScreen")
+            if (source == "SelectScreen")
             {
                 ButtonClicked();
             }
@@ -147,7 +198,7 @@ namespace NoRV
         }
         private void stopButtonCheck()
         {
-            if(buttonCheckThread != null)
+            if (buttonCheckThread != null)
             {
                 buttonCheckThread.Abort();
                 buttonCheckThread = null;
@@ -193,20 +244,20 @@ namespace NoRV
                     buttonStatus = threshold;
                 if (buttonStatus < 0)
                     buttonStatus = 0;
-                
+
                 Thread.Sleep(30);
             }
         }
         private void ButtonClicked(bool longPress = false)
         {
-            if(ignoreInput)
+            if (ignoreInput)
             {
                 return;
             }
 
             if (longPress)
             {
-                if(status != STATUS_WAIT)
+                if (status == STATUS_RECORD)
                 {
                     btnSpeak.Invoke(new Action(() =>
                     {
@@ -219,13 +270,20 @@ namespace NoRV
                 TimeSpan elapse = DateTime.Now - lastButtonClicked;
                 if (elapse.TotalSeconds > 10)
                 {
+
                     PlayMP3("Audios/StartAudio.mp3", (s, e) =>
                     {
                         lastButtonClicked = DateTime.Now;
+                        if (source == "SelectScreen")
+                        {
+                            startKillerThread();
+                        }
+                        File.Delete("Audios/StartAudio.mp3.mp3");
                     });
                 }
                 else
                 {
+                    stopKillerThread();
                     btnSpeak.Invoke(new Action(() =>
                     {
                         btnSpeak.PerformClick();
@@ -236,12 +294,39 @@ namespace NoRV
             {
                 PauseRecording();
             }
-            else if(status == STATUS_PAUSE)
+            else if (status == STATUS_PAUSE)
             {
                 UnpauseRecording();
             }
         }
-        private void PlayMP3(string mp3File, EventHandler<StoppedEventArgs> stopHandler = null)
+        private Thread killerThread = null;
+        private void startKillerThread()
+        {
+            stopKillerThread();
+            killerThread = new Thread(new ThreadStart(KillProc));
+            killerThread.Start();
+        }
+        private void stopKillerThread()
+        {
+            if (killerThread != null)
+            {
+                killerThread.Abort();
+                killerThread = null;
+            }
+        }
+        private void KillProc()
+        {
+            try
+            {
+                Thread.Sleep(10 * 1000);
+                if (status == STATUS_WAIT)
+                    Invoke(new Action(() => Close()));
+            }
+            catch (ThreadAbortException) { }
+            catch (Exception) { }
+        }
+
+        private void PlayMP3(string mp3File, EventHandler<StoppedEventArgs> stopHandler = null, int volume = -1)
         {
             DisposeAudioPlayer();
             this.Invoke(new Action(() =>
@@ -250,6 +335,12 @@ namespace NoRV
                 waveOutDevice = new WaveOut();
                 audioFileReader = new AudioFileReader(mp3File);
                 waveOutDevice.Init(audioFileReader);
+
+                if (volume == -1)
+                    waveOutDevice.Volume = 1f;
+                else
+                    waveOutDevice.Volume = volume * 1f / Config.getInstance().getDefaultVolume();
+
                 waveOutDevice.Play();
                 waveOutDevice.PlaybackStopped += (s, e) =>
                 {
@@ -283,8 +374,6 @@ namespace NoRV
             }));
         }
 
-
-
         private void startLEDFlash()
         {
             stopLEDFlash();
@@ -305,7 +394,7 @@ namespace NoRV
             while (true)
             {
                 Thread.Sleep(Config.getInstance().getFlashPeriod());
-                if(ledStatus)
+                if (ledStatus)
                 {
                     ButtonManager.getInstance().turnOnLED();
                 }
@@ -338,21 +427,22 @@ namespace NoRV
 
         private void btnSpeak_Click(object sender, EventArgs e)
         {
-            if(ignoreInput)
+            if (ignoreInput)
             {
                 return;
             }
-            if(status == STATUS_WAIT)
+            if (status == STATUS_WAIT)
             {
                 StartRecording();
             }
-            else if(status == STATUS_RECORD || status == STATUS_PAUSE)
+            else if (status == STATUS_RECORD || status == STATUS_PAUSE)
             {
                 StopRecording();
             }
         }
         private void StartRecording()
         {
+            InsertLog("Start");
             status = STATUS_RECORD;
             ignoreInput = true;
 
@@ -392,6 +482,7 @@ namespace NoRV
         }
         private void PauseRecording()
         {
+            InsertLog("Off");
             status = STATUS_PAUSE;
             PlayMP3("Audios/PauseAudio.mp3", (s, e) =>
             {
@@ -406,14 +497,17 @@ namespace NoRV
                     Thread.Sleep(1000);
                     OBSManager.PauseOBSRecording();
                     startLEDFlash();
+                    startAlertThread();
                 };
             });
         }
         private void UnpauseRecording()
         {
+            InsertLog("On");
             status = STATUS_RECORD;
             OBSManager.UnpauseOBSRecording();
             solidLED();
+            stopAlertThread();
             Thread.Sleep(1000);
             PlayMP3("Audios/UnpauseAudio.mp3", (s, e) =>
             {
@@ -428,6 +522,36 @@ namespace NoRV
                 };
             });
         }
+
+        private Thread alertThread = null;
+        private void startAlertThread()
+        {
+            stopAlertThread();
+            alertThread = new Thread(new ThreadStart(AlertProc));
+            alertThread.Start();
+        }
+        private void stopAlertThread()
+        {
+            if(alertThread != null)
+            {
+                alertThread.Abort();
+                alertThread = null;
+            }
+        }
+        private void AlertProc()
+        {
+            try
+            {
+                while (true)
+                {
+                    Thread.Sleep(Config.getInstance().getAlertInterval() * 1000);
+                    PlayMP3("Audios/BreakAlertAudio.mp3", null, Config.getInstance().getAlertVolume());
+                }
+            }
+            catch (ThreadAbortException) { }
+            catch (Exception) { }
+        }
+
 
         private void GenerateGoogleTTS()
         {
@@ -454,6 +578,32 @@ namespace NoRV
                 AudioConfig = config
             });
             using (Stream output = File.Create("tts.mp3"))
+            {
+                response.AudioContent.WriteTo(output);
+            }
+        }
+        private void GenerateStartAudio(string witness, string type)
+        {
+            SynthesisInput input = new SynthesisInput
+            {
+                Text = Config.getInstance().getStartTempate().Replace("#Witness Type#", type).Replace("#Witness#", witness)
+            };
+            VoiceSelectionParams voice = new VoiceSelectionParams
+            {
+                LanguageCode = "en-US",
+                Name = cbVoice.SelectedItem.ToString()
+            };
+            AudioConfig config = new AudioConfig
+            {
+                AudioEncoding = AudioEncoding.Mp3
+            };
+            var response = client.SynthesizeSpeech(new SynthesizeSpeechRequest
+            {
+                Input = input,
+                Voice = voice,
+                AudioConfig = config
+            });
+            using (Stream output = File.Create("Audios/StartAudio.mp3"))
             {
                 response.AudioContent.WriteTo(output);
             }

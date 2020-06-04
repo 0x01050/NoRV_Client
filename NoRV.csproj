@@ -152,7 +152,12 @@
     <Compile Include="OBSManager.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="WebRequestHandler.cs" />
+    <Compile Include="WaitScreen.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="WaitScreen.Designer.cs">
+      <DependentUpon>WaitScreen.cs</DependentUpon>
+    </Compile>
     <Compile Include="WebServer.cs" />
     <EmbeddedResource Include="InfoScreen.resx">
       <DependentUpon>InfoScreen.cs</DependentUpon>
@@ -176,6 +181,9 @@
       <DependentUpon>Resources.resx</DependentUpon>
       <DesignTime>True</DesignTime>
     </Compile>
+    <EmbeddedResource Include="WaitScreen.resx">
+      <DependentUpon>WaitScreen.cs</DependentUpon>
+    </EmbeddedResource>
     <None Include="NoRV TTS-c4a3e2c55a4f.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
@@ -195,10 +203,10 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\loading.gif" />
-    <Content Include="Audios\PauseAudio.mp3">
+    <Content Include="Audios\BreakAlertAudio.mp3">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Audios\StartAudio.mp3">
+    <Content Include="Audios\PauseAudio.mp3">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="Audios\StopAudio.mp3">

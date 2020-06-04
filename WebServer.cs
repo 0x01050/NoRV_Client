@@ -48,7 +48,6 @@ namespace NoRV
 		{
 			ThreadPool.QueueUserWorkItem(delegate
 			{
-				Console.WriteLine("Webserver running...");
 				try
 				{
 					while (_listener.IsListening)

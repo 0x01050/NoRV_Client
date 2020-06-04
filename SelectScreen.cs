@@ -208,6 +208,7 @@ namespace NoRV
         }
         private void SelectProc()
         {
+            int retry = 0;
             while(true)
             {
                 try
@@ -216,6 +217,9 @@ namespace NoRV
                     if(selectedIdx >= appointList.Length)
                     {
                         selectedIdx = 0;
+                        retry++;
+                        if (retry >= 2)
+                            break;
                     }
 
                     GenerateGoogleTTS(Witness[selectedIdx], Type[selectedIdx]);
@@ -228,8 +232,8 @@ namespace NoRV
                 catch (Exception) { }
                 Thread.Sleep(8 * 1000);
             }
+            selectedIdx = -1;
         }
-        private bool ignoreInput = false;
         IWavePlayer waveOutDevice = null;
         AudioFileReader audioFileReader = null;
         private void PlayMP3(string mp3File, EventHandler<StoppedEventArgs> stopHandler = null)
@@ -237,15 +241,14 @@ namespace NoRV
             DisposeAudioPlayer();
             this.Invoke(new Action(() =>
             {
-                ignoreInput = true;
                 waveOutDevice = new WaveOut();
                 audioFileReader = new AudioFileReader(mp3File);
                 waveOutDevice.Init(audioFileReader);
+                waveOutDevice.Volume = 1f;
                 waveOutDevice.Play();
                 waveOutDevice.PlaybackStopped += (s, e) =>
                 {
                     DisposeAudioPlayer();
-                    ignoreInput = false;
                 };
                 if (stopHandler != null)
                 {
@@ -323,17 +326,13 @@ namespace NoRV
         }
         private void ButtonClicked()
         {
-            if (ignoreInput)
-            {
-                return;
-            }
-
-            if(selectThread == null)
+            if(selectThread == null || !selectThread.IsAlive)
             {
                 Invoke(new Action(() =>
                 {
                     startSelectThread();
                 }));
+                return;
             }
 
             Invoke(new Action(() =>

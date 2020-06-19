@@ -72,7 +72,14 @@ namespace NoRV
         private string _logPath = "";
         private int _alertInterval = 300;
         private int _alertVolume = 25;
+        private string _selectTemplate = "";
         private string _startTemplate = "";
+        private string _totalTimeTemplate = "";
+        private string _endTimeTemplate = "";
+        private string _aucityAPIUrl = "";
+        private int _aucityFetchInterval = 60;
+        private string _aucityAPIUser = "";
+        private string _aucityAPIPass = "";
         private void LoadGlobalConfig()
         {
             var xml = XDocument.Load(@"Config.xml");
@@ -100,9 +107,31 @@ namespace NoRV
                     case "BreakAlertVolume":
                         _alertVolume = (int)item.Attribute("Value");
                         break;
+                    case "SelectWitnessAudioTemplate":
+                        _selectTemplate = (string)item.Attribute("Value");
+                        break;
                     case "StartAudioTemplate":
                         _startTemplate = (string)item.Attribute("Value");
                         break;
+                    case "TotalTimeAudioTemplate":
+                        _totalTimeTemplate = (string)item.Attribute("Value");
+                        break;
+                    case "EndTimeAudioTemplate":
+                        _endTimeTemplate = (string)item.Attribute("Value");
+                        break;
+                    case "AucityAPIUrl":
+                        _aucityAPIUrl = (string)item.Attribute("Value");
+                        break;
+                    case "AucityFetchInterval":
+                        _aucityFetchInterval = (int)item.Attribute("Value");
+                        break;
+                    case "AucityAPIUser":
+                        _aucityAPIUser = (string)item.Attribute("Value");
+                        break;
+                    case "AucityAPIPass":
+                        _aucityAPIPass = (string)item.Attribute("Value");
+                        break;
+
                 }
             }
         }
@@ -134,9 +163,37 @@ namespace NoRV
         {
             return _alertVolume;
         }
-        public string getStartTempate()
+        public string getSelectTemplate()
+        {
+            return _selectTemplate;
+        }
+        public string getStartTemplate()
         {
             return _startTemplate;
+        }
+        public string getTotalTimeTemplate()
+        {
+            return _totalTimeTemplate;
+        }
+        public string getEndTimeTemplate()
+        {
+            return _endTimeTemplate;
+        }
+        public string getAucityAPIUrl()
+        {
+            return _aucityAPIUrl;
+        }
+        public int getAucityFetchInterval()
+        {
+            return _aucityFetchInterval;
+        }
+        public string getAucityAPIUser()
+        {
+            return _aucityAPIUser;
+        }
+        public string getAucityAPIPass()
+        {
+            return _aucityAPIPass;
         }
 
 

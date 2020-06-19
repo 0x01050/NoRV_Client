@@ -48,6 +48,7 @@
             this.btnLoad = new System.Windows.Forms.Button();
             this.lblNoRVMachineID = new System.Windows.Forms.Label();
             this.txtNoRVMachineID = new System.Windows.Forms.TextBox();
+            this.lblJobID = new System.Windows.Forms.Label();
             this.SuspendLayout();
             // 
             // lblWitness
@@ -245,12 +246,21 @@
             this.txtNoRVMachineID.TabIndex = 0;
             this.txtNoRVMachineID.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
             // 
+            // lblJobID
+            // 
+            this.lblJobID.Location = new System.Drawing.Point(382, 84);
+            this.lblJobID.Name = "lblJobID";
+            this.lblJobID.Size = new System.Drawing.Size(0, 0);
+            this.lblJobID.TabIndex = 11;
+            this.lblJobID.Visible = false;
+            // 
             // InfoScreen
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.AutoSize = true;
             this.ClientSize = new System.Drawing.Size(484, 261);
+            this.Controls.Add(this.lblJobID);
             this.Controls.Add(this.txtNoRVMachineID);
             this.Controls.Add(this.lblNoRVMachineID);
             this.Controls.Add(this.btnLoad);
@@ -308,6 +318,7 @@
         private System.Windows.Forms.Button btnLoad;
         private System.Windows.Forms.Label lblNoRVMachineID;
         private System.Windows.Forms.TextBox txtNoRVMachineID;
+        private System.Windows.Forms.Label lblJobID;
     }
 }
 

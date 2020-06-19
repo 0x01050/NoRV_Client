@@ -18,22 +18,25 @@ namespace NoRV
     {
         public int selectedIdx = -1;
         
-        private JObject[] appointList = new JObject[0];
+        public JObject[] appointList = new JObject[0];
 
         private List<string> Witness = new List<string>();
         private List<string> Type = new List<string>();
 
         private Thread selectThread = null;
+        private bool ignoreInput = false;
 
         public SelectScreen(JObject[] jobs)
         {
             appointList = jobs;
             InitializeComponent();
         }
-
-        private void SelectScreen_Load(object sender, EventArgs e)
+        private void initJobs()
         {
-            InitGoogleCredential();
+            lstAppointments.Items.Clear();
+            Witness.Clear();
+            Type.Clear();
+
             foreach (JObject job in appointList)
             {
                 string datetime = "";
@@ -78,6 +81,12 @@ namespace NoRV
                 Witness.Add(witness);
                 Type.Add(type);
             }
+        }
+        private void SelectScreen_Load(object sender, EventArgs e)
+        {
+            InitGoogleCredential();
+            initJobs();
+            startLoadThread();
             startButtonCheck();
             startLEDFlash();
         }
@@ -88,6 +97,7 @@ namespace NoRV
             stopSelectThread();
             stopButtonCheck();
             stopLEDFlash();
+            stopLoadThread();
             if(DialogResult != DialogResult.OK)
                 ButtonManager.getInstance().turnOffLED();
         }
@@ -169,7 +179,7 @@ namespace NoRV
         {
             SynthesisInput input = new SynthesisInput
             {
-                Text = "To start with " + witness + " " + type + " deposition, press button now."
+                Text = Config.getInstance().getSelectTemplate().Replace("#Witness Type#", type).Replace("#Witness#", witness).Replace("30B6", "Thirty B 6")
             };
             VoiceSelectionParams voice = new VoiceSelectionParams
             {
@@ -233,6 +243,7 @@ namespace NoRV
                 Thread.Sleep(8 * 1000);
             }
             selectedIdx = -1;
+            startLoadThread();
         }
         IWavePlayer waveOutDevice = null;
         AudioFileReader audioFileReader = null;
@@ -326,10 +337,16 @@ namespace NoRV
         }
         private void ButtonClicked()
         {
+            if(ignoreInput)
+            {
+                return;
+            }
+
             if(selectThread == null || !selectThread.IsAlive)
             {
                 Invoke(new Action(() =>
                 {
+                    stopLoadThread();
                     startSelectThread();
                 }));
                 return;
@@ -345,6 +362,51 @@ namespace NoRV
                     Close();
                 }
             }));
+        }
+        private Thread loadThread = null;
+        private void startLoadThread()
+        {
+            stopLoadThread();
+            loadThread = new Thread(new ThreadStart(LoadAppointments));
+            loadThread.Start();
+        }
+        private void stopLoadThread()
+        {
+            if (loadThread != null)
+            {
+                loadThread.Abort();
+                loadThread = null;
+            }
+        }
+
+        private void LoadAppointments()
+        {
+            while (true)
+            {
+                try
+                {
+                    Thread.Sleep(Config.getInstance().getAucityFetchInterval() * 1000);
+                    List<JObject> jobs = JobManager.getJobs();
+                    if (appointList.Length != jobs.Count)
+                    {
+                        ignoreInput = true;
+                        PlayMP3("Audios/LoadingAudio.mp3", (s, e) =>
+                        {
+                            ignoreInput = false;
+                            appointList = jobs.ToArray();
+                            Invoke(new Action(() => initJobs()));
+                        });
+                    }
+                    else
+                    {
+                        appointList = jobs.ToArray();
+                        Invoke(new Action(() => initJobs()));
+                    }
+
+                }
+                catch (ThreadAbortException) { return; }
+                catch (Exception) { }
+            }
         }
     }
 }

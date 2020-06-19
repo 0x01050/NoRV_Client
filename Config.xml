@@ -1,13 +1,20 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <AppConfig>
   <Global>
-    <Item Key="DefaultVolume" Value="50" />
+    <Item Key="DefaultVolume" Value="65" />
     <Item Key="AnnounceTime" Value="" />
-    <Item Key="FlashPeriod" Value="500" />
-    <Item Key="LogPath" Value="" />
-    <Item Key="BreakAlertInterval" Value="300" />
-    <Item Key="BreakAlertVolume" Value="25" />
-    <Item Key="StartAudioTemplate" Value="We are about to begin the #Witness Type# of #Witness#. Please press the button in 10 seconds to confirm, if this was error simply ignore this message." />
+    <Item Key="FlashPeriod" Value="100" />
+    <Item Key="LogPath" Value="C:\Users\Master\Desktop\Dropbox\Client Name 00001\" />
+    <Item Key="BreakAlertInterval" Value="200" />
+    <Item Key="BreakAlertVolume" Value="40" />
+    <Item Key="SelectWitnessAudioTemplate" Value="To start with the #Witness Type# deposition of #Witness# , press the button now." />
+    <Item Key="StartAudioTemplate" Value="We are about to begin the #Witness Type# deposition of #Witness# . Press the button within 10 seconds to proceed. if this was by error, simply ignore this message and it will reset back." />
+    <Item Key="TotalTimeAudioTemplate" Value="We have been on the record for" />
+    <Item Key="EndTimeAudioTemplate" Value="Total running time for this deposition is" />
+    <Item Key="AucityAPIUrl" Value="https://acuityscheduling.com/api/v1/appointments?direction=ASC&amp;minDate=%MINDATE%&amp;maxDate=%MAXDATE%" />
+    <Item Key="AucityFetchInterval" Value="60" />
+    <Item Key="AucityAPIUser" Value="19487502" />
+    <Item Key="AucityAPIPass" Value="30fce42b9991bbd32cea500a49c7d3b9" />
   </Global>
 
   <OBS>
@@ -43,7 +50,7 @@
 
       NORV tech nor any of their technicians are related to any party in this action, nor they are financially interested in the outcome.
 
-      Would all pressent please identify yourselves for the record after which the court reporter will identify themselves and then swear in the witness.
+      Would all prezent please identify yourselves for the record after which the court reporter will identify themselves and then swear in the witness.
     </Template>
 
     <Template Type="30B6">
@@ -58,7 +65,7 @@
 
       NORV tech nor any of their technicians are related to any party in this action, nor they are financially interested in the outcome.
 
-      Would all pressent please identify yourselves for the record after which the court reporter will identify themselves and then swear in the witness.
+      Would all prezent please identify yourselves for the record after which the court reporter will identify themselves and then swear in the witness.
     </Template>
   </Templates>
 </AppConfig>

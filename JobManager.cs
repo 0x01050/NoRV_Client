@@ -5,31 +5,33 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
-using System.Security.Cryptography.X509Certificates;
 using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Forms;
+using System.Xml.Linq;
+using System.Xml.XPath;
 
 namespace NoRV
 {
     class JobManager
     {
-        public List<JObject> getJobs()
+        public static List<JObject> getJobs()
         {
             List<JObject> _jobs = new List<JObject>();
 
             var httpClient = new HttpClient(new HttpClientHandler() { UseDefaultCredentials = true })
             {
-                Timeout = new TimeSpan(0, 0, 5)
+                Timeout = new TimeSpan(0, 0, 8)
             };
             httpClient.DefaultRequestHeaders.Add("ContentType", "application/json");
-            var apiKeyPwd = Encoding.UTF8.GetBytes("19487502:30fce42b9991bbd32cea500a49c7d3b9");
+            var apiKeyPwd = Encoding.UTF8.GetBytes(Config.getInstance().getAucityAPIUser() + ":" + Config.getInstance().getAucityAPIPass());
             string basicAuth = Convert.ToBase64String(apiKeyPwd);
             httpClient.DefaultRequestHeaders.Add("Authorization", "Basic " + basicAuth);
             ServicePointManager.ServerCertificateValidationCallback = delegate { return true; };
 
             string now = DateTime.Now.ToString("yyyy-MM-dd");
-            HttpResponseMessage response = httpClient.GetAsync("https://acuityscheduling.com/api/v1/appointments?direction=ASC&minDate=" + now + "&maxDate=" + now).Result;
+            if(Program.DEBUG)
+                now = "2020-06-08";
+            string url = Config.getInstance().getAucityAPIUrl().Replace("%MINDATE%", now).Replace("%MAXDATE%", now);
+            HttpResponseMessage response = httpClient.GetAsync(url).Result;
             if (response.StatusCode == HttpStatusCode.OK)
             {
                 string content = response.Content.ReadAsStringAsync().Result;
@@ -38,6 +40,12 @@ namespace NoRV
                 {
                     foreach (JObject appointItem in respArray)
                     {
+                        if(appointItem.ContainsKey("id"))
+                        {
+                            string jobID = appointItem["id"].ToString();
+                            if(checkFinishedJob(jobID))
+                                continue;
+                        }
                         if (appointItem.ContainsKey("datetime"))
                         {
                             string datetime = appointItem.GetValue("datetime").ToString();
@@ -75,6 +83,52 @@ namespace NoRV
                 throw new Exception(response.StatusCode.ToString());
             }
             return _jobs;
+        }
+
+        public static void FinishJob(string jobID)
+        {
+            removeUnnecessaryLog();
+            if(!checkFinishedJob(jobID))
+            {
+                string now = DateTime.Now.ToString("yyyy-MM-dd");
+                var xml = XDocument.Load(@"Log.xml");
+
+
+                if(xml.XPathSelectElements(String.Format("//Group[@Date='{0}']", now)).Count() == 0)
+                {
+                    XElement newElem = new XElement("Group");
+                    newElem.Add(new XAttribute("Date", now));
+                    xml.Root.Add(newElem);
+                    xml.Save(@"Log.xml");
+                }
+                var query = from c in xml.Root.Descendants("Group")
+                        where (string)c.Attribute("Date") == now
+                        select c;
+                foreach(var item in query)
+                {
+                    XElement newElem = new XElement("Log");
+                    newElem.Add(new XAttribute("ID", jobID));
+                    item.Add(newElem);
+                    xml.Save(@"Log.xml");
+                }
+            }
+        }
+
+        private static bool checkFinishedJob(string jobID)
+        {
+            string now = DateTime.Now.ToString("yyyy-MM-dd");
+            var xml = XDocument.Load(@"Log.xml");
+            return xml.XPathSelectElements(String.Format("//Group[@Date='{0}']/Log[@ID='{1}']", now, jobID)).Count() > 0;
+        }
+
+        private static void removeUnnecessaryLog()
+        {
+            string now = DateTime.Now.ToString("yyyy-MM-dd");
+            var xml = XDocument.Load(@"Log.xml");
+            xml.Root.Descendants("Group")
+                    .Where(x => (string)x.Attribute("Date") != now)
+                    .Remove();
+            xml.Save(@"Log.xml");
         }
     }
 }

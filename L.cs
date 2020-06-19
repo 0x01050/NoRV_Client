@@ -1,7 +1,4 @@
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 using System;
-using System.IO;
 using System.Management;
 using System.Security.Cryptography;
 using System.Text;
@@ -378,17 +375,17 @@ public class L
 		return ClassAES.EncryptStringAES(t, sharedSecret);
 	}
 
-	public static string serial = "";
+    private static string serial = "";
 
-	public static string v()
+    public static string v()
 	{
 		try
 		{
-			if (string.IsNullOrEmpty(serial))
+            if (string.IsNullOrEmpty(serial))
 			{
 				serial = g();
 			}
-			return serial.Substring(0, 32);
+			return serial;
 		}
 		catch (Exception)
 		{

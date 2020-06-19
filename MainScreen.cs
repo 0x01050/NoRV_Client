@@ -118,25 +118,31 @@ namespace NoRV
         }
         private void SaveLog()
         {
-            logs.Add(String.Format("total running time = {0}:{1}", totalSeconds / 60, totalSeconds % 60));
+            logs.Add("total running time =" + buildElapsedTimeString(totalSeconds));
             logs.Add(String.Format("total breaks = {0}", logs.Count - 3));
-            File.WriteAllLines(Config.getInstance().getLogPath() + logFile + ".txt", logs);
+            try
+            {
+                File.WriteAllLines(Config.getInstance().getLogPath() + logFile + ".txt", logs);
+            }
+            catch(DirectoryNotFoundException)
+            {
+                File.WriteAllLines(logFile + ".txt", logs);
+            }
+            catch(Exception) { }
         }
         private void InsertLog(string type)
         {
-            DateTime now = DateTime.UtcNow.AddHours(tzOffset);
-
+            string action = type + DateTime.UtcNow.AddHours(tzOffset).ToString(": h:mmtt");
             if (type == "Start" || type == "On")
             {
-                lastLog = type + now.ToString(": h:mmtt");
+                lastLog = action;
                 lastLogTime = DateTime.Now;
             }
             if (type == "Off" || type == "End")
             {
-                TimeSpan elapse = DateTime.Now - lastLogTime;
-                lastLog += " - " + type + now.ToString(": h:mmtt") + String.Format(" = {0} minutes on record", (int)elapse.TotalMinutes);
-                totalSeconds += (int)elapse.TotalSeconds;
-                logs.Add(lastLog);
+                int elapSec = (int)(DateTime.Now - lastLogTime).TotalSeconds;
+                logs.Add(lastLog + " - " + action + " =" + buildElapsedTimeString(elapSec));
+                totalSeconds += elapSec;
             }
         }
 
@@ -320,7 +326,11 @@ namespace NoRV
             {
                 Thread.Sleep(10 * 1000);
                 if (status == STATUS_WAIT)
-                    Invoke(new Action(() => Close()));
+                    Invoke(new Action(() => 
+                    {
+                        DialogResult = DialogResult.OK;
+                        Close();
+                    }));
             }
             catch (ThreadAbortException) { }
             catch (Exception) { }
@@ -470,34 +480,47 @@ namespace NoRV
             {
                 ignoreInput = true;
                 DateTime tzNow = DateTime.UtcNow.AddHours(tzOffset);
-                SpeechSynthesizer speech = new SpeechSynthesizer();
-                speech.SpeakAsync(Config.getInstance().getAnnounceTime() + tzNow.ToString(" h:mm tt"));
-                speech.SpeakCompleted += (ss, ee) =>
+                SpeechSynthesizer stopAudio = new SpeechSynthesizer();
+                stopAudio.SpeakAsync(Config.getInstance().getAnnounceTime() + tzNow.ToString(" h:mm tt"));
+                stopAudio.SpeakCompleted += (ss, ee) =>
                 {
-                    btnSpeak.Image = Properties.Resources.play;
-                    btnSpeak.Text = "SPEAK IT";
-                    Close();
+                    SpeechSynthesizer totalAudio = new SpeechSynthesizer();
+                    totalAudio.SpeakAsync(Config.getInstance().getEndTimeTemplate() + buildElapsedTimeString(totalSeconds));
+                    totalAudio.SpeakCompleted += (sss, eee) =>
+                    {
+                        ignoreInput = false;
+
+                        btnSpeak.Image = Properties.Resources.play;
+                        btnSpeak.Text = "SPEAK IT";
+                        Close();
+                    };
                 };
             });
         }
         private void PauseRecording()
         {
-            InsertLog("Off");
+            InsertLog("Off");                                                                                                                                                                           
             status = STATUS_PAUSE;
             PlayMP3("Audios/PauseAudio.mp3", (s, e) =>
             {
                 ignoreInput = true;
                 DisposeAudioPlayer();
                 DateTime tzNow = DateTime.UtcNow.AddHours(tzOffset);
-                SpeechSynthesizer speech = new SpeechSynthesizer();
-                speech.SpeakAsync(Config.getInstance().getAnnounceTime() + tzNow.ToString(" h:mm tt"));
-                speech.SpeakCompleted += (ss, ee) =>
+                SpeechSynthesizer pauseAudio = new SpeechSynthesizer();
+                pauseAudio.SpeakAsync(Config.getInstance().getAnnounceTime() + tzNow.ToString(" h:mm tt"));
+                pauseAudio.SpeakCompleted += (ss, ee) =>
                 {
-                    ignoreInput = false;
                     Thread.Sleep(1000);
                     OBSManager.PauseOBSRecording();
                     startLEDFlash();
                     startAlertThread();
+
+                    SpeechSynthesizer totalAudio = new SpeechSynthesizer();
+                    totalAudio.SpeakAsync(Config.getInstance().getTotalTimeTemplate() + buildElapsedTimeString(totalSeconds));
+                    totalAudio.SpeakCompleted += (sss, eee) =>
+                    {
+                        ignoreInput = false;
+                    };
                 };
             });
         }
@@ -514,9 +537,9 @@ namespace NoRV
                 ignoreInput = true;
                 DisposeAudioPlayer();
                 DateTime tzNow = DateTime.UtcNow.AddHours(tzOffset);
-                SpeechSynthesizer speech = new SpeechSynthesizer();
-                speech.SpeakAsync(Config.getInstance().getAnnounceTime() + tzNow.ToString(" h:mm tt"));
-                speech.SpeakCompleted += (ss, ee) =>
+                SpeechSynthesizer unpauseAudio = new SpeechSynthesizer();
+                unpauseAudio.SpeakAsync(Config.getInstance().getAnnounceTime() + tzNow.ToString(" h:mm tt"));
+                unpauseAudio.SpeakCompleted += (ss, ee) =>
                 {
                     ignoreInput = false;
                 };
@@ -586,7 +609,7 @@ namespace NoRV
         {
             SynthesisInput input = new SynthesisInput
             {
-                Text = Config.getInstance().getStartTempate().Replace("#Witness Type#", type).Replace("#Witness#", witness)
+                Text = Config.getInstance().getStartTemplate().Replace("#Witness Type#", type).Replace("#Witness#", witness).Replace("30B6", "Thirty B 6")
             };
             VoiceSelectionParams voice = new VoiceSelectionParams
             {
@@ -607,6 +630,28 @@ namespace NoRV
             {
                 response.AudioContent.WriteTo(output);
             }
+        }
+
+        private string buildElapsedTimeString(int totalSec)
+        {
+            string elapse = " ";
+            if (totalSec > 3600)
+            {
+                elapse += String.Format("{0} hours", totalSec / 3600);
+                totalSec %= 3600;
+                if (totalSec > 0)
+                    elapse += ", ";
+            }
+            if (totalSec > 60)
+            {
+                elapse += String.Format("{0} minutes", totalSec / 60);
+                totalSec %= 60;
+                if (totalSec > 0)
+                    elapse += " and ";
+            }
+            if (totalSec > 0)
+                elapse += String.Format("{0} seconds", totalSec);
+            return elapse;
         }
     }
 }

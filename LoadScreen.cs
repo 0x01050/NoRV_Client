@@ -39,7 +39,7 @@ namespace NoRV
             try
             {
                 Application.UseWaitCursor = true;
-                List<JObject> jobs = JobManager.getJobs();
+                List<JObject> jobs = new JobManager().getJobs();
                 foreach(JObject job in jobs)
                 {
 

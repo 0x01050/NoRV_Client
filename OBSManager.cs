@@ -1,6 +1,12 @@
-﻿using System.Diagnostics;
+﻿using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Linq;
 using System.Runtime.InteropServices;
+using System.Text;
 using System.Threading;
+using System.Threading.Tasks;
+using System.Windows.Forms;
 
 namespace NoRV
 {
@@ -8,8 +14,6 @@ namespace NoRV
     {
         public static bool CheckOBSRunning()
         {
-            if (Program.DEBUG)
-                return true;
             Process[] obs64 = Process.GetProcessesByName(Config.getInstance().getOBSProcessName());
             return obs64.Length > 0;
         }

@@ -102,9 +102,6 @@ namespace NoRV
             stopLoadThread();
             MainScreen form = new MainScreen(InfoList, source);
             form.ShowDialog();
-            if (form.DialogResult != DialogResult.OK && !String.IsNullOrEmpty(lblJobID.Text))
-                JobManager.FinishJob(lblJobID.Text);
-            lblJobID.Text = "";
             startLoadThread();
         }
 
@@ -168,14 +165,15 @@ namespace NoRV
         {
             Invoke(new Action(() =>
             {
+                JObject[] jobs = _jobs.ToArray();
                 stopLoadThread();
-                SelectScreen form = new SelectScreen(_jobs.ToArray());
+                SelectScreen form = new SelectScreen(jobs);
                 if (form.ShowDialog() == DialogResult.OK)
                 {
-                    if (form.selectedIdx >= 0 && form.selectedIdx < form.appointList.Length)
+                    if (form.selectedIdx >= 0 && form.selectedIdx < jobs.Length)
                     {
                         ClearFields();
-                        JObject appointItem = form.appointList[form.selectedIdx];
+                        JObject appointItem = jobs[form.selectedIdx];
                         SetInfo(appointItem);
                         if (!btnNext.Enabled)
                             ButtonManager.getInstance().turnOffLED();
@@ -194,10 +192,6 @@ namespace NoRV
         {
             Invoke(new Action(() =>
             {
-                if(appointItem.ContainsKey("id"))
-                {
-                    lblJobID.Text = appointItem["id"].ToString();
-                }
                 if (appointItem.ContainsKey("forms") && appointItem.GetValue("forms") is JArray forms && forms.Count > 0)
                 {
                     dynamic info = forms.ToArray<dynamic>()[0];
@@ -266,9 +260,17 @@ namespace NoRV
                 sleepTime = 10 * 1000;
                 try
                 {
-                    List<JObject> jobs = JobManager.getJobs();
-                    sleepTime = 30 * 1000;
-                    if (jobs.Count > 0)
+                    List<JObject> jobs = new JobManager().getJobs();
+                    if (jobs.Count == 1)
+                    {
+                        SetInfo(jobs[0]);
+                        btnNext.Invoke(new Action(() =>
+                        {
+                            btnNext.PerformClick();
+                        }));
+                        sleepTime = 30 * 1000;
+                    }
+                    if (jobs.Count > 1)
                     {
                         selectJob(jobs);
                     }

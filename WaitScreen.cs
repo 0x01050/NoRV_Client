@@ -6,34 +6,19 @@ namespace NoRV
 {
     public partial class WaitScreen : Form
     {
-        Thread obsCheckThread = null;
         public WaitScreen()
         {
             InitializeComponent();
-            obsCheckThread = new Thread(new ThreadStart(OBSCheck));
-            obsCheckThread.Start();
+            Thread thread = new Thread(new ThreadStart(OBSCheck));
+            thread.Start();
         }
         private void OBSCheck()
         {
-            try
+            while(!OBSManager.CheckOBSRunning())
             {
-                while (!OBSManager.CheckOBSRunning())
-                {
-                    Thread.Sleep(500);
-                }
-                Invoke(new Action(() => Close()));
+                Thread.Sleep(500);
             }
-            catch(ThreadAbortException) { }
-            catch(Exception) { }
-        }
-
-        private void WaitScreen_FormClosing(object sender, FormClosingEventArgs e)
-        {
-            if(obsCheckThread != null)
-            {
-                obsCheckThread.Abort();
-                obsCheckThread = null;
-            }
+            Invoke(new Action(() => Close()));
         }
     }
 }

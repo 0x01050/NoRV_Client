@@ -1,4 +1,10 @@
-﻿using System.Text;
+﻿using Google.Rpc;
+using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace NoRV
@@ -91,8 +97,7 @@ namespace NoRV
 
         public bool checkButtonPressed()
         {
-            if (Program.DEBUG)
-                return Control.ModifierKeys == Keys.Control;
+            //return Control.ModifierKeys == Keys.Control;
 
             if (getButtonStatus() != INITIATED)
             {

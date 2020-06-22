@@ -1,3 +1,4 @@
+using NoRV;
 using System;
 using System.Management;
 using System.Security.Cryptography;
@@ -392,4 +393,16 @@ public class L
 			throw new SystemException("Cannot Get NoRV Machine ID");
 		}
 	}
+
+	private static string machineID = "";
+	public static string getID()
+    {
+		if (Program.DEBUG)
+			return "41ee136b0362ecf5cbac71ef9314232d";
+		return machineID;
+    }
+	public static void setID(string id)
+    {
+		machineID = id;
+    }
 }

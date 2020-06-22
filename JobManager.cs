@@ -29,7 +29,7 @@ namespace NoRV
 
             string now = DateTime.Now.ToString("yyyy-MM-dd");
             if(Program.DEBUG)
-                now = "2020-06-08";
+                now = "2020-06-19";
             string url = Config.getInstance().getAucityAPIUrl().Replace("%MINDATE%", now).Replace("%MAXDATE%", now);
             HttpResponseMessage response = httpClient.GetAsync(url).Result;
             if (response.StatusCode == HttpStatusCode.OK)
@@ -70,7 +70,7 @@ namespace NoRV
                                     }
                                 }
                             }
-                            if (NoRVID == L.v())
+                            if (NoRVID == L.getID())
                             {
                                 _jobs.Add(appointItem);
                             }
@@ -82,6 +82,7 @@ namespace NoRV
             {
                 throw new Exception(response.StatusCode.ToString());
             }
+            Program.changeJobs(_jobs.Count.ToString());
             return _jobs;
         }
 

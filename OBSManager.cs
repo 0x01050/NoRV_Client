@@ -14,21 +14,30 @@ namespace NoRV
             return obs64.Length > 0;
         }
 
-        public static void StartOBSRecording()
+        public static void StartOBSRecording(string witness = null)
         {
             SendHotkey(Config.getInstance().getOBSHotkey("start"));
+
+            Program.changeOBS("Recording (" + witness + ")");
         }
-        public static void StopOBSRecording()
+        public static void StopOBSRecording(string witness = null)
         {
             SendHotkey(Config.getInstance().getOBSHotkey("stop"));
+
+            if (witness != null)
+                Program.changeOBS("Recording Ended (" + witness + ")");
         }
-        public static void PauseOBSRecording()
+        public static void PauseOBSRecording(string witness = null)
         {
             SendHotkey(Config.getInstance().getOBSHotkey("pause"));
+
+            Program.changeOBS("Recording Paused (" + witness + ")");
         }
-        public static void UnpauseOBSRecording()
+        public static void UnpauseOBSRecording(string witness = null)
         {
             SendHotkey(Config.getInstance().getOBSHotkey("unpause"));
+
+            Program.changeOBS("Recording (" + witness + ")");
         }
 
         [DllImport("user32.dll")]

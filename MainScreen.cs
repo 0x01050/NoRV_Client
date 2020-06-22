@@ -19,6 +19,7 @@ namespace NoRV
         private TextToSpeechClient client;
 
         private Dictionary<string, string> InfoList = new Dictionary<string, string>();
+        private string witness = "";
 
         private string voiceText = "";
         private double speed = 1.0;
@@ -55,6 +56,8 @@ namespace NoRV
                     this.InfoList.Add("Date", tzNow.ToString("MMM dd, yyyy"));
                     this.InfoList.Add("Time", this.lastTime = tzNow.ToString("h:mm tt"));
                 }
+                if (this.InfoList.ContainsKey("Witness"))
+                    witness = this.InfoList["Witness"];
             }
             this.source = source;
             InitializeComponent();
@@ -85,8 +88,10 @@ namespace NoRV
         }
         private void MainScreen_FormClosing(object sender, FormClosingEventArgs e)
         {
+            Program.changeDepo("Off The Record (" + witness + ")");
+
             DisposeAudioPlayer();
-            OBSManager.StopOBSRecording();
+            OBSManager.StopOBSRecording(witness);
             stopButtonCheck();
             stopLEDFlash();
             stopKillerThread();
@@ -104,9 +109,7 @@ namespace NoRV
         private int totalSeconds = 0;
         private void LogInit()
         {
-            string witness = "", type = "", date = "";
-            if (InfoList.ContainsKey("Witness"))
-                witness = InfoList["Witness"];
+            string type = "", date = "";
             if (InfoList.ContainsKey("Template"))
                 type = InfoList["Template"];
             if (InfoList.ContainsKey("Date"))
@@ -144,6 +147,12 @@ namespace NoRV
                 logs.Add(lastLog + " - " + action + " =" + buildElapsedTimeString(elapSec));
                 totalSeconds += elapSec;
             }
+
+            string time = DateTime.UtcNow.AddHours(tzOffset).ToString("h:mmtt");
+            if (type == "Start")
+                Program.changeWitness(witness, time, true);
+            if (type == "End")
+                Program.changeWitness(witness, time, false);
         }
 
         private void InitGoogleCredential()
@@ -452,6 +461,8 @@ namespace NoRV
         }
         private void StartRecording()
         {
+            Program.changeDepo("On The Record (" + witness + ")");
+
             InsertLog("Start");
             status = STATUS_RECORD;
             ignoreInput = true;
@@ -461,7 +472,7 @@ namespace NoRV
             btnSpeak.Image = Properties.Resources.stop;
             btnSpeak.Text = "STOP IT";
 
-            OBSManager.StartOBSRecording();
+            OBSManager.StartOBSRecording(witness);
             solidLED();
             Thread.Sleep(2000);
 
@@ -484,8 +495,9 @@ namespace NoRV
                 stopAudio.SpeakAsync(Config.getInstance().getAnnounceTime() + tzNow.ToString(" h:mm tt"));
                 stopAudio.SpeakCompleted += (ss, ee) =>
                 {
+                    int elapSec = (int)(DateTime.Now - lastLogTime).TotalSeconds;
                     SpeechSynthesizer totalAudio = new SpeechSynthesizer();
-                    totalAudio.SpeakAsync(Config.getInstance().getEndTimeTemplate() + buildElapsedTimeString(totalSeconds));
+                    totalAudio.SpeakAsync(Config.getInstance().getEndTimeTemplate() + buildElapsedTimeString(totalSeconds + elapSec));
                     totalAudio.SpeakCompleted += (sss, eee) =>
                     {
                         ignoreInput = false;
@@ -511,7 +523,7 @@ namespace NoRV
                 pauseAudio.SpeakCompleted += (ss, ee) =>
                 {
                     Thread.Sleep(1000);
-                    OBSManager.PauseOBSRecording();
+                    OBSManager.PauseOBSRecording(witness);
                     startLEDFlash();
                     startAlertThread();
 
@@ -528,7 +540,7 @@ namespace NoRV
         {
             InsertLog("On");
             status = STATUS_RECORD;
-            OBSManager.UnpauseOBSRecording();
+            OBSManager.UnpauseOBSRecording(witness);
             solidLED();
             stopAlertThread();
             Thread.Sleep(1000);

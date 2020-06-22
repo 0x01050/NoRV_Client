@@ -15,6 +15,7 @@
     <Item Key="AucityFetchInterval" Value="60" />
     <Item Key="AucityAPIUser" Value="19487502" />
     <Item Key="AucityAPIPass" Value="30fce42b9991bbd32cea500a49c7d3b9" />
+    <Item Key="ServerUrl" Value="http://35.222.155.75" />
   </Global>
 
   <OBS>

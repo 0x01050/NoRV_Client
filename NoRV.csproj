@@ -141,6 +141,12 @@
     <Compile Include="LoadScreen.Designer.cs">
       <DependentUpon>LoadScreen.cs</DependentUpon>
     </Compile>
+    <Compile Include="RegisterScreen.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="RegisterScreen.Designer.cs">
+      <DependentUpon>RegisterScreen.cs</DependentUpon>
+    </Compile>
     <Compile Include="SelectScreen.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -167,6 +173,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="LoadScreen.resx">
       <DependentUpon>LoadScreen.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="RegisterScreen.resx">
+      <DependentUpon>RegisterScreen.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="SelectScreen.resx">
       <DependentUpon>SelectScreen.cs</DependentUpon>

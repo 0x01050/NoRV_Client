@@ -80,6 +80,7 @@ namespace NoRV
         private int _aucityFetchInterval = 60;
         private string _aucityAPIUser = "";
         private string _aucityAPIPass = "";
+        private string _serverUrl = "";
         private void LoadGlobalConfig()
         {
             var xml = XDocument.Load(@"Config.xml");
@@ -130,6 +131,9 @@ namespace NoRV
                         break;
                     case "AucityAPIPass":
                         _aucityAPIPass = (string)item.Attribute("Value");
+                        break;
+                    case "ServerUrl":
+                        _serverUrl = (string)item.Attribute("Value");
                         break;
 
                 }
@@ -194,6 +198,10 @@ namespace NoRV
         public string getAucityAPIPass()
         {
             return _aucityAPIPass;
+        }
+        public string getServerUrl()
+        {
+            return _serverUrl;
         }
 
 

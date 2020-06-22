@@ -20,7 +20,7 @@ namespace NoRV
 
         private void InfoScreen_Load(object sender, EventArgs e)
         {
-            txtNoRVMachineID.Text = L.v();
+            txtNoRVMachineID.Text = L.getID();
             ButtonManager.getInstance().turnOffLED();
 
             startLoadThread();
@@ -241,20 +241,23 @@ namespace NoRV
                                         {
                                             TimeZone.SelectedItem = oneInfo.value.ToString().Trim();
                                         }
-                                        if (key == "Videographer")
-                                        {
-                                            Videographer.Text = oneInfo.value;
-                                        }
-                                        if (key == "Commission")
-                                        {
-                                            Commission.Text = oneInfo.value;
-                                        }
+                                        //if (key == "Videographer")
+                                        //{
+                                        //    Videographer.Text = oneInfo.value;
+                                        //}
+                                        //if (key == "Commission")
+                                        //{
+                                        //    Commission.Text = oneInfo.value;
+                                        //}
                                     }
                                 }
                             }
                         }
                     }
                 }
+
+                Videographer.Text = Program.videographer;
+                Commission.Text = Program.commission;
             }));
         }
 

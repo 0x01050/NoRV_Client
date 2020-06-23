@@ -15,7 +15,7 @@ namespace NoRV
 {
     static class Program
     {
-        public static bool DEBUG = false;
+        public static bool DEBUG = true;
 
         public static string videographer = "";
         public static string commission = "";
@@ -66,14 +66,6 @@ namespace NoRV
                 reportStatus();
             }
         }
-        public static void changeDepo(string newDepo)
-        {
-            if(depo != newDepo)
-            {
-                depo = newDepo;
-                reportStatus();
-            }
-        }
         public static void changeJobs(string newJob)
         {
             if(jobs != newJob)
@@ -82,17 +74,47 @@ namespace NoRV
                 reportStatus();
             }
         }
-        public static void changeWitness(string title, string time, bool start)
+        public static void changeWitness(string id, string title, string time, int type)
         {
-            if(start)
-                witness.Add(new string[] { title, time, "Not concluded" });
-            else
+            string date = DateTime.Now.ToString("yyyy-MM-dd");
+            string[] found = witness.Find(x => x[0] == id);
+            if (found == null)
+                witness.Add(new string[] { id, title, date, "", "" });
+            else if (type == 1)
             {
-                int idx = witness.Count - 1;
-                if (idx >= 0)
-                    witness[idx][2] = time;
+                found[3] = time;
+                found[4] = "Not concluded";
             }
+            else if (type == 2)
+            {
+                found[4] = time;
+            }
+            else
+                return;
             reportStatus();
+        }
+
+        private static void filterWitness()
+        {
+            witness.Sort((l, r) =>
+            {
+                if (l == null || l.Length != 5)
+                    return 1;
+                if (r == null || r.Length != 5)
+                    return -1;
+                if (l[3] == "")
+                    return 1;
+                if (r[3] == "")
+                    return -1;
+                return l[3].CompareTo(r[3]);
+            });
+            witness = witness.FindAll(x =>
+            {
+                if (x == null || x.Length != 5)
+                    return false;
+                string date = DateTime.Now.ToString("yyyy-MM-dd");
+                return x[2] == date;
+            });
         }
 
         private static PerformanceCounter theCPUCounter = new PerformanceCounter("Process", "% Processor Time", Process.GetCurrentProcess().ProcessName);
@@ -107,6 +129,7 @@ namespace NoRV
                 button = ButtonManager.getInstance().getButtonStatus() == ButtonManager.INITIATED ? "Operational" : "Not Operational";
                 string screenshot = CaptureScreen(Screen.PrimaryScreen);
                 string joinedWitness = "";
+                filterWitness();
                 if (witness.Count > 0)
                     joinedWitness += formatWitness(witness[0]);
                 for(int i = 1; i < witness.Count; i ++)
@@ -134,10 +157,10 @@ namespace NoRV
         private static string formatWitness(string[] onelog)
         {
             string curStr = "";
-            if (onelog.Length > 0)
-                curStr = onelog[0];
-            if (onelog.Length > 2)
-                curStr += " (" + onelog[1] + "/" + onelog[2] + ")";
+            if (onelog.Length > 1)
+                curStr = onelog[1];
+            if (onelog.Length > 3 && onelog[3] != "")
+                curStr += " (" + onelog[3] + "/" + onelog[4] + ")";
             return curStr;
         }
         private static string CaptureScreen(Screen window)

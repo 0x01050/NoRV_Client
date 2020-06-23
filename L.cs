@@ -397,8 +397,6 @@ public class L
 	private static string machineID = "";
 	public static string getID()
     {
-		if (Program.DEBUG)
-			return "41ee136b0362ecf5cbac71ef9314232d";
 		return machineID;
     }
 	public static void setID(string id)

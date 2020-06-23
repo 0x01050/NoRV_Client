@@ -85,7 +85,15 @@ namespace NoRV
         private void SelectScreen_Load(object sender, EventArgs e)
         {
             InitGoogleCredential();
-            initJobs();
+            ignoreInput = true;
+            PlayMP3("Audios/LoadingAudio.mp3", (s, ee) =>
+            {
+                ignoreInput = false;
+                Invoke(new Action(() =>
+                {
+                    initJobs();
+                }));
+            });
             startLoadThread();
             startButtonCheck();
             startLEDFlash();
@@ -378,8 +386,37 @@ namespace NoRV
                 loadThread = null;
             }
         }
+        private int FindDifference(JObject[] appointList, List<JObject> jobs)
+        {
+            if (appointList.Length != jobs.Count)
+                return 1;
+            foreach(JObject job in appointList)
+            {
+                JObject found = jobs.Find(x =>
+                {
+                    if (!x.ContainsKey("id") || !job.ContainsKey("id"))
+                        return false;
+                    string leftID = (string)x["id"], rightID = (string)job["id"];
+                    if (leftID == null || rightID == null)
+                        return false;
+                    return leftID == rightID;
+                });
+                if (found == null)
+                    return 1;
 
+                string lValue = (string)job["datetime"], rValue = (string)found["datetime"];
+                if (lValue == null || rValue == null || lValue != rValue)
+                    return 2;
+                if (job["forms"] == null || found["forms"] == null)
+                    return 2;
+                lValue = job["forms"].ToString(); rValue = found["forms"].ToString();
+                if (lValue == null || rValue == null || lValue != rValue)
+                    return 2;
+            }
+            return 0;
+        }
         private void LoadAppointments()
+
         {
             while (true)
             {
@@ -387,22 +424,25 @@ namespace NoRV
                 {
                     Thread.Sleep(Config.getInstance().getAucityFetchInterval() * 1000);
                     List<JObject> jobs = JobManager.getJobs();
-                    if (appointList.Length != jobs.Count)
+                    int difference = FindDifference(appointList, jobs);
+                    if(difference == 0)
                     {
+                        appointList = jobs.ToArray();
+                        Invoke(new Action(() => initJobs()));
+                    }
+                    else
+                    {
+                        string audio = "Audios/LoadingAudio.mp3";
+                        if (difference == 2)
+                            audio = "Audios/UpdatingAudio.mp3";
                         ignoreInput = true;
-                        PlayMP3("Audios/LoadingAudio.mp3", (s, e) =>
+                        PlayMP3(audio, (s, e) =>
                         {
                             ignoreInput = false;
                             appointList = jobs.ToArray();
                             Invoke(new Action(() => initJobs()));
                         });
                     }
-                    else
-                    {
-                        appointList = jobs.ToArray();
-                        Invoke(new Action(() => initJobs()));
-                    }
-
                 }
                 catch (ThreadAbortException) { return; }
                 catch (Exception) { }

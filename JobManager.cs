@@ -28,8 +28,8 @@ namespace NoRV
             ServicePointManager.ServerCertificateValidationCallback = delegate { return true; };
 
             string now = DateTime.Now.ToString("yyyy-MM-dd");
-            if(Program.DEBUG)
-                now = "2020-06-19";
+            if (Program.DEBUG)
+                now = "2020-06-23";
             string url = Config.getInstance().getAucityAPIUrl().Replace("%MINDATE%", now).Replace("%MAXDATE%", now);
             HttpResponseMessage response = httpClient.GetAsync(url).Result;
             if (response.StatusCode == HttpStatusCode.OK)
@@ -40,9 +40,10 @@ namespace NoRV
                 {
                     foreach (JObject appointItem in respArray)
                     {
+                        string jobID = "";
                         if(appointItem.ContainsKey("id"))
                         {
-                            string jobID = appointItem["id"].ToString();
+                            jobID = appointItem["id"].ToString();
                             if(checkFinishedJob(jobID))
                                 continue;
                         }
@@ -50,6 +51,7 @@ namespace NoRV
                         {
                             string datetime = appointItem.GetValue("datetime").ToString();
                             string NoRVID = "";
+                            string witness = "";
 
                             if (appointItem.ContainsKey("forms") && appointItem.GetValue("forms") is JArray forms && forms.Count > 0)
                             {
@@ -64,7 +66,10 @@ namespace NoRV
                                             if (oneInfo.name == Config.getInstance().getMachineIDKey())
                                             {
                                                 NoRVID = oneInfo.value;
-                                                break;
+                                            }
+                                            if(oneInfo.name == Config.getInstance().getWitnessKey())
+                                            {
+                                                witness = oneInfo.value;
                                             }
                                         }
                                     }
@@ -72,6 +77,7 @@ namespace NoRV
                             }
                             if (NoRVID == L.getID())
                             {
+                                Program.changeWitness(jobID, witness, "", 0);
                                 _jobs.Add(appointItem);
                             }
                         }

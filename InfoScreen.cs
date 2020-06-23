@@ -99,6 +99,8 @@ namespace NoRV
                 }
             }
 
+            InfoList.Add("ID", lblJobID.Text);
+
             stopLoadThread();
             MainScreen form = new MainScreen(InfoList, source);
             form.ShowDialog();

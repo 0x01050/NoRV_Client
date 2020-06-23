@@ -28,6 +28,7 @@ namespace NoRV
 
         // Mapping Config
         private string _machineIDKey = "";
+        private string _witnessKey = "";
         private List<string> _keyList = new List<string>();
         private List<string> _nameList = new List<string>();
         private void LoadMappingConfig()
@@ -43,6 +44,10 @@ namespace NoRV
                 }
                 else
                 {
+                    if ((string)item.Attribute("Key") == "Witness")
+                    {
+                        _witnessKey = (string)item.Attribute("Name");
+                    }
                     _keyList.Add((string)item.Attribute("Key"));
                     _nameList.Add((string)item.Attribute("Name"));
                 }
@@ -51,6 +56,10 @@ namespace NoRV
         public string getMachineIDKey()
         {
             return _machineIDKey;
+        }
+        public string getWitnessKey()
+        {
+            return _witnessKey;
         }
         public string[] getKeyList()
         {

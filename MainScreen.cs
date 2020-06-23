@@ -19,6 +19,7 @@ namespace NoRV
         private TextToSpeechClient client;
 
         private Dictionary<string, string> InfoList = new Dictionary<string, string>();
+        private string id = "";
         private string witness = "";
 
         private string voiceText = "";
@@ -56,6 +57,8 @@ namespace NoRV
                     this.InfoList.Add("Date", tzNow.ToString("MMM dd, yyyy"));
                     this.InfoList.Add("Time", this.lastTime = tzNow.ToString("h:mm tt"));
                 }
+                if (this.InfoList.ContainsKey("ID"))
+                    id = this.InfoList["ID"];
                 if (this.InfoList.ContainsKey("Witness"))
                     witness = this.InfoList["Witness"];
             }
@@ -88,8 +91,6 @@ namespace NoRV
         }
         private void MainScreen_FormClosing(object sender, FormClosingEventArgs e)
         {
-            Program.changeDepo("Off The Record (" + witness + ")");
-
             DisposeAudioPlayer();
             OBSManager.StopOBSRecording(witness);
             stopButtonCheck();
@@ -150,9 +151,9 @@ namespace NoRV
 
             string time = DateTime.UtcNow.AddHours(tzOffset).ToString("h:mmtt");
             if (type == "Start")
-                Program.changeWitness(witness, time, true);
+                Program.changeWitness(id, witness, time, 1);
             if (type == "End")
-                Program.changeWitness(witness, time, false);
+                Program.changeWitness(id, witness, time, 2);
         }
 
         private void InitGoogleCredential()
@@ -461,8 +462,6 @@ namespace NoRV
         }
         private void StartRecording()
         {
-            Program.changeDepo("On The Record (" + witness + ")");
-
             InsertLog("Start");
             status = STATUS_RECORD;
             ignoreInput = true;

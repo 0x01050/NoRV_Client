@@ -90,6 +90,8 @@ namespace NoRV
         private string _aucityAPIUser = "";
         private string _aucityAPIPass = "";
         private string _serverUrl = "";
+        private string _videographer = "";
+        private string _commission = "";
         private void LoadGlobalConfig()
         {
             var xml = XDocument.Load(@"Config.xml");
@@ -144,7 +146,12 @@ namespace NoRV
                     case "ServerUrl":
                         _serverUrl = (string)item.Attribute("Value");
                         break;
-
+                    case "Videographer":
+                        _videographer = (string)item.Attribute("Value");
+                        break;
+                    case "Commission":
+                        _commission = (string)item.Attribute("Value");
+                        break;
                 }
             }
         }
@@ -211,6 +218,14 @@ namespace NoRV
         public string getServerUrl()
         {
             return _serverUrl;
+        }
+        public string getVideographer()
+        {
+            return _videographer;
+        }
+        public string getCommission()
+        {
+            return _commission;
         }
 
 

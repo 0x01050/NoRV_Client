@@ -24,6 +24,8 @@ namespace NoRV
 
             if (witness != null)
                 Program.changeOBS("Recording Ended (" + witness + ")");
+            else
+                Program.changeOBS("Awaiting Recording (Unknown)");
         }
         public static void PauseOBSRecording(string witness = null)
         {

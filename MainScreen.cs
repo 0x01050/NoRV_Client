@@ -92,15 +92,29 @@ namespace NoRV
         private void MainScreen_FormClosing(object sender, FormClosingEventArgs e)
         {
             DisposeAudioPlayer();
-            OBSManager.StopOBSRecording(witness);
+            if (DialogResult == DialogResult.OK)
+            {
+                OBSManager.StopOBSRecording(witness);
+            }
+            else
+            {
+                OBSManager.StopOBSRecording();
+            }
             stopButtonCheck();
             stopLEDFlash();
             stopKillerThread();
             stopAlertThread();
             ButtonManager.getInstance().turnOffLED();
 
-            InsertLog("End");
-            SaveLog();
+            if(DialogResult == DialogResult.OK)
+            {
+                InsertLog("End");
+                SaveLog();
+            }
+            else
+            {
+                Program.changeWitness(id, witness, "", 3);
+            }
         }
 
         private string logFile = "";
@@ -338,7 +352,6 @@ namespace NoRV
                 if (status == STATUS_WAIT)
                     Invoke(new Action(() => 
                     {
-                        DialogResult = DialogResult.OK;
                         Close();
                     }));
             }
@@ -503,6 +516,8 @@ namespace NoRV
 
                         btnSpeak.Image = Properties.Resources.play;
                         btnSpeak.Text = "SPEAK IT";
+
+                        DialogResult = DialogResult.OK;
                         Close();
                     };
                 };

@@ -5,10 +5,10 @@
     <Item Key="AnnounceTime" Value="" />
     <Item Key="FlashPeriod" Value="100" />
     <Item Key="LogPath" Value="C:\Users\Master\Desktop\Dropbox\Client Name 00001\" />
-    <Item Key="BreakAlertInterval" Value="200" />
+    <Item Key="BreakAlertInterval" Value="100" />
     <Item Key="BreakAlertVolume" Value="40" />
     <Item Key="SelectWitnessAudioTemplate" Value="To start with the #Witness Type# deposition of #Witness# , press the button now." />
-    <Item Key="StartAudioTemplate" Value="We are about to begin the #Witness Type# deposition of #Witness# . Press the button within 10 seconds to proceed. if this was by error, simply ignore this message and it will reset back." />
+    <Item Key="StartAudioTemplate" Value="We are about to begin the #Witness Type# deposition of #Witness# . Please make sure all the mics are outside the enclosure and within 2 feet of their designated speakers. If this was by error, simply ignore this message and the system will reset back. otherwise press the button within 10 seconds to begin." />
     <Item Key="TotalTimeAudioTemplate" Value="We have been on the record for" />
     <Item Key="EndTimeAudioTemplate" Value="Total running time for this deposition is" />
     <Item Key="AucityAPIUrl" Value="https://acuityscheduling.com/api/v1/appointments?direction=ASC&amp;minDate=%MINDATE%&amp;maxDate=%MAXDATE%" />
@@ -16,6 +16,8 @@
     <Item Key="AucityAPIUser" Value="19487502" />
     <Item Key="AucityAPIPass" Value="30fce42b9991bbd32cea500a49c7d3b9" />
     <Item Key="ServerUrl" Value="http://35.222.155.75" />
+    <Item Key="Videographer" Value="Monti Majthoob" />
+    <Item Key="Commission" Value="4,1,7,6. 0,6,3,9." />
   </Global>
 
   <OBS>

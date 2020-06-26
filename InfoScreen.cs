@@ -20,7 +20,7 @@ namespace NoRV
 
         private void InfoScreen_Load(object sender, EventArgs e)
         {
-            txtNoRVMachineID.Text = L.getID();
+            txtNoRVMachineID.Text = L.v();
             ButtonManager.getInstance().turnOffLED();
 
             startLoadThread();
@@ -104,7 +104,7 @@ namespace NoRV
             stopLoadThread();
             MainScreen form = new MainScreen(InfoList, source);
             form.ShowDialog();
-            if (form.DialogResult != DialogResult.OK && !String.IsNullOrEmpty(lblJobID.Text))
+            if (form.DialogResult == DialogResult.OK && !String.IsNullOrEmpty(lblJobID.Text))
                 JobManager.FinishJob(lblJobID.Text);
             lblJobID.Text = "";
             startLoadThread();

@@ -386,7 +386,7 @@ public class L
 			{
 				serial = g();
 			}
-			return serial;
+			return serial.Substring(0, 32);
 		}
 		catch (Exception)
 		{

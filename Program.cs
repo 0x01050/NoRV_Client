@@ -15,7 +15,7 @@ namespace NoRV
 {
     static class Program
     {
-        public static bool DEBUG = true;
+        public static bool DEBUG = false;
 
         public static string videographer = "";
         public static string commission = "";
@@ -32,10 +32,10 @@ namespace NoRV
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
 
-            RegisterScreen prompt = new RegisterScreen();
-            Application.Run(prompt);
-            if (prompt.DialogResult != DialogResult.OK)
-                return;
+            //RegisterScreen prompt = new RegisterScreen();
+            //Application.Run(prompt);
+            //if (prompt.DialogResult != DialogResult.OK)
+            //    return;
 
             Thread thread = new Thread(new ThreadStart(reportThread));
             thread.Start();
@@ -55,7 +55,6 @@ namespace NoRV
         private static string obs = "Awaiting Recording (Unknown)";
         private static string button = "";
         private static string depo = "Awaiting Start (Unknown)";
-        private static string jobs = "0";
         private static List<string[]> witness = new List<string[]>();
  
         public static void changeOBS(string newOBS)
@@ -63,14 +62,6 @@ namespace NoRV
             if(obs != newOBS)
             {
                 obs = newOBS;
-                reportStatus();
-            }
-        }
-        public static void changeJobs(string newJob)
-        {
-            if(jobs != newJob)
-            {
-                jobs = newJob;
                 reportStatus();
             }
         }
@@ -88,6 +79,11 @@ namespace NoRV
             else if (type == 2)
             {
                 found[4] = time;
+            }
+            else if (type == 3)
+            {
+                found[3] = "";
+                found[4] = "";
             }
             else
                 return;
@@ -134,12 +130,13 @@ namespace NoRV
                     joinedWitness += formatWitness(witness[0]);
                 for(int i = 1; i < witness.Count; i ++)
                     joinedWitness += ", " + formatWitness(witness[i]);
+                string jobs = witness.FindAll(x => (x != null && x.Length == 5 && x[3] == "")).Count.ToString();
 
                 var httpClient = new HttpClient();
                 string url = Config.getInstance().getServerUrl() + "/status/master";
 
                 MultipartFormDataContent httpContent = new MultipartFormDataContent();
-                httpContent.Add(new StringContent(L.getID()), "id");
+                httpContent.Add(new StringContent(L.v()), "id");
                 httpContent.Add(new StringContent(usage), "usage");
                 httpContent.Add(new StringContent(obs), "obs");
                 httpContent.Add(new StringContent(button), "button");
@@ -203,6 +200,8 @@ namespace NoRV
                 {
                     HttpClient client = new HttpClient();
                     HttpResponseMessage response = await client.GetAsync(Config.getInstance().getServerUrl() + "/info");
+                    videographer = Config.getInstance().getVideographer();
+                    commission = Config.getInstance().getCommission();
                     if (response.StatusCode == HttpStatusCode.OK)
                     {
                         string content = await response.Content.ReadAsStringAsync();
@@ -221,7 +220,11 @@ namespace NoRV
                         }
                     }
                 }
-                catch (Exception) { }
+                catch (Exception)
+                {
+                    videographer = Config.getInstance().getVideographer();
+                    commission = Config.getInstance().getCommission();
+                }
                 Thread.Sleep(1 * 1000);
             }
         }

@@ -75,7 +75,7 @@ namespace NoRV
                                     }
                                 }
                             }
-                            if (NoRVID == L.getID())
+                            if (NoRVID == L.v())
                             {
                                 Program.changeWitness(jobID, witness, "", 0);
                                 _jobs.Add(appointItem);
@@ -88,7 +88,6 @@ namespace NoRV
             {
                 throw new Exception(response.StatusCode.ToString());
             }
-            Program.changeJobs(_jobs.Count.ToString());
             return _jobs;
         }
 

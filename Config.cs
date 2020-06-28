@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Xml.Linq;
@@ -231,10 +232,17 @@ namespace NoRV
 
         // OBS Config
         private string _obsProcess = "obs64";
-        private string _startHotkey = "^R";
-        private string _stopHotkey = "^S";
-        private string _pauseHotkey = "^P";
-        private string _unpauseHotkey = "^U";
+        private string _laptopDeviceName = "";
+        private Size _laptopResolution = new Size(1280, 720);
+        private double _detectThreashold = 0;
+        private int _switchTime = 5000;
+        private string _startHotkey = "R";
+        private string _stopHotkey = "S";
+        private string _pauseHotkey = "P";
+        private string _unpauseHotkey = "U";
+        private string _witnessHotkey = "1";
+        private string _exhibitsHotkey = "2";
+
         private void LoadOBSConfig()
         {
             var xml = XDocument.Load(@"Config.xml");
@@ -246,6 +254,18 @@ namespace NoRV
                 {
                     case "ProcessName":
                         _obsProcess = (string)item.Attribute("Value");
+                        break;
+                    case "LaptopDeviceName":
+                        _laptopDeviceName = (string)item.Attribute("Value");
+                        break;
+                    case "LaptopResolution":
+                        _laptopResolution = new Size((int)item.Attribute("Width"), (int)item.Attribute("Height"));
+                        break;
+                    case "DetectThreadhold":
+                        _detectThreashold = (double)item.Attribute("Value");
+                        break;
+                    case "SwitchTime":
+                        _switchTime = (int)item.Attribute("Value");
                         break;
                     case "StartHotkey":
                         _startHotkey = (string)item.Attribute("Value");
@@ -259,12 +279,34 @@ namespace NoRV
                     case "UnpauseHotkey":
                         _unpauseHotkey = (string)item.Attribute("Value");
                         break;
+                    case "WitnessHotkey":
+                        _witnessHotkey = (string)item.Attribute("Value");
+                        break;
+                    case "ExhibitsHotkey":
+                        _exhibitsHotkey = (string)item.Attribute("Value");
+                        break;
                 }
             }
         }
         public string getOBSProcessName()
         {
             return _obsProcess;
+        }
+        public string getLaptopDeviceName()
+        {
+            return _laptopDeviceName;
+        }
+        public Size getLaptopResolution()
+        {
+            return _laptopResolution;
+        }
+        public double getDetectThreshold()
+        {
+            return _detectThreashold;
+        }
+        public int getSwitchTime()
+        {
+            return _switchTime;
         }
         public string getOBSHotkey(string action)
         {
@@ -278,6 +320,10 @@ namespace NoRV
                     return _pauseHotkey;
                 case "unpause":
                     return _unpauseHotkey;
+                case "witness":
+                    return _witnessHotkey;
+                case "exhibits":
+                    return _exhibitsHotkey;
             }
             return "";
         }

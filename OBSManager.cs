@@ -1,4 +1,5 @@
-﻿using System.Diagnostics;
+﻿using System;
+using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Threading;
 
@@ -39,20 +40,34 @@ namespace NoRV
 
             Program.changeOBS("Recording (" + witness + ")");
         }
+        public static void SwitchToWitness()
+        {
+            SendHotkey(Config.getInstance().getOBSHotkey("witness"));
+        }
+        public static void SwitchToExhibits()
+        {
+            SendHotkey(Config.getInstance().getOBSHotkey("exhibits"));
+        }
 
         [DllImport("user32.dll")]
         static extern void keybd_event(byte bVk, byte bScan, int dwFlags, int dwExtraInfo);
         private static void SendHotkey(string hotkey)
         {
             hotkey = hotkey.ToUpper();
-            if (hotkey.Length > 0 && hotkey[0] >= 'A' && hotkey[0] <= 'Z')
+            if (hotkey.Length > 0 && Char.IsLetterOrDigit(hotkey[0]))
             {
-                int vk = hotkey[0] - 'A';
+                int vk;
+                if (Char.IsDigit(hotkey[0]))
+                    vk = 0x30 + hotkey[0] - '0';
+                else if (Char.IsLower(hotkey[0]))
+                    vk = 0x41 + hotkey[0] - 'a';
+                else
+                    vk = 0x41 + hotkey[0] - 'A';
                 keybd_event(0x11, 0, 0, 0);
-                keybd_event((byte)(0x41 + vk), 0, 0, 0);
+                keybd_event((byte)vk, 0, 0, 0);
                 Thread.Sleep(75);
                 keybd_event(0x11, 0, 2, 0);
-                keybd_event((byte)(0x41 + vk), 0, 2, 0);
+                keybd_event((byte)vk, 0, 2, 0);
             }
         }
     }

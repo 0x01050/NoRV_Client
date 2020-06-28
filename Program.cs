@@ -32,6 +32,9 @@ namespace NoRV
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
 
+            LaptopScreen laptop = new LaptopScreen();
+            laptop.Show();
+
             //RegisterScreen prompt = new RegisterScreen();
             //Application.Run(prompt);
             //if (prompt.DialogResult != DialogResult.OK)

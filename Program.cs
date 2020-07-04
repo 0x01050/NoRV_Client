@@ -8,6 +8,7 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Runtime.InteropServices;
 using System.Threading;
 using System.Windows.Forms;
 
@@ -32,8 +33,8 @@ namespace NoRV
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
 
-            LaptopScreen laptop = new LaptopScreen();
-            laptop.Show();
+            //LaptopScreen laptop = new LaptopScreen();
+            //laptop.Show();
 
             //RegisterScreen prompt = new RegisterScreen();
             //Application.Run(prompt);
@@ -44,10 +45,13 @@ namespace NoRV
             thread.Start();
             Thread updateInfo = new Thread(new ThreadStart(updateInfoThread));
             updateInfo.Start();
+            Thread detectThread = new Thread(new ThreadStart(DetectWork));
+            detectThread.Start();
             if (!OBSManager.CheckOBSRunning())
                 Application.Run(new WaitScreen());
             OBSManager.StopOBSRecording();
             Application.Run(new InfoScreen());
+            detectThread.Abort();
             updateInfo.Abort();
             thread.Abort();
         }
@@ -230,6 +234,142 @@ namespace NoRV
                 }
                 Thread.Sleep(1 * 1000);
             }
+        }
+
+        private static void DetectWork()
+        {
+            Bitmap prevBitmap = null;
+            DateTime lastChanged = DateTime.Now.AddSeconds(-10);
+
+            while (true)
+            {
+                Process[] processlist = Process.GetProcesses();
+                foreach (Process proc in processlist)
+                {
+                    if(proc.MainWindowTitle == Config.getInstance().getMirrorSourceWindow())
+                    {
+                        try
+                        {
+                            Image capture = CaptureWindow(proc.MainWindowHandle);
+                            var cloned = new Bitmap(capture);
+                            if (prevBitmap != null)
+                            {
+                                var difference = CalculateDifference(prevBitmap, cloned);
+                                if (difference > Config.getInstance().getDetectThreshold())
+                                {
+                                    OBSManager.SwitchToExhibits();
+                                    lastChanged = DateTime.Now;
+                                }
+                                else
+                                {
+                                    TimeSpan span = DateTime.Now - lastChanged;
+                                    if (span.TotalMilliseconds > Config.getInstance().getSwitchTime())
+                                    {
+                                        OBSManager.SwitchToWitness();
+                                    }
+                                }
+                            }
+                            prevBitmap = cloned;
+                        }
+                        catch(Exception e)
+                        {
+                            Console.WriteLine(e.StackTrace);
+                        }
+                    }
+                }
+                Thread.Sleep(100);
+            }
+        }
+        static float CalculateDifference(Bitmap bitmap1, Bitmap bitmap2)
+        {
+            if (bitmap1.Size != bitmap2.Size)
+            {
+                return -1;
+            }
+
+            var rectangle = new Rectangle(0, 0, bitmap1.Width, bitmap1.Height);
+
+            BitmapData bitmapData1 = bitmap1.LockBits(rectangle, ImageLockMode.ReadOnly, bitmap1.PixelFormat);
+            BitmapData bitmapData2 = bitmap2.LockBits(rectangle, ImageLockMode.ReadOnly, bitmap2.PixelFormat);
+
+            float diff = 0;
+            var byteCount = rectangle.Width * rectangle.Height * 3;
+
+            unsafe
+            {
+                byte* pointer1 = (byte*)bitmapData1.Scan0.ToPointer();
+                byte* pointer2 = (byte*)bitmapData2.Scan0.ToPointer();
+
+                for (int x = 0; x < byteCount; x++)
+                {
+                    diff += (float)Math.Abs(*pointer1 - *pointer2) / 255;
+                    pointer1++;
+                    pointer2++;
+                }
+            }
+
+            bitmap1.UnlockBits(bitmapData1);
+            bitmap2.UnlockBits(bitmapData2);
+
+            return 100 * diff / byteCount;
+        }
+        private static Image CaptureWindow(IntPtr handle)
+        {
+            IntPtr hdcSrc = User32.GetWindowDC(handle);
+            User32.RECT windowRect = new User32.RECT();
+            User32.GetWindowRect(handle, ref windowRect);
+            int width = windowRect.right - windowRect.left;
+            int height = windowRect.bottom - windowRect.top;
+            IntPtr hdcDest = GDI32.CreateCompatibleDC(hdcSrc);
+            IntPtr hBitmap = GDI32.CreateCompatibleBitmap(hdcSrc, width, height);
+            IntPtr hOld = GDI32.SelectObject(hdcDest, hBitmap);
+            GDI32.BitBlt(hdcDest, 0, 0, width, height, hdcSrc, 0, 0, GDI32.SRCCOPY);
+            GDI32.SelectObject(hdcDest, hOld);
+            GDI32.DeleteDC(hdcDest);
+            User32.ReleaseDC(handle, hdcSrc);
+            Image img = Image.FromHbitmap(hBitmap);
+            GDI32.DeleteObject(hBitmap);
+            return img;
+        }
+        private class GDI32
+        {
+
+            public const int SRCCOPY = 0x00CC0020;
+            [DllImport("gdi32.dll")]
+            public static extern bool BitBlt(IntPtr hObject, int nXDest, int nYDest,
+                int nWidth, int nHeight, IntPtr hObjectSource,
+                int nXSrc, int nYSrc, int dwRop);
+            [DllImport("gdi32.dll")]
+            public static extern IntPtr CreateCompatibleBitmap(IntPtr hDC, int nWidth,
+                int nHeight);
+            [DllImport("gdi32.dll")]
+            public static extern IntPtr CreateCompatibleDC(IntPtr hDC);
+            [DllImport("gdi32.dll")]
+            public static extern bool DeleteDC(IntPtr hDC);
+            [DllImport("gdi32.dll")]
+            public static extern bool DeleteObject(IntPtr hObject);
+            [DllImport("gdi32.dll")]
+            public static extern IntPtr SelectObject(IntPtr hDC, IntPtr hObject);
+        }
+
+        private class User32
+        {
+            [StructLayout(LayoutKind.Sequential)]
+            public struct RECT
+            {
+                public int left;
+                public int top;
+                public int right;
+                public int bottom;
+            }
+            [DllImport("user32.dll")]
+            public static extern IntPtr GetDesktopWindow();
+            [DllImport("user32.dll")]
+            public static extern IntPtr GetWindowDC(IntPtr hWnd);
+            [DllImport("user32.dll")]
+            public static extern IntPtr ReleaseDC(IntPtr hWnd, IntPtr hDC);
+            [DllImport("user32.dll")]
+            public static extern IntPtr GetWindowRect(IntPtr hWnd, ref RECT rect);
         }
     }
 }

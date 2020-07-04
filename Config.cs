@@ -232,8 +232,8 @@ namespace NoRV
 
         // OBS Config
         private string _obsProcess = "obs64";
-        private string _laptopDeviceName = "";
-        private Size _laptopResolution = new Size(1280, 720);
+        private string _mirrorSourceProcess = "Receiver";
+        private string _mirrorSourceWindow = "Connect";
         private double _detectThreashold = 0;
         private int _switchTime = 5000;
         private string _startHotkey = "R";
@@ -255,11 +255,9 @@ namespace NoRV
                     case "ProcessName":
                         _obsProcess = (string)item.Attribute("Value");
                         break;
-                    case "LaptopDeviceName":
-                        _laptopDeviceName = (string)item.Attribute("Value");
-                        break;
-                    case "LaptopResolution":
-                        _laptopResolution = new Size((int)item.Attribute("Width"), (int)item.Attribute("Height"));
+                    case "MirrorSource":
+                        _mirrorSourceProcess = (string)item.Attribute("Process");
+                        _mirrorSourceWindow = (string)item.Attribute("Windoww");
                         break;
                     case "DetectThreadhold":
                         _detectThreashold = (double)item.Attribute("Value");
@@ -292,13 +290,13 @@ namespace NoRV
         {
             return _obsProcess;
         }
-        public string getLaptopDeviceName()
+        public string getMirrorSourceProcess()
         {
-            return _laptopDeviceName;
+            return _mirrorSourceProcess;
         }
-        public Size getLaptopResolution()
+        public string getMirrorSourceWindow()
         {
-            return _laptopResolution;
+            return _mirrorSourceWindow;
         }
         public double getDetectThreshold()
         {

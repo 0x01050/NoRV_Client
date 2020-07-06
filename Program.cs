@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json;
+﻿using Accord;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -178,7 +179,7 @@ namespace NoRV
                 using (Bitmap bmp = new Bitmap(s_rect.Width, s_rect.Height))
                 {
                     using (Graphics gScreen = Graphics.FromImage(bmp))
-                        gScreen.CopyFromScreen(s_rect.Location, Point.Empty, s_rect.Size);
+                        gScreen.CopyFromScreen(s_rect.Location, System.Drawing.Point.Empty, s_rect.Size);
                     using (Bitmap newBmp = new Bitmap(bmp, new Size(428, 240)))
                     {
                         using (MemoryStream ms = new MemoryStream())
@@ -349,9 +350,9 @@ namespace NoRV
             int width = windowRect.right - windowRect.left;
             int height = windowRect.bottom - windowRect.top;
             IntPtr hdcDest = GDI32.CreateCompatibleDC(hdcSrc);
-            IntPtr hBitmap = GDI32.CreateCompatibleBitmap(hdcSrc, width, height);
+            IntPtr hBitmap = GDI32.CreateCompatibleBitmap(hdcSrc, width, height - Config.getInstance().getMirrorIgnore());
             IntPtr hOld = GDI32.SelectObject(hdcDest, hBitmap);
-            GDI32.BitBlt(hdcDest, 0, 0, width, height, hdcSrc, 0, 0, GDI32.SRCCOPY);
+            GDI32.BitBlt(hdcDest, 0, 0, width, height - Config.getInstance().getMirrorIgnore(), hdcSrc, 0, Config.getInstance().getMirrorIgnore(), GDI32.SRCCOPY);
             GDI32.SelectObject(hdcDest, hOld);
             GDI32.DeleteDC(hdcDest);
             User32.ReleaseDC(handle, hdcSrc);

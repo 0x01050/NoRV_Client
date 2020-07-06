@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Accord.Collections;
+using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
@@ -232,9 +233,10 @@ namespace NoRV
 
         // OBS Config
         private string _obsProcess = "obs64";
-        private string _mirrorSourceProcess = "Receiver";
-        private string _mirrorSourceWindow = "Connect";
+        private string _mirrorSourceProcess = "Mirror";
+        private string _mirrorSourceWindow = "*";
         private Size _mirrorResolution = new Size(1280, 720);
+        private int _mirrorIgnore = 10;
         private double _detectThreashold = 0;
         private int _switchTime = 5000;
         private string _startHotkey = "R";
@@ -262,6 +264,7 @@ namespace NoRV
                         break;
                     case "MirrorResolution":
                         _mirrorResolution = new Size((int)item.Attribute("Width"), (int)item.Attribute("Height"));
+                        _mirrorIgnore = (int)item.Attribute("Ignore");
                         break;
                     case "DetectThreadhold":
                         _detectThreashold = (double)item.Attribute("Value");
@@ -305,6 +308,10 @@ namespace NoRV
         public Size getMirrorResolution()
         {
             return _mirrorResolution;
+        }
+        public int getMirrorIgnore()
+        {
+            return _mirrorIgnore;
         }
         public double getDetectThreshold()
         {

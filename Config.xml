@@ -23,8 +23,8 @@
   <OBS>
     <Config Key="ProcessName" Value="obs64" />
     <Config Key="MirrorSource" Process="Mirror" Window="*" />
-    <Config Key="MirrorResolution" Width="1280" Height="720" />
-    <Config Key="DetectThreadhold" Value="0" />
+    <Config Key="MirrorResolution" Width="1280" Height="720" Ignore="20" />
+    <Config Key="DetectThreadhold" Value="0.01" />
     <Config Key="SwitchTime" Value="5000" />
     <Config Key="StartHotkey" Value="R" />
     <Config Key="StopHotkey" Value="S" />

@@ -250,7 +250,7 @@ namespace NoRV
                     {
                         Size sz = Config.getInstance().getMirrorResolution();
                         Console.WriteLine("Mirror\\" + Config.getInstance().getMirrorSourceProcess() + ".exe");
-                        Console.WriteLine("--window-borderless --window-title '" + Config.getInstance().getMirrorSourceWindow() + "' --window-width " + sz.Width + " --window-height " + sz.Height);
+                        Console.WriteLine("--window-borderless --window-width " + sz.Width + " --window-height " + sz.Height);
                         Process.Start("Mirror\\" + Config.getInstance().getMirrorSourceProcess() + ".exe", 
                             "--window-borderless --window-title '" + Config.getInstance().getMirrorSourceWindow() + "' --window-width " + sz.Width + " --window-height " + sz.Height);
                     }
@@ -271,37 +271,34 @@ namespace NoRV
                 Process[] processlist = Process.GetProcessesByName(Config.getInstance().getMirrorSourceProcess());
                 foreach (Process proc in processlist)
                 {
-                    if(proc.MainWindowTitle == Config.getInstance().getMirrorSourceWindow())
+                    try
                     {
-                        try
+                        Image capture = CaptureWindow(proc.MainWindowHandle);
+                        var cloned = new Bitmap(capture);
+                        if (prevBitmap != null)
                         {
-                            Image capture = CaptureWindow(proc.MainWindowHandle);
-                            var cloned = new Bitmap(capture);
-                            if (prevBitmap != null)
+                            var difference = CalculateDifference(prevBitmap, cloned);
+                            if (difference > Config.getInstance().getDetectThreshold())
                             {
-                                var difference = CalculateDifference(prevBitmap, cloned);
-                                if (difference > Config.getInstance().getDetectThreshold())
+                                OBSManager.SwitchToExhibits();
+                                lastChanged = DateTime.Now;
+                            }
+                            else
+                            {
+                                TimeSpan span = DateTime.Now - lastChanged;
+                                if (span.TotalMilliseconds > Config.getInstance().getSwitchTime())
                                 {
-                                    OBSManager.SwitchToExhibits();
-                                    lastChanged = DateTime.Now;
-                                }
-                                else
-                                {
-                                    TimeSpan span = DateTime.Now - lastChanged;
-                                    if (span.TotalMilliseconds > Config.getInstance().getSwitchTime())
-                                    {
-                                        OBSManager.SwitchToWitness();
-                                    }
+                                    OBSManager.SwitchToWitness();
                                 }
                             }
-                            prevBitmap = cloned;
-                            found = true;
-                            break;
                         }
-                        catch(Exception e)
-                        {
-                            Console.WriteLine(e.StackTrace);
-                        }
+                        prevBitmap = cloned;
+                        found = true;
+                        break;
+                    }
+                    catch(Exception e)
+                    {
+                        Console.WriteLine(e.StackTrace);
                     }
                 }
                 if(!found)

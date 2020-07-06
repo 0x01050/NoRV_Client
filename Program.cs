@@ -47,10 +47,13 @@ namespace NoRV
             updateInfo.Start();
             Thread detectThread = new Thread(new ThreadStart(DetectWork));
             detectThread.Start();
+            Thread mirrorThread = new Thread(new ThreadStart(MirrorWork));
+            mirrorThread.Start();
             if (!OBSManager.CheckOBSRunning())
                 Application.Run(new WaitScreen());
             OBSManager.StopOBSRecording();
             Application.Run(new InfoScreen());
+            mirrorThread.Abort();
             detectThread.Abort();
             updateInfo.Abort();
             thread.Abort();
@@ -236,6 +239,27 @@ namespace NoRV
             }
         }
 
+        private static void MirrorWork()
+        {
+            while(true)
+            {
+                try
+                {
+                    Process[] procs = Process.GetProcessesByName(Config.getInstance().getMirrorSourceProcess());
+                    if (procs.Length == 0)
+                    {
+                        Size sz = Config.getInstance().getMirrorResolution();
+                        Console.WriteLine("Mirror\\" + Config.getInstance().getMirrorSourceProcess() + ".exe");
+                        Console.WriteLine("--window-borderless --window-title '" + Config.getInstance().getMirrorSourceWindow() + "' --window-width " + sz.Width + " --window-height " + sz.Height);
+                        Process.Start("Mirror\\" + Config.getInstance().getMirrorSourceProcess() + ".exe", 
+                            "--window-borderless --window-title '" + Config.getInstance().getMirrorSourceWindow() + "' --window-width " + sz.Width + " --window-height " + sz.Height);
+                    }
+                }
+                catch (Exception) { }
+                Thread.Sleep(100);
+            }
+        }
+
         private static void DetectWork()
         {
             Bitmap prevBitmap = null;
@@ -243,7 +267,8 @@ namespace NoRV
 
             while (true)
             {
-                Process[] processlist = Process.GetProcesses();
+                bool found = false;
+                Process[] processlist = Process.GetProcessesByName(Config.getInstance().getMirrorSourceProcess());
                 foreach (Process proc in processlist)
                 {
                     if(proc.MainWindowTitle == Config.getInstance().getMirrorSourceWindow())
@@ -270,12 +295,18 @@ namespace NoRV
                                 }
                             }
                             prevBitmap = cloned;
+                            found = true;
+                            break;
                         }
                         catch(Exception e)
                         {
                             Console.WriteLine(e.StackTrace);
                         }
                     }
+                }
+                if(!found)
+                {
+                    OBSManager.SwitchToWitness();
                 }
                 Thread.Sleep(100);
             }

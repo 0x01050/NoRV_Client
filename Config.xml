@@ -22,7 +22,8 @@
 
   <OBS>
     <Config Key="ProcessName" Value="obs64" />
-    <Config Key="MirrorSource" Process="Receiver" Windoww="Connect" />
+    <Config Key="MirrorSource" Process="Mirror" Window="Mirror" />
+    <Config Key="MirrorResolution" Width="1280" Height="720" />
     <Config Key="DetectThreadhold" Value="0" />
     <Config Key="SwitchTime" Value="5000" />
     <Config Key="StartHotkey" Value="R" />

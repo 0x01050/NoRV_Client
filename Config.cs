@@ -234,6 +234,7 @@ namespace NoRV
         private string _obsProcess = "obs64";
         private string _mirrorSourceProcess = "Receiver";
         private string _mirrorSourceWindow = "Connect";
+        private Size _mirrorResolution = new Size(1280, 720);
         private double _detectThreashold = 0;
         private int _switchTime = 5000;
         private string _startHotkey = "R";
@@ -257,7 +258,10 @@ namespace NoRV
                         break;
                     case "MirrorSource":
                         _mirrorSourceProcess = (string)item.Attribute("Process");
-                        _mirrorSourceWindow = (string)item.Attribute("Windoww");
+                        _mirrorSourceWindow = (string)item.Attribute("Window");
+                        break;
+                    case "MirrorResolution":
+                        _mirrorResolution = new Size((int)item.Attribute("Width"), (int)item.Attribute("Height"));
                         break;
                     case "DetectThreadhold":
                         _detectThreashold = (double)item.Attribute("Value");
@@ -297,6 +301,10 @@ namespace NoRV
         public string getMirrorSourceWindow()
         {
             return _mirrorSourceWindow;
+        }
+        public Size getMirrorResolution()
+        {
+            return _mirrorResolution;
         }
         public double getDetectThreshold()
         {

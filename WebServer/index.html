@@ -1,0 +1,188 @@
+<html>
+	<head>
+		<script src="jquery.min.js"></script>
+		<script>
+            var curElement = null;
+            /* When the user clicks on the button, 
+            toggle between hiding and showing the dropdown content */
+            function dropdown_show(id) {
+                hideAllDropdown();
+                document.getElementById(id).classList.toggle("show");
+            }
+
+            // Close the dropdown if the user clicks outside of it
+            window.onclick = function (event) {
+                if (event.target.matches('.dropbtn')) {
+                    curElement = event.target;
+                }
+                if (event.target.matches('.dropdown-item')) {
+                    if (curElement != null) {
+                        curElement.innerText = event.target.innerText;
+                    }
+                }
+                if (!event.target.matches('.dropbtn')) {
+                    hideAllDropdown();
+                }
+            }
+
+            function hideAllDropdown() {
+                var dropdowns = document.getElementsByClassName("dropdown-content");
+                var i;
+                for (i = 0; i < dropdowns.length; i++) {
+                    var openDropdown = dropdowns[i];
+                    if (openDropdown.classList.contains('show')) {
+                        openDropdown.classList.remove('show');
+                    }
+                }
+                curElement = null;
+            }
+		</script>
+        <style>
+            .dropbtn {
+                color: black;
+                font-size: 16px;
+                cursor: pointer;
+                border-bottom: 2px solid #121212;
+            }
+
+                .dropbtn:hover, .dropbtn:focus {
+                    background-color: #2980B9;
+                }
+
+            .dropdown {
+                position: relative;
+                display: inline-block;
+                padding-right: 1ex;
+            }
+
+            .dropdown-content {
+                display: none;
+                position: absolute;
+                background-color: #f1f1f1;
+                min-width: 160px;
+                overflow: auto;
+                box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+                z-index: 1;
+            }
+
+                .dropdown-content a {
+                    color: black;
+                    padding: 12px 16px;
+                    text-decoration: none;
+                    display: block;
+                }
+
+            .dropdown a:hover {
+                background-color: #ddd;
+            }
+
+            .show {
+                display: block;
+            }
+        </style>
+	</head>
+	<body>
+        <div>
+            <div>
+                <span class="dropdown">
+                    <a onclick="dropdown_show('dropdown-list-1')" class="dropbtn">This</a>
+                    <sup>2</sup>
+                    <div id="dropdown-list-1" class="dropdown-content">
+                        <a class="dropdown-item">This</a>
+                        <a class="dropdown-item">Dis</a>
+                    </div>
+                </span>
+                <span class="dropdown">
+                    <a class="dropbtn">is</a>
+                </span>
+                <span class="dropdown">
+                    <a class="dropbtn">a</a>
+                </span>
+                <span class="dropdown">
+                    <a onclick="dropdown_show('dropdown-list-2')" class="dropbtn">textbook.</a>
+                    <sup>3</sup>
+                    <div id="dropdown-list-2" class="dropdown-content">
+                        <a class="dropdown-item">textbook.</a>
+                        <a class="dropdown-item">tex-book.</a>
+                        <a class="dropdown-item">text-boo.</a>
+                    </div>
+                </span>
+            </div>
+            <div>
+                <span class="dropdown">
+                    <a onclick="dropdown_show('dropdown-list-3')" class="dropbtn">This</a>
+                    <sup>2</sup>
+                    <div id="dropdown-list-3" class="dropdown-content">
+                        <a class="dropdown-item">This</a>
+                        <a class="dropdown-item">Dis</a>
+                    </div>
+                </span>
+                <span class="dropdown">
+                    <a class="dropbtn">is</a>
+                </span>
+                <span class="dropdown">
+                    <a class="dropbtn">a</a>
+                </span>
+                <span class="dropdown">
+                    <a onclick="dropdown_show('dropdown-list-4')" class="dropbtn">textbook.</a>
+                    <sup>3</sup>
+                    <div id="dropdown-list-4" class="dropdown-content">
+                        <a class="dropdown-item">textbook.</a>
+                        <a class="dropdown-item">tex-book.</a>
+                        <a class="dropdown-item">text-boo.</a>
+                    </div>
+                </span>
+            </div>
+            <div>
+                <span class="dropdown">
+                    <a onclick="dropdown_show('dropdown-list-5')" class="dropbtn">This</a>
+                    <sup>2</sup>
+                    <div id="dropdown-list-5" class="dropdown-content">
+                        <a class="dropdown-item">This</a>
+                        <a class="dropdown-item">Dis</a>
+                    </div>
+                </span>
+                <span class="dropdown">
+                    <a class="dropbtn">is</a>
+                </span>
+                <span class="dropdown">
+                    <a class="dropbtn">a</a>
+                </span>
+                <span class="dropdown">
+                    <a onclick="dropdown_show('dropdown-list-6')" class="dropbtn">textbook.</a>
+                    <sup>3</sup>
+                    <div id="dropdown-list-6" class="dropdown-content">
+                        <a class="dropdown-item">textbook.</a>
+                        <a class="dropdown-item">tex-book.</a>
+                        <a class="dropdown-item">text-boo.</a>
+                    </div>
+                </span>
+            </div>
+            <div>
+                <span class="dropdown">
+                    <a onclick="dropdown_show('dropdown-list-7')" class="dropbtn">This</a>
+                    <sup>2</sup>
+                    <div id="dropdown-list-7" class="dropdown-content">
+                        <a class="dropdown-item">This</a>
+                        <a class="dropdown-item">Dis</a>
+                    </div>
+                </span>
+                <span class="dropdown">
+                    <a class="dropbtn">is</a>
+                </span>
+                <span class="dropdown">
+                    <a class="dropbtn">a</a>
+                </span>
+                <span class="dropdown">
+                    <a onclick="dropdown_show('dropdown-list-8')" class="dropbtn">textbook.</a>
+                    <sup>3</sup>
+                    <div id="dropdown-list-8" class="dropdown-content">
+                        <a class="dropdown-item">textbook.</a>
+                        <a class="dropdown-item">tex-book.</a>
+                        <a class="dropdown-item">text-boo.</a>
+                    </div>
+                </span>
+            </div>
+        </div>
+	</body>
+</html>

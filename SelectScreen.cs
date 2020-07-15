@@ -153,18 +153,14 @@ namespace NoRV
             }
         }
 
-        private GoogleCredential googleCredential;
-        private Channel channel;
         private TextToSpeechClient client;
         private string voiceName = "";
 
         private void InitGoogleCredential()
         {
-            using (Stream m = new FileStream("NoRV TTS-c4a3e2c55a4f.json", FileMode.Open))
-                googleCredential = GoogleCredential.FromStream(m);
-            channel = new Channel(TextToSpeechClient.DefaultEndpoint.Host,
-                googleCredential.ToChannelCredentials());
-            client = TextToSpeechClient.Create(channel);
+            var builder = new TextToSpeechClientBuilder();
+            builder.CredentialsPath = "NoRV TTS-c4a3e2c55a4f.json";
+            client = builder.Build();
 
             ListVoicesRequest voiceReq = new ListVoicesRequest { LanguageCode = "en-US" };
             ListVoicesResponse voiceResp = this.client.ListVoices(voiceReq);

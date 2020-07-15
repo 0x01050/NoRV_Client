@@ -1,4 +1,6 @@
 ﻿using Accord;
+using GoogleTranscribing;
+using Grapevine.Server;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -11,6 +13,7 @@ using System.Net;
 using System.Net.Http;
 using System.Runtime.InteropServices;
 using System.Threading;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace NoRV
@@ -28,19 +31,28 @@ namespace NoRV
         [STAThread]
         static void Main()
         {
-            WebServer webServer = new WebServer(WebServer.SendResponse, "http://127.0.0.1:4001/now/");
-            webServer.Run();
+            string port = Config.getInstance().getWebServerPort();
+            var server = new RestServer(new ServerSettings()
+            {
+                Host = "*",
+                Port = "9999",
+                PublicFolder = new PublicFolder("WebServer")
+            });
+            while (true)
+            {
+                try
+                {
+                    server.Start();
+                    break;
+                }
+                catch (Exception)
+                {
+                    ServerCheck(port);
+                }
+            }
 
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-
-            //LaptopScreen laptop = new LaptopScreen();
-            //laptop.Show();
-
-            //RegisterScreen prompt = new RegisterScreen();
-            //Application.Run(prompt);
-            //if (prompt.DialogResult != DialogResult.OK)
-            //    return;
 
             Thread thread = new Thread(new ThreadStart(reportThread));
             thread.Start();
@@ -50,14 +62,36 @@ namespace NoRV
             detectThread.Start();
             Thread mirrorThread = new Thread(new ThreadStart(MirrorWork));
             mirrorThread.Start();
+            CancellationTokenSource cts = new CancellationTokenSource();
+            Task.Run(() => InfiniteStreaming.RecognizeAsync(cts), cts.Token);
             if (!OBSManager.CheckOBSRunning())
                 Application.Run(new WaitScreen());
             OBSManager.StopOBSRecording();
             Application.Run(new InfoScreen());
+            cts.Cancel();
             mirrorThread.Abort();
             detectThread.Abort();
             updateInfo.Abort();
             thread.Abort();
+
+            server.Stop();
+        }
+
+        private static void ServerCheck(string port)
+        {
+            try
+            {
+                string args = string.Format(@"http add urlacl url=http://*:{0}/ user=Everyone", port);
+
+                ProcessStartInfo psi = new ProcessStartInfo("netsh", args);
+                psi.Verb = "runas";
+                psi.CreateNoWindow = true;
+                psi.WindowStyle = ProcessWindowStyle.Hidden;
+                psi.UseShellExecute = true;
+
+                Process.Start(psi).WaitForExit();
+            }
+            catch(Exception) { }
         }
 
 
@@ -250,14 +284,12 @@ namespace NoRV
                     if (procs.Length == 0)
                     {
                         Size sz = Config.getInstance().getMirrorResolution();
-                        Console.WriteLine("Mirror\\" + Config.getInstance().getMirrorSourceProcess() + ".exe");
-                        Console.WriteLine("--window-borderless --window-width " + sz.Width + " --window-height " + sz.Height);
                         Process.Start("Mirror\\" + Config.getInstance().getMirrorSourceProcess() + ".exe", 
                             "--window-borderless --window-title '" + Config.getInstance().getMirrorSourceWindow() + "' --window-width " + sz.Width + " --window-height " + sz.Height);
                     }
                 }
                 catch (Exception) { }
-                Thread.Sleep(100);
+                Thread.Sleep(5000);
             }
         }
 
@@ -400,5 +432,6 @@ namespace NoRV
             [DllImport("user32.dll")]
             public static extern IntPtr GetWindowRect(IntPtr hWnd, ref RECT rect);
         }
+
     }
 }

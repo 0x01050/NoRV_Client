@@ -94,6 +94,7 @@ namespace NoRV
         private string _serverUrl = "";
         private string _videographer = "";
         private string _commission = "";
+        private string _webServerPort = "9999";
         private void LoadGlobalConfig()
         {
             var xml = XDocument.Load(@"Config.xml");
@@ -153,6 +154,9 @@ namespace NoRV
                         break;
                     case "Commission":
                         _commission = (string)item.Attribute("Value");
+                        break;
+                    case "WebServerPort":
+                        _webServerPort = (string)item.Attribute("Value");
                         break;
                 }
             }
@@ -229,6 +233,10 @@ namespace NoRV
         {
             return _commission;
         }
+        public string getWebServerPort()
+        {
+            return _webServerPort;
+        }
 
 
         // OBS Config
@@ -266,7 +274,7 @@ namespace NoRV
                         _mirrorResolution = new Size((int)item.Attribute("Width"), (int)item.Attribute("Height"));
                         _mirrorIgnore = (int)item.Attribute("Ignore");
                         break;
-                    case "DetectThreadhold":
+                    case "DetectThreashold":
                         _detectThreashold = (double)item.Attribute("Value");
                         break;
                     case "SwitchTime":

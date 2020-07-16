@@ -67,7 +67,11 @@ namespace NoRV
             if (!OBSManager.CheckOBSRunning())
                 Application.Run(new WaitScreen());
             OBSManager.StopOBSRecording();
+            TrackForm track = new TrackForm();
+            track.Show();
             Application.Run(new InfoScreen());
+            track.Terminate();
+            track.Close();
             cts.Cancel();
             mirrorThread.Abort();
             detectThread.Abort();
@@ -283,9 +287,23 @@ namespace NoRV
                     Process[] procs = Process.GetProcessesByName(Config.getInstance().getMirrorSourceProcess());
                     if (procs.Length == 0)
                     {
-                        Size sz = Config.getInstance().getMirrorResolution();
-                        Process.Start("Mirror\\" + Config.getInstance().getMirrorSourceProcess() + ".exe", 
-                            "--window-borderless --window-title '" + Config.getInstance().getMirrorSourceWindow() + "' --window-width " + sz.Width + " --window-height " + sz.Height);
+                        Process proc = Process.Start("Mirror\\" + Config.getInstance().getMirrorSourceProcess() + ".exe", 
+                            "--fullscreen --window-borderless --window-title '" + Config.getInstance().getMirrorSourceWindow() + "'");
+                        Thread.Sleep(2000);
+                        if (proc.MainWindowHandle != null)
+                        {
+                            User32.SetWindowPos(proc.MainWindowHandle, User32.HWND_BOTTOM, 0, 0, 0, 0, User32.NOMOVE_NOSIZE_FLAG);
+                        }
+                    }
+                    else
+                    {
+                        foreach(var proc in procs)
+                        {
+                            if(proc.MainWindowHandle != null)
+                            {
+                                User32.SetWindowPos(proc.MainWindowHandle, User32.HWND_BOTTOM, 0, 0, 0, 0, User32.NOMOVE_NOSIZE_FLAG);
+                            }
+                        }
                     }
                 }
                 catch (Exception) { }
@@ -431,6 +449,11 @@ namespace NoRV
             public static extern IntPtr ReleaseDC(IntPtr hWnd, IntPtr hDC);
             [DllImport("user32.dll")]
             public static extern IntPtr GetWindowRect(IntPtr hWnd, ref RECT rect);
+
+            [DllImport("user32.dll")]
+            public static extern bool SetWindowPos(IntPtr hWnd, IntPtr hWndInsertAfter, int X, int Y, int cx, int cy, uint uFlags);
+            public static readonly uint NOMOVE_NOSIZE_FLAG = 0x0001 | 0x0002;
+            public static readonly IntPtr HWND_BOTTOM = new IntPtr(1);
         }
 
     }

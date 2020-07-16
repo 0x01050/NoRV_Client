@@ -53,7 +53,6 @@ namespace NoRV
         static extern void keybd_event(byte bVk, byte bScan, int dwFlags, int dwExtraInfo);
         private static void SendHotkey(string hotkey)
         {
-            return;
             hotkey = hotkey.ToUpper();
             if (hotkey.Length > 0 && Char.IsLetterOrDigit(hotkey[0]))
             {

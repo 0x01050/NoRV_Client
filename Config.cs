@@ -241,18 +241,35 @@ namespace NoRV
 
         // OBS Config
         private string _obsProcess = "obs64";
-        private string _mirrorSourceProcess = "Mirror";
-        private string _mirrorSourceWindow = "*";
-        private Size _mirrorResolution = new Size(1280, 720);
-        private int _mirrorIgnore = 10;
-        private double _detectThreashold = 0;
-        private int _switchTime = 5000;
         private string _startHotkey = "R";
         private string _stopHotkey = "S";
         private string _pauseHotkey = "P";
         private string _unpauseHotkey = "U";
         private string _witnessHotkey = "1";
         private string _exhibitsHotkey = "2";
+        // Mirror
+        private string _mirrorSourceProcess = "Mirror";
+        private string _mirrorSourceWindow = "*";
+        private Size _mirrorResolution = new Size(1280, 720);
+        private int _mirrorIgnore = 10;
+        private double _detectThreashold = 0;
+        private int _switchTime = 5000;
+        // Face Detect
+        private string _cameraName = "";
+        private int _ignoreTop = 25;
+        private int _ignoreBottom = 25;
+        private Size _detectMainArea = new Size(400, 400);
+        private int _detectOutsideSec = 60;
+        private Size _inputResolution = new Size(1920, 1080);
+        private Size _outputResolution = new Size(854, 480);
+        private double _zoomTopPadding = 0.5;
+        private double _zoomTotalHeight = 3.5;
+        private int _smoothXOffset = 100;
+        private int _smoothXSpeed = 5;
+        private int _smoothYOffset = 70;
+        private int _smoothYSpeed = 5;
+        private int _smoothZOffset = 20;
+        private int _smoothZSpeed = 2;
 
         private void LoadOBSConfig()
         {
@@ -265,20 +282,6 @@ namespace NoRV
                 {
                     case "ProcessName":
                         _obsProcess = (string)item.Attribute("Value");
-                        break;
-                    case "MirrorSource":
-                        _mirrorSourceProcess = (string)item.Attribute("Process");
-                        _mirrorSourceWindow = (string)item.Attribute("Window");
-                        break;
-                    case "MirrorResolution":
-                        _mirrorResolution = new Size((int)item.Attribute("Width"), (int)item.Attribute("Height"));
-                        _mirrorIgnore = (int)item.Attribute("Ignore");
-                        break;
-                    case "DetectThreashold":
-                        _detectThreashold = (double)item.Attribute("Value");
-                        break;
-                    case "SwitchTime":
-                        _switchTime = (int)item.Attribute("Value");
                         break;
                     case "StartHotkey":
                         _startHotkey = (string)item.Attribute("Value");
@@ -298,6 +301,51 @@ namespace NoRV
                     case "ExhibitsHotkey":
                         _exhibitsHotkey = (string)item.Attribute("Value");
                         break;
+
+                    case "MirrorSource":
+                        _mirrorSourceProcess = (string)item.Attribute("Process");
+                        _mirrorSourceWindow = (string)item.Attribute("Window");
+                        break;
+                    case "MirrorResolution":
+                        _mirrorResolution = new Size((int)item.Attribute("Width"), (int)item.Attribute("Height"));
+                        _mirrorIgnore = (int)item.Attribute("Ignore");
+                        break;
+                    case "DetectThreashold":
+                        _detectThreashold = (double)item.Attribute("Value");
+                        break;
+                    case "SwitchTime":
+                        _switchTime = (int)item.Attribute("Value");
+                        break;
+
+                    case "CameraName":
+                        _cameraName = (string)item.Attribute("Value");
+                        break;
+                    case "IgnoreRegion":
+                        _ignoreTop = (int)item.Attribute("Top");
+                        _ignoreBottom = (int)item.Attribute("Bottom");
+                        break;
+                    case "MainArea":
+                        _detectMainArea = new Size((int)item.Attribute("Width"), (int)item.Attribute("Height"));
+                        _detectOutsideSec = (int)item.Attribute("Outside");
+                        break;
+                    case "InputResolution":
+                        _inputResolution = new Size((int)item.Attribute("Width"), (int)item.Attribute("Height"));
+                        break;
+                    case "OutputResolution":
+                        _outputResolution = new Size((int)item.Attribute("Width"), (int)item.Attribute("Height"));
+                        break;
+                    case "Zoom":
+                        _zoomTopPadding = (double)item.Attribute("TopPadding");
+                        _zoomTotalHeight = (double)item.Attribute("TotalHeight");
+                        break;
+                    case "Smoothing":
+                        _smoothXOffset = (int)item.Attribute("XOffset");
+                        _smoothXSpeed = (int)item.Attribute("XSpeed");
+                        _smoothYOffset = (int)item.Attribute("YOffset");
+                        _smoothYSpeed = (int)item.Attribute("YSpeed");
+                        _smoothZOffset = (int)item.Attribute("ZOffset");
+                        _smoothZSpeed = (int)item.Attribute("ZSpeed");
+                        break;
                 }
             }
         }
@@ -305,6 +353,26 @@ namespace NoRV
         {
             return _obsProcess;
         }
+        public string getOBSHotkey(string action)
+        {
+            switch(action)
+            {
+                case "start":
+                    return _startHotkey;
+                case "stop":
+                    return _stopHotkey;
+                case "pause":
+                    return _pauseHotkey;
+                case "unpause":
+                    return _unpauseHotkey;
+                case "witness":
+                    return _witnessHotkey;
+                case "exhibits":
+                    return _exhibitsHotkey;
+            }
+            return "";
+        }
+
         public string getMirrorSourceProcess()
         {
             return _mirrorSourceProcess;
@@ -329,26 +397,67 @@ namespace NoRV
         {
             return _switchTime;
         }
-        public string getOBSHotkey(string action)
-        {
-            switch(action)
-            {
-                case "start":
-                    return _startHotkey;
-                case "stop":
-                    return _stopHotkey;
-                case "pause":
-                    return _pauseHotkey;
-                case "unpause":
-                    return _unpauseHotkey;
-                case "witness":
-                    return _witnessHotkey;
-                case "exhibits":
-                    return _exhibitsHotkey;
-            }
-            return "";
-        }
 
+        public string getCameraName()
+        {
+            return _cameraName;
+        }
+        public int getTopIgnorePercent()
+        {
+            return _ignoreTop;
+        }
+        public int getBottomIgnorePercent()
+        {
+            return _ignoreBottom;
+        }
+        public Size getDetectMainArea()
+        {
+            return _detectMainArea;
+        }
+        public int getDetectOutsideWaitSeconds()
+        {
+            return _detectOutsideSec;
+        }
+        public Size getCameraInputResolution()
+        {
+            return _inputResolution;
+        }
+        public Size getOutputOutputResolution()
+        {
+            return _outputResolution;
+        }
+        public double getZoomTopPadding()
+        {
+            return _zoomTopPadding;
+        }
+        public double getZoomTotalHeight()
+        {
+            return _zoomTotalHeight;
+        }
+        public int getSmoothingXOffset()
+        {
+            return _smoothXOffset;
+        }
+        public int getSmoothingXSpeed()
+        {
+            return _smoothXSpeed;
+        }
+        public int getSmoothingYOffset()
+        {
+            return _smoothYOffset;
+        }
+        public int getSmoothingYSpeed()
+        {
+            return _smoothYSpeed;
+        }
+        public int getSmoothingZOffset()
+        {
+            return _smoothZOffset;
+        }
+        public int getSmoothingZSpeed()
+        {
+            return _smoothZSpeed;
+        }
 
         public string getTemplate(string template)
         {

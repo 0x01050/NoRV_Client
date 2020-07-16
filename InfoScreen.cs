@@ -102,10 +102,12 @@ namespace NoRV
             InfoList.Add("ID", lblJobID.Text);
 
             stopLoadThread();
+            TranscribeManager.Start();
             MainScreen form = new MainScreen(InfoList, source);
             form.ShowDialog();
             if (form.DialogResult == DialogResult.OK && !String.IsNullOrEmpty(lblJobID.Text))
                 JobManager.FinishJob(lblJobID.Text);
+            TranscribeManager.Stop();
             lblJobID.Text = "";
             startLoadThread();
         }

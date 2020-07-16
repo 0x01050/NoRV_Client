@@ -10,6 +10,7 @@ namespace NoRV
 {
     class Config
     {
+        private static string xmlFile = @"Config.xml";
         private static Config _instance = null;
         public static Config getInstance()
         {
@@ -35,7 +36,7 @@ namespace NoRV
         private List<string> _nameList = new List<string>();
         private void LoadMappingConfig()
         {
-            var xml = XDocument.Load(@"Config.xml");
+            var xml = XDocument.Load(xmlFile);
             var query = from c in xml.Root.Descendants("Keyword")
                         select c;
             foreach (var item in query)
@@ -97,7 +98,7 @@ namespace NoRV
         private string _webServerPort = "9999";
         private void LoadGlobalConfig()
         {
-            var xml = XDocument.Load(@"Config.xml");
+            var xml = XDocument.Load(xmlFile);
             var query = from c in xml.Root.Descendants("Item")
                         select c;
             foreach (var item in query)
@@ -259,6 +260,7 @@ namespace NoRV
         private int _ignoreTop = 25;
         private int _ignoreBottom = 25;
         private Size _detectMainArea = new Size(400, 400);
+        private bool _mainAreaShow = false;
         private int _detectOutsideSec = 60;
         private Size _inputResolution = new Size(1920, 1080);
         private Size _outputResolution = new Size(854, 480);
@@ -273,7 +275,7 @@ namespace NoRV
 
         private void LoadOBSConfig()
         {
-            var xml = XDocument.Load(@"Config.xml");
+            var xml = XDocument.Load(xmlFile);
             var query = from c in xml.Root.Descendants("Config")
                         select c;
             foreach (var item in query)
@@ -327,6 +329,7 @@ namespace NoRV
                     case "MainArea":
                         _detectMainArea = new Size((int)item.Attribute("Width"), (int)item.Attribute("Height"));
                         _detectOutsideSec = (int)item.Attribute("Outside");
+                        _mainAreaShow = ((string)item.Attribute("Show") == "true");
                         break;
                     case "InputResolution":
                         _inputResolution = new Size((int)item.Attribute("Width"), (int)item.Attribute("Height"));
@@ -414,6 +417,10 @@ namespace NoRV
         {
             return _detectMainArea;
         }
+        public bool mainAreaVisible()
+        {
+            return _mainAreaShow;
+        }
         public int getDetectOutsideWaitSeconds()
         {
             return _detectOutsideSec;
@@ -461,7 +468,7 @@ namespace NoRV
 
         public string getTemplate(string template)
         {
-            var xml = XDocument.Load(@"Config.xml");
+            var xml = XDocument.Load(xmlFile);
             var query = from c in xml.Root.Descendants("Template")
                         where (string)c.Attribute("Type") == template
                         select c.Value.ToString()

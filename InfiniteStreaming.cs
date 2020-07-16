@@ -129,7 +129,7 @@ namespace GoogleTranscribing
                                 Console.WriteLine($"\nTranscript: {mainAlt.Transcript}\n");
                             else
                             {
-                                int wordCnt = mainAlt.Transcript.Split(new char[] { ' ' }).Length;
+                                int wordCnt = mainAlt.Transcript.Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries).Length;
                                 List<string>[] candidates = new List<string>[wordCnt];
                                 for (int i = 0; i < wordCnt; i++)
                                 {
@@ -137,7 +137,7 @@ namespace GoogleTranscribing
                                 }
                                 foreach (var alt in finalResult.Alternatives)
                                 {
-                                    var words = alt.Transcript.Split(new char[] { ' ' });
+                                    var words = alt.Transcript.Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
                                     if(wordCnt == words.Length)
                                     {
                                         for (int i = 0; i < wordCnt; i++)

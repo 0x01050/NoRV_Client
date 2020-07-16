@@ -63,7 +63,8 @@ namespace NoRV
             Thread mirrorThread = new Thread(new ThreadStart(MirrorWork));
             mirrorThread.Start();
             CancellationTokenSource cts = new CancellationTokenSource();
-            Task.Run(() => InfiniteStreaming.RecognizeAsync(cts), cts.Token);
+            TranscribeManager.Stop();
+            Task.Run(() => InfiniteStreaming.RecognizeAsync(cts, TranscribeManager.NewTranscript, TranscribeManager.NewCandidate), cts.Token);
             if (!OBSManager.CheckOBSRunning())
                 Application.Run(new WaitScreen());
             OBSManager.StopOBSRecording();
@@ -79,6 +80,10 @@ namespace NoRV
             thread.Abort();
 
             server.Stop();
+            foreach(var proc in Process.GetProcessesByName("adb"))
+            {
+                proc.Kill();
+            }
         }
 
         private static void ServerCheck(string port)
@@ -289,11 +294,6 @@ namespace NoRV
                     {
                         Process proc = Process.Start("Mirror\\" + Config.getInstance().getMirrorSourceProcess() + ".exe", 
                             "--fullscreen --window-borderless --window-title '" + Config.getInstance().getMirrorSourceWindow() + "'");
-                        Thread.Sleep(2000);
-                        if (proc.MainWindowHandle != null)
-                        {
-                            User32.SetWindowPos(proc.MainWindowHandle, User32.HWND_BOTTOM, 0, 0, 0, 0, User32.NOMOVE_NOSIZE_FLAG);
-                        }
                     }
                     else
                     {

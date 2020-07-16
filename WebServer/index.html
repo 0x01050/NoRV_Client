@@ -1,42 +1,84 @@
 <html>
-	<head>
-		<script src="jquery.min.js"></script>
-		<script>
-            var curElement = null;
-            /* When the user clicks on the button, 
-            toggle between hiding and showing the dropdown content */
-            function dropdown_show(id) {
-                hideAllDropdown();
-                document.getElementById(id).classList.toggle("show");
+    <head>
+        <script src="jquery.min.js"></script>
+        <script>
+            var lastTimestamp = -1, refreshInterval = 100;
+            function hideAllDropdown() {
+                $(".dropdown-content").removeClass('show');
             }
-
-            // Close the dropdown if the user clicks outside of it
             window.onclick = function (event) {
-                if (event.target.matches('.dropbtn')) {
-                    curElement = event.target;
-                }
-                if (event.target.matches('.dropdown-item')) {
-                    if (curElement != null) {
-                        curElement.innerText = event.target.innerText;
-                    }
-                }
                 if (!event.target.matches('.dropbtn')) {
                     hideAllDropdown();
                 }
             }
+            function getTranscripts() {
+                $.ajax({
+                    url : '/getTranscripts?lastTimestamp=' + lastTimestamp,
+                    type : 'GET',
+                    success: function (data, text) {
+                        try {
+                            var result = JSON.parse(data);
+                            if(result.status == "Offline")
+                            {
+                                $("#offline").show();
+                                $("#transcripts").hide();
+                                $("#candidate").hide();
+                                
+                                $("#transcripts").text("");
+                                $("#candidate").text("");
+                            }
+                            else if(result.status == "Recording")
+                            {
+                                $("#offline").hide();
+                                $("#transcripts").show();
+                                $("#candidate").show();
+                                for (const transcript of result.transcripts) {
+                                    var words = JSON.parse(transcript.Transcript);
+                                    var div = $('<div></div>');
+                                    for (const word of words) {
+                                        var span = $("<span class='dropdown'></span>");
+                                        $("<a class='dropbtn'>" + word[0] + "</a>").appendTo(span);
+                                        if(word.length > 1)
+                                        {
+                                            $("<sup>" + word.length + "</sup>").appendTo(span);
+                                            var list = $("<div class='dropdown-content'></div>");
+                                            for(const cand of word) {
+                                                $("<a class='dropdown-item'>" + cand + "</a>").appendTo(list);
+                                            }
+                                            list.appendTo(span);
+                                        }
+                                        span.appendTo(div);
+                                    }
+                                    div.appendTo('#transcripts');
+                                    lastTimestamp = transcript.Timestamp;
+                                }
 
-            function hideAllDropdown() {
-                var dropdowns = document.getElementsByClassName("dropdown-content");
-                var i;
-                for (i = 0; i < dropdowns.length; i++) {
-                    var openDropdown = dropdowns[i];
-                    if (openDropdown.classList.contains('show')) {
-                        openDropdown.classList.remove('show');
+                                $(".dropbtn").click(function() {
+                                    hideAllDropdown();
+                                    $(this).siblings('div').addClass('show');
+                                });
+                                $(".dropdown-item").click(function() {
+                                    $(this).parent().siblings('a').text($(this).text());
+                                });
+
+                                $("#candidate").text(result.candidate);
+                                $("html, body").animate({ scrollTop: $(document).height() }, "slow");
+                            }
+                        }
+                        catch(err) { }
+                        setTimeout(getTranscripts, refreshInterval);
+                    },
+                    error: function (request, status, error) {
+                        setTimeout(getTranscripts, refreshInterval);
                     }
-                }
-                curElement = null;
+                });
             }
-		</script>
+
+            $(document).ready(function() {
+                setTimeout(getTranscripts, refreshInterval);
+            });
+            
+        </script>
         <style>
             .dropbtn {
                 color: black;
@@ -45,9 +87,9 @@
                 border-bottom: 2px solid #121212;
             }
 
-                .dropbtn:hover, .dropbtn:focus {
-                    background-color: #2980B9;
-                }
+            .dropbtn:hover, .dropbtn:focus {
+                background-color: #2980B9;
+            }
 
             .dropdown {
                 position: relative;
@@ -65,12 +107,12 @@
                 z-index: 1;
             }
 
-                .dropdown-content a {
-                    color: black;
-                    padding: 12px 16px;
-                    text-decoration: none;
-                    display: block;
-                }
+            .dropdown-content a {
+                color: black;
+                padding: 12px 16px;
+                text-decoration: none;
+                display: block;
+            }
 
             .dropdown a:hover {
                 background-color: #ddd;
@@ -79,110 +121,27 @@
             .show {
                 display: block;
             }
+
+            .dropdown-item {
+                cursor: hand;
+            }
+
+            #candidate {
+                font-size: 16px;
+                margin-top: 4px;
+            }
+
+            body>div {
+                /*margin*/
+            }
         </style>
-	</head>
-	<body>
-        <div>
-            <div>
-                <span class="dropdown">
-                    <a onclick="dropdown_show('dropdown-list-1')" class="dropbtn">This</a>
-                    <sup>2</sup>
-                    <div id="dropdown-list-1" class="dropdown-content">
-                        <a class="dropdown-item">This</a>
-                        <a class="dropdown-item">Dis</a>
-                    </div>
-                </span>
-                <span class="dropdown">
-                    <a class="dropbtn">is</a>
-                </span>
-                <span class="dropdown">
-                    <a class="dropbtn">a</a>
-                </span>
-                <span class="dropdown">
-                    <a onclick="dropdown_show('dropdown-list-2')" class="dropbtn">textbook.</a>
-                    <sup>3</sup>
-                    <div id="dropdown-list-2" class="dropdown-content">
-                        <a class="dropdown-item">textbook.</a>
-                        <a class="dropdown-item">tex-book.</a>
-                        <a class="dropdown-item">text-boo.</a>
-                    </div>
-                </span>
-            </div>
-            <div>
-                <span class="dropdown">
-                    <a onclick="dropdown_show('dropdown-list-3')" class="dropbtn">This</a>
-                    <sup>2</sup>
-                    <div id="dropdown-list-3" class="dropdown-content">
-                        <a class="dropdown-item">This</a>
-                        <a class="dropdown-item">Dis</a>
-                    </div>
-                </span>
-                <span class="dropdown">
-                    <a class="dropbtn">is</a>
-                </span>
-                <span class="dropdown">
-                    <a class="dropbtn">a</a>
-                </span>
-                <span class="dropdown">
-                    <a onclick="dropdown_show('dropdown-list-4')" class="dropbtn">textbook.</a>
-                    <sup>3</sup>
-                    <div id="dropdown-list-4" class="dropdown-content">
-                        <a class="dropdown-item">textbook.</a>
-                        <a class="dropdown-item">tex-book.</a>
-                        <a class="dropdown-item">text-boo.</a>
-                    </div>
-                </span>
-            </div>
-            <div>
-                <span class="dropdown">
-                    <a onclick="dropdown_show('dropdown-list-5')" class="dropbtn">This</a>
-                    <sup>2</sup>
-                    <div id="dropdown-list-5" class="dropdown-content">
-                        <a class="dropdown-item">This</a>
-                        <a class="dropdown-item">Dis</a>
-                    </div>
-                </span>
-                <span class="dropdown">
-                    <a class="dropbtn">is</a>
-                </span>
-                <span class="dropdown">
-                    <a class="dropbtn">a</a>
-                </span>
-                <span class="dropdown">
-                    <a onclick="dropdown_show('dropdown-list-6')" class="dropbtn">textbook.</a>
-                    <sup>3</sup>
-                    <div id="dropdown-list-6" class="dropdown-content">
-                        <a class="dropdown-item">textbook.</a>
-                        <a class="dropdown-item">tex-book.</a>
-                        <a class="dropdown-item">text-boo.</a>
-                    </div>
-                </span>
-            </div>
-            <div>
-                <span class="dropdown">
-                    <a onclick="dropdown_show('dropdown-list-7')" class="dropbtn">This</a>
-                    <sup>2</sup>
-                    <div id="dropdown-list-7" class="dropdown-content">
-                        <a class="dropdown-item">This</a>
-                        <a class="dropdown-item">Dis</a>
-                    </div>
-                </span>
-                <span class="dropdown">
-                    <a class="dropbtn">is</a>
-                </span>
-                <span class="dropdown">
-                    <a class="dropbtn">a</a>
-                </span>
-                <span class="dropdown">
-                    <a onclick="dropdown_show('dropdown-list-8')" class="dropbtn">textbook.</a>
-                    <sup>3</sup>
-                    <div id="dropdown-list-8" class="dropdown-content">
-                        <a class="dropdown-item">textbook.</a>
-                        <a class="dropdown-item">tex-book.</a>
-                        <a class="dropdown-item">text-boo.</a>
-                    </div>
-                </span>
-            </div>
+    </head>
+    <body>
+        <div id="offline">
+            <h1>Recording is stopped<h1>
         </div>
-	</body>
+        <div id="transcripts">
+        </div>
+        <div id="candidate"></div>
+    </body>
 </html>

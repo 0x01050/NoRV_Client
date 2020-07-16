@@ -13,6 +13,7 @@ namespace NoRV
 {
     class JobManager
     {
+        private static string xmlFile = @"Log.xml";
         public static List<JObject> getJobs()
         {
             List<JObject> _jobs = new List<JObject>();
@@ -97,7 +98,7 @@ namespace NoRV
             if(!checkFinishedJob(jobID))
             {
                 string now = DateTime.Now.ToString("yyyy-MM-dd");
-                var xml = XDocument.Load(@"Log.xml");
+                var xml = XDocument.Load(xmlFile);
 
 
                 if(xml.XPathSelectElements(String.Format("//Group[@Date='{0}']", now)).Count() == 0)
@@ -105,7 +106,7 @@ namespace NoRV
                     XElement newElem = new XElement("Group");
                     newElem.Add(new XAttribute("Date", now));
                     xml.Root.Add(newElem);
-                    xml.Save(@"Log.xml");
+                    xml.Save(xmlFile);
                 }
                 var query = from c in xml.Root.Descendants("Group")
                         where (string)c.Attribute("Date") == now
@@ -115,7 +116,7 @@ namespace NoRV
                     XElement newElem = new XElement("Log");
                     newElem.Add(new XAttribute("ID", jobID));
                     item.Add(newElem);
-                    xml.Save(@"Log.xml");
+                    xml.Save(xmlFile);
                 }
             }
         }
@@ -123,18 +124,18 @@ namespace NoRV
         private static bool checkFinishedJob(string jobID)
         {
             string now = DateTime.Now.ToString("yyyy-MM-dd");
-            var xml = XDocument.Load(@"Log.xml");
+            var xml = XDocument.Load(xmlFile);
             return xml.XPathSelectElements(String.Format("//Group[@Date='{0}']/Log[@ID='{1}']", now, jobID)).Count() > 0;
         }
 
         private static void removeUnnecessaryLog()
         {
             string now = DateTime.Now.ToString("yyyy-MM-dd");
-            var xml = XDocument.Load(@"Log.xml");
+            var xml = XDocument.Load(xmlFile);
             xml.Root.Descendants("Group")
                     .Where(x => (string)x.Attribute("Date") != now)
                     .Remove();
-            xml.Save(@"Log.xml");
+            xml.Save(xmlFile);
         }
     }
 }

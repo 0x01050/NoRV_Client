@@ -152,9 +152,7 @@ namespace NoRV
                     }
                 }));
             }
-            catch (Exception ee) {
-                Console.WriteLine(ee);
-            }
+            catch (Exception) { }
         }
         private void DetectWork(object param)
         {
@@ -266,7 +264,8 @@ namespace NoRV
                 if (curBitmap != null)
                     g.DrawImage(curBitmap, new Rectangle(0, 0, outputResolution.Width, outputResolution.Height), new Rectangle(x, y, realWidth, realHeight), GraphicsUnit.Pixel);
 
-                g.DrawRectangle(new Pen(Color.Blue, 2), new Rectangle((inputResolution.Width / 2 - mainDetectArea.Width / 2 - x) * outputResolution.Width / realWidth, (inputResolution.Height / 2 - mainDetectArea.Height / 2 - y) * outputResolution.Height / realHeight, mainDetectArea.Width * outputResolution.Width / realWidth, mainDetectArea.Height * outputResolution.Height / realHeight));
+                if (Config.getInstance().mainAreaVisible())
+                    g.DrawRectangle(new Pen(Color.Blue, 2), new Rectangle((inputResolution.Width / 2 - mainDetectArea.Width / 2 - x) * outputResolution.Width / realWidth, (inputResolution.Height / 2 - mainDetectArea.Height / 2 - y) * outputResolution.Height / realHeight, mainDetectArea.Width * outputResolution.Width / realWidth, mainDetectArea.Height * outputResolution.Height / realHeight));
                 _needRedraw = false;
             }
         }

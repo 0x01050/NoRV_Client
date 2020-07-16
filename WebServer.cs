@@ -18,5 +18,13 @@ namespace NoRV
 			return context;
 		}
 
+		[RestRoute(HttpMethod = HttpMethod.GET, PathInfo = "/getTranscripts")]
+		public IHttpContext getTranscripts(IHttpContext context)
+		{
+			var lastTimestamp = context.Request.QueryString["lastTimestamp"];
+			context.Response.SendResponse(TranscribeManager.getTranscripts(Int64.Parse(lastTimestamp)));
+			return context;
+		}
+
 	}
 }

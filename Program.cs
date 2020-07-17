@@ -38,7 +38,8 @@ namespace NoRV
                 Port = "9999",
                 PublicFolder = new PublicFolder("WebServer")
             });
-            while (true)
+            int i = 0;
+            for(i = 0; i < 3; i ++)
             {
                 try
                 {
@@ -49,6 +50,11 @@ namespace NoRV
                 {
                     ServerCheck(port);
                 }
+            }
+            if(i == 3)
+            {
+                Application.Exit();
+                return;
             }
 
             Application.EnableVisualStyles();
@@ -354,7 +360,7 @@ namespace NoRV
                 }
                 if(!found)
                 {
-                    OBSManager.SwitchToWitness();
+                    //OBSManager.SwitchToWitness();
                 }
                 Thread.Sleep(100);
             }

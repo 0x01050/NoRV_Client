@@ -14,6 +14,7 @@ namespace NoRV
 		[RestRoute(HttpMethod = HttpMethod.GET, PathInfo = "/api/time")]
 		public IHttpContext Time(IHttpContext context)
 		{
+			context.Response.AddHeader("Access-Control-Allow-Origin", "*");
 			context.Response.SendResponse(DateTime.UtcNow.AddHours(tzOffset).ToString("MMM d,yyyy h:mm:ss tt"));
 			return context;
 		}

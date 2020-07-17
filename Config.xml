@@ -39,7 +39,7 @@
     <!-- Face Detect -->
     <Config Key="CameraName" Value="ManyCam Virtual Webcam" />
     <Config Key="IgnoreRegion" Top="25" Bottom="25" />
-    <Config Key="MainArea" Width="400" Height="400" Outside="60" Show="false" />
+    <Config Key="MainArea" Width="400" Height="400" Outside="60" />
     <Config Key="InputResolution" Width="1920" Height="1080" />
     <Config Key="OutputResolution" Width="854" Height="480" />
     <Config Key="Zoom" TopPadding="1" TotalHeight="3.5" />

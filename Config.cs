@@ -260,7 +260,6 @@ namespace NoRV
         private int _ignoreTop = 25;
         private int _ignoreBottom = 25;
         private Size _detectMainArea = new Size(400, 400);
-        private bool _mainAreaShow = false;
         private int _detectOutsideSec = 60;
         private Size _inputResolution = new Size(1920, 1080);
         private Size _outputResolution = new Size(854, 480);
@@ -329,7 +328,6 @@ namespace NoRV
                     case "MainArea":
                         _detectMainArea = new Size((int)item.Attribute("Width"), (int)item.Attribute("Height"));
                         _detectOutsideSec = (int)item.Attribute("Outside");
-                        _mainAreaShow = ((string)item.Attribute("Show") == "true");
                         break;
                     case "InputResolution":
                         _inputResolution = new Size((int)item.Attribute("Width"), (int)item.Attribute("Height"));
@@ -416,10 +414,6 @@ namespace NoRV
         public Size getDetectMainArea()
         {
             return _detectMainArea;
-        }
-        public bool mainAreaVisible()
-        {
-            return _mainAreaShow;
         }
         public int getDetectOutsideWaitSeconds()
         {

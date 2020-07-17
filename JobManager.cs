@@ -30,7 +30,7 @@ namespace NoRV
 
             string now = DateTime.Now.ToString("yyyy-MM-dd");
             if (Program.DEBUG)
-                now = "2020-06-23";
+                now = "2020-07-17";
             string url = Config.getInstance().getAucityAPIUrl().Replace("%MINDATE%", now).Replace("%MAXDATE%", now);
             HttpResponseMessage response = httpClient.GetAsync(url).Result;
             if (response.StatusCode == HttpStatusCode.OK)

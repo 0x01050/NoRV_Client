@@ -92,7 +92,7 @@ namespace NoRV
         public bool checkButtonPressed()
         {
             if (Program.DEBUG)
-                return Control.ModifierKeys == Keys.Control;
+                return Control.ModifierKeys == Keys.Alt;
 
             if (getButtonStatus() != INITIATED)
             {

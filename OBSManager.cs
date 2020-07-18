@@ -2,6 +2,7 @@
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace NoRV
 {
@@ -40,19 +41,53 @@ namespace NoRV
 
             Program.changeOBS("Recording (" + witness + ")");
         }
+
+        private static int sceneMode = -1;
         public static void SwitchToWitness()
         {
-            SendHotkey(Config.getInstance().getOBSHotkey("witness"));
+            if (sceneMode != 0)
+            {
+                sceneMode = 0;
+                SendHotkey(Config.getInstance().getOBSHotkey("witness"));
+            }
         }
         public static void SwitchToExhibits()
         {
-            SendHotkey(Config.getInstance().getOBSHotkey("exhibits"));
+            if (sceneMode != 1)
+            {
+                sceneMode = 1;
+                SendHotkey(Config.getInstance().getOBSHotkey("exhibits"));
+            }
         }
 
         [DllImport("user32.dll")]
         static extern void keybd_event(byte bVk, byte bScan, int dwFlags, int dwExtraInfo);
-        private static void SendHotkey(string hotkey)
+
+        private static bool _hotkeyRunning = false;
+        private static async Task<int> SendHotkey(string hotkey)
         {
+            using (var timeoutCancellationTokenSource = new CancellationTokenSource())
+            {
+                int timeout = 1000;
+                var task = TriggerHotkey(hotkey, timeoutCancellationTokenSource);
+
+                var completedTask = await Task.WhenAny(task, Task.Delay(timeout, timeoutCancellationTokenSource.Token));
+                if (completedTask == task)
+                {
+                    timeoutCancellationTokenSource.Cancel();
+                    return await task;
+                }
+            }
+            return 0;
+        }
+        private static async Task<int> TriggerHotkey(string hotkey, CancellationTokenSource cts)
+        {
+            while (_hotkeyRunning)
+            {
+                if (cts.IsCancellationRequested)
+                    return 0;
+            }
+            _hotkeyRunning = true;
             hotkey = hotkey.ToUpper();
             if (hotkey.Length > 0 && Char.IsLetterOrDigit(hotkey[0]))
             {
@@ -69,6 +104,8 @@ namespace NoRV
                 keybd_event(0x11, 0, 2, 0);
                 keybd_event((byte)vk, 0, 2, 0);
             }
+            _hotkeyRunning = false;
+            return 0;
         }
     }
 }

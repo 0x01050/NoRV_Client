@@ -195,6 +195,7 @@ namespace GoogleTranscribing
 
         private async Task ListenAudio(Socket handler, int number)
         {
+            Console.WriteLine("##### Listening Audio Started #####");
             byte[] bytes = null;
             while (isRunning)
             {
@@ -202,22 +203,31 @@ namespace GoogleTranscribing
                 int bytesRec = handler.Receive(bytes);
                 if(bytesRec > 0)
                     _microphoneBuffer.Add(ByteString.CopyFrom(bytes, 0, bytesRec));
+                else
+                    break;
             }
             handler.Close();
+            isRunning = false;
+            Console.WriteLine("##### Listening Audio Ended #####");
         }
 
         private async Task StartListening(CancellationTokenSource cts, Socket handler)
         {
+            Console.WriteLine("##### Listening Started #####");
             Task.Run(() => ListenAudio(handler, new Random().Next(0, 100)), cts.Token);
             try
             {
                 await RunAsync(cts);
             }
-            catch (Exception) {}
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+            }
             isRunning = false;
+            Console.WriteLine("##### Listening Ended #####");
         }
 
-        public static async Task RecognizeAsync(CancellationTokenSource cts, RecognizedCallback recognized = null, RecognizingCallback recognizing = null)
+        public static void RecognizeAsync(RecognizedCallback recognized = null, RecognizingCallback recognizing = null)
         {
             Recognized = recognized;
             Recognizing = recognizing;
@@ -233,6 +243,7 @@ namespace GoogleTranscribing
                     listener.Listen(10);
 
                     InfiniteStreaming instance = null;
+                    CancellationTokenSource cts = new CancellationTokenSource();
                     while (!cts.IsCancellationRequested)
                     {
                         Socket handler = listener.Accept();

@@ -3,6 +3,7 @@ using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
+using static NoRV.Program;
 
 namespace NoRV
 {
@@ -87,7 +88,16 @@ namespace NoRV
                 if (cts.IsCancellationRequested)
                     return 0;
             }
+            Console.WriteLine($"HotKey Pressed - {hotkey}");
             _hotkeyRunning = true;
+            Process[] obs64 = Process.GetProcessesByName(Config.getInstance().getOBSProcessName());
+            foreach(var obs in obs64)
+            {
+                if (obs.MainWindowHandle != null)
+                {
+                    User32.SetWindowPos(obs.MainWindowHandle, User32.HWND_TOP, 0, 0, 0, 0, User32.NOMOVE_NOSIZE_SHOW_FLAG);
+                }
+            }
             hotkey = hotkey.ToUpper();
             if (hotkey.Length > 0 && Char.IsLetterOrDigit(hotkey[0]))
             {

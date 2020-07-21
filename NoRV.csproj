@@ -396,4 +396,8 @@
   <Import Project="packages\Accord.3.8.0\build\Accord.targets" Condition="Exists('packages\Accord.3.8.0\build\Accord.targets')" />
   <Import Project="packages\Grpc.Core.2.30.0\build\net45\Grpc.Core.targets" Condition="Exists('packages\Grpc.Core.2.30.0\build\net45\Grpc.Core.targets')" />
   <Import Project="packages\Emgu.CV.runtime.windows.4.3.0.3890\build\Emgu.CV.runtime.windows.targets" Condition="Exists('packages\Emgu.CV.runtime.windows.4.3.0.3890\build\Emgu.CV.runtime.windows.targets')" />
+  <PropertyGroup>
+    <PreBuildEvent>
+    </PreBuildEvent>
+  </PropertyGroup>
 </Project>

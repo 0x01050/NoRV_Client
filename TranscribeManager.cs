@@ -14,10 +14,10 @@ namespace NoRV
     class TranscribeManager
     {
         private static string xmlFile = @"Transcribe.xml";
-        public static XDocument Open()
+        public static XDocument Open(bool wait = true)
         {
             XDocument xml = null;
-            for (int i = 0; i < 3; i++)
+            for (int i = 0; (i < 3 && !wait || i < 5 && wait); i++)
             {
                 try
                 {
@@ -156,7 +156,7 @@ namespace NoRV
         {
             try
             {
-                var xml = Open();
+                var xml = Open(false);
                 if (xml == null)
                     return;
                 if (getStatus(xml) == "Recording")

@@ -32,18 +32,18 @@
     
     <!-- Mirror -->
     <Config Key="MirrorSource" Process="Mirror" Window="*" />
-    <Config Key="MirrorResolution" Width="1280" Height="720" Ignore="20" />
+    <Config Key="MirrorResolution" Width="854" Height="480" Ignore="20" />
     <Config Key="DetectThreashold" Value="0.1" />
     <Config Key="SwitchTime" Value="5000" />
   
     <!-- Face Detect -->
-    <Config Key="CameraName" Value="ManyCam Virtual Webcam" />
-    <Config Key="IgnoreRegion" Top="25" Bottom="25" />
-    <Config Key="MainArea" Width="400" Height="400" Outside="60" />
+    <Config Key="CameraName" Value="AVerMedia ExtremeCap SDI UVC" />
+    <Config Key="IgnoreRegion" Top="10" Bottom="25" />
+    <Config Key="MainArea" Width="500" Height="400" Outside="60" />
     <Config Key="InputResolution" Width="1920" Height="1080" />
     <Config Key="OutputResolution" Width="854" Height="480" />
-    <Config Key="Zoom" TopPadding="1" TotalHeight="3.5" />
-    <Config Key="Smoothing" XOffset="100" XSpeed="5" YOffset="70" YSpeed="5" ZOffset="20" ZSpeed="2" />
+    <Config Key="Zoom" TopPadding="0.3" TotalHeight="2.5" />
+    <Config Key="Smoothing" XOffset="70" XSpeed="5" YOffset="30" YSpeed="5" ZOffset="10" ZSpeed="3" />
   </OBS>
 
   <Keywords>

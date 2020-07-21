@@ -43,6 +43,7 @@ namespace NoRV
             {
                 try
                 {
+                    Console.WriteLine("##### WebServer Started #####");
                     server.Start();
                     break;
                 }
@@ -60,36 +61,52 @@ namespace NoRV
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
 
+            Console.WriteLine("##### Report Thread Started #####");
             Thread thread = new Thread(new ThreadStart(reportThread));
             thread.Start();
+            Console.WriteLine("##### Update Thread Started #####");
             Thread updateInfo = new Thread(new ThreadStart(updateInfoThread));
             updateInfo.Start();
+            Console.WriteLine("##### Face Detect Thread Started #####");
             Thread detectThread = new Thread(new ThreadStart(DetectWork));
             detectThread.Start();
+            Console.WriteLine("##### Mirror Thread Started #####");
+            TrackForm track = new TrackForm();
+            track.Show();
             Thread mirrorThread = new Thread(new ThreadStart(MirrorWork));
             mirrorThread.Start();
             CancellationTokenSource cts = new CancellationTokenSource();
             TranscribeManager.Stop();
-            Task.Run(() => InfiniteStreaming.RecognizeAsync(cts, TranscribeManager.NewTranscript, TranscribeManager.NewCandidate), cts.Token);
+            Console.WriteLine("##### Transcribing Started #####");
+            Thread transcribeThread = new Thread(() => InfiniteStreaming.RecognizeAsync(TranscribeManager.NewTranscript, TranscribeManager.NewCandidate));
+            transcribeThread.Start();
             if (!OBSManager.CheckOBSRunning())
                 Application.Run(new WaitScreen());
             OBSManager.StopOBSRecording();
-            TrackForm track = new TrackForm();
-            track.Show();
+            Console.WriteLine("##### Track Form Started #####");
             Application.Run(new InfoScreen());
             track.Terminate();
             track.Close();
-            cts.Cancel();
+            Console.WriteLine("##### Track Form Ended #####");
             mirrorThread.Abort();
+            Console.WriteLine("##### Mirror Thread Ended #####");
             detectThread.Abort();
+            Console.WriteLine("##### Face Detect Thread Ended #####");
             updateInfo.Abort();
+            Console.WriteLine("##### Update Thread Ended #####");
             thread.Abort();
+            Console.WriteLine("##### Report Thread Ended #####");
 
             server.Stop();
-            foreach(var proc in Process.GetProcessesByName("adb"))
+            Console.WriteLine("##### WebServer Stopped #####");
+            foreach (var proc in Process.GetProcessesByName("adb"))
             {
                 proc.Kill();
             }
+            Console.WriteLine("##### Adb Processed Killed #####");
+
+            transcribeThread.Abort();
+            Console.WriteLine("##### Transcribing Ended #####");
         }
 
         private static void ServerCheck(string port)
@@ -299,7 +316,7 @@ namespace NoRV
                     if (procs.Length == 0)
                     {
                         Process proc = Process.Start("Mirror\\" + Config.getInstance().getMirrorSourceProcess() + ".exe", 
-                            "--fullscreen --window-borderless --window-title '" + Config.getInstance().getMirrorSourceWindow() + "'");
+                            "--fullscreen --max-size 1024 --window-borderless --window-title '" + Config.getInstance().getMirrorSourceWindow() + "'");
                     }
                     else
                     {
@@ -307,7 +324,7 @@ namespace NoRV
                         {
                             if(proc.MainWindowHandle != null)
                             {
-                                User32.SetWindowPos(proc.MainWindowHandle, User32.HWND_BOTTOM, 0, 0, 0, 0, User32.NOMOVE_NOSIZE_FLAG);
+                                User32.SetWindowPos(proc.MainWindowHandle, User32.HWND_BOTTOM, 0, 0, 0, 0, User32.NOMOVE_NOSIZE_SHOW_FLAG);
                             }
                         }
                     }
@@ -360,7 +377,7 @@ namespace NoRV
                 }
                 if(!found)
                 {
-                    //OBSManager.SwitchToWitness();
+                    OBSManager.SwitchToWitness();
                 }
                 Thread.Sleep(100);
             }
@@ -376,7 +393,7 @@ namespace NoRV
 
             BitmapData bitmapData1 = bitmap1.LockBits(rectangle, ImageLockMode.ReadOnly, bitmap1.PixelFormat);
             BitmapData bitmapData2 = bitmap2.LockBits(rectangle, ImageLockMode.ReadOnly, bitmap2.PixelFormat);
-
+            
             float diff = 0;
             var byteCount = rectangle.Width * rectangle.Height * 3;
 
@@ -437,7 +454,7 @@ namespace NoRV
             public static extern IntPtr SelectObject(IntPtr hDC, IntPtr hObject);
         }
 
-        private class User32
+        public class User32
         {
             [StructLayout(LayoutKind.Sequential)]
             public struct RECT
@@ -458,7 +475,8 @@ namespace NoRV
 
             [DllImport("user32.dll")]
             public static extern bool SetWindowPos(IntPtr hWnd, IntPtr hWndInsertAfter, int X, int Y, int cx, int cy, uint uFlags);
-            public static readonly uint NOMOVE_NOSIZE_FLAG = 0x0001 | 0x0002;
+            public static readonly uint NOMOVE_NOSIZE_SHOW_FLAG = 0x0001 | 0x0002 | 0x0040;
+            public static readonly IntPtr HWND_TOP = new IntPtr(0);
             public static readonly IntPtr HWND_BOTTOM = new IntPtr(1);
         }
 

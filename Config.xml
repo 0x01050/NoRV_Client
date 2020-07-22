@@ -22,6 +22,17 @@
   </Global>
 
   <OBS>
+    <!-- WebSocket -->
+    <Config Key="ProcessName" Value="obs64" />
+    <Config Key="StartHotkey" Value="Start" />
+    <Config Key="StopHotkey" Value="Stop" />
+    <Config Key="PauseHotkey" Value="Stop" />
+    <Config Key="UnpauseHotkey" Value="Start" />
+    <Config Key="WitnessHotkey" Value="Witness" />
+    <Config Key="ExhibitsHotkey" Value="Exhibit" />
+    
+    <!-- Hotkeys -->
+    <!--
     <Config Key="ProcessName" Value="obs64" />
     <Config Key="StartHotkey" Value="R" />
     <Config Key="StopHotkey" Value="S" />
@@ -29,6 +40,7 @@
     <Config Key="UnpauseHotkey" Value="U" />
     <Config Key="WitnessHotkey" Value="1" />
     <Config Key="ExhibitsHotkey" Value="2" />
+    -->
     
     <!-- Mirror -->
     <Config Key="MirrorSource" Process="Mirror" Window="*" />

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using OBSWebsocketDotNet;
+using System;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Threading;
@@ -67,18 +68,41 @@ namespace NoRV
         private static bool _hotkeyRunning = false;
         private static async Task<int> SendHotkey(string hotkey)
         {
-            using (var timeoutCancellationTokenSource = new CancellationTokenSource())
+            // Using Web Socket
+            var _obs = new OBSWebsocket();
+            try
             {
-                int timeout = 1000;
-                var task = TriggerHotkey(hotkey, timeoutCancellationTokenSource);
-
-                var completedTask = await Task.WhenAny(task, Task.Delay(timeout, timeoutCancellationTokenSource.Token));
-                if (completedTask == task)
+                _obs.Connect("ws://127.0.0.1:4444", "");
+                switch (hotkey)
                 {
-                    timeoutCancellationTokenSource.Cancel();
-                    return await task;
+                    case "Start":
+                        _obs.StartRecording();
+                        break;
+                    case "Stop":
+                        _obs.StopRecording();
+                        break;
+                    default:
+                        _obs.SetCurrentScene(hotkey);
+                        break;
                 }
+                _obs.Disconnect();
             }
+            catch(Exception) { }
+
+            // Using Hotkey
+            //using (var timeoutCancellationTokenSource = new CancellationTokenSource())
+            //{
+            //    int timeout = 1000;
+            //    var task = TriggerHotkey(hotkey, timeoutCancellationTokenSource);
+
+            //    var completedTask = await Task.WhenAny(task, Task.Delay(timeout, timeoutCancellationTokenSource.Token));
+            //    if (completedTask == task)
+            //    {
+            //        timeoutCancellationTokenSource.Cancel();
+            //        return await task;
+            //    }
+            //}
+
             return 0;
         }
         private static async Task<int> TriggerHotkey(string hotkey, CancellationTokenSource cts)

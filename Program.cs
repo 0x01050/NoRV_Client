@@ -20,7 +20,7 @@ namespace NoRV
 {
     static class Program
     {
-        public static bool DEBUG = false;
+        public static bool DEBUG = true;
 
         public static string videographer = "";
         public static string commission = "";
@@ -107,6 +107,8 @@ namespace NoRV
 
             transcribeThread.Abort();
             Console.WriteLine("##### Transcribing Ended #####");
+
+            Application.Exit();
         }
 
         private static void ServerCheck(string port)

@@ -265,6 +265,9 @@ namespace NoRV
                     g.DrawImage(curBitmap, new Rectangle(0, 0, outputResolution.Width, outputResolution.Height), new Rectangle(x, y, realWidth, realHeight), GraphicsUnit.Pixel);
 
                 _needRedraw = false;
+
+                if (detected)
+                    Console.WriteLine("Face Detected!!!");
             }
         }
 

@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿using System;
+using System.Text;
 using System.Windows.Forms;
 
 namespace NoRV
@@ -64,18 +65,13 @@ namespace NoRV
         }
         public void turnOffLED()
         {
-            if(getButtonStatus() != INITIATED)
-            {
-                return;
-            }
-
-            for(int ledColor = 0; ledColor < 3; ledColor ++)
-            {
-                Delcom.DelcomLEDControl(deviceHandle, ledColor, Delcom.LEDON);
-                Delcom.DelcomLEDPower(deviceHandle, ledColor, 0);
-            }
+            setLEDBrightness(0);
         }
         public void turnOnLED()
+        {
+            setLEDBrightness(100);
+        }
+        public void setLEDBrightness(int bright)
         {
             if (getButtonStatus() != INITIATED)
             {
@@ -85,7 +81,7 @@ namespace NoRV
             for (int ledColor = 0; ledColor < 3; ledColor++)
             {
                 Delcom.DelcomLEDControl(deviceHandle, ledColor, Delcom.LEDON);
-                Delcom.DelcomLEDPower(deviceHandle, ledColor, 100);
+                Delcom.DelcomLEDPower(deviceHandle, ledColor, bright);
             }
         }
 

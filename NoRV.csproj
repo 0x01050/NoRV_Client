@@ -295,6 +295,9 @@
     <Content Include="Audios\BreakAlertAudio.mp3">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <Content Include="Audios\InternetDetected.mp3">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="Audios\LoadingAudio.mp3">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>

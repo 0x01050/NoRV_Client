@@ -4,6 +4,7 @@
     <Item Key="DefaultVolume" Value="65" />
     <Item Key="AnnounceTime" Value="" />
     <Item Key="FlashPeriod" Value="100" />
+    <Item Key="PulsatePeriod" Value="1000" />
     <Item Key="LogPath" Value="C:\Users\Master\Desktop\Dropbox\Client Name 00001\" />
     <Item Key="BreakAlertInterval" Value="100" />
     <Item Key="BreakAlertVolume" Value="40" />

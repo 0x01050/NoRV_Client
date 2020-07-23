@@ -80,7 +80,8 @@ namespace NoRV
         private int _buttonClickThreshold = 3;
         private int _defaultVolume = 50;
         private string _announceTime = "";
-        private int _flashPeriod = 1000;
+        private int _flashPeriod = 100;
+        private int _pulsatePeriod = 1000;
         private string _logPath = "";
         private int _alertInterval = 300;
         private int _alertVolume = 25;
@@ -113,6 +114,9 @@ namespace NoRV
                         break;
                     case "FlashPeriod":
                         _flashPeriod = (int)item.Attribute("Value");
+                        break;
+                    case "PulsatePeriod":
+                        _pulsatePeriod = (int)item.Attribute("Value");
                         break;
                     case "LogPath":
                         _logPath = (string)item.Attribute("Value");
@@ -177,6 +181,10 @@ namespace NoRV
         public int getFlashPeriod()
         {
             return _flashPeriod;
+        }
+        public int getPulsatePeriod()
+        {
+            return _pulsatePeriod;
         }
         public string getLogPath()
         {

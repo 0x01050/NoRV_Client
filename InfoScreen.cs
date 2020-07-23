@@ -1,4 +1,5 @@
 ﻿using AudioSwitcher.AudioApi.CoreAudio;
+using NAudio.Wave;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
@@ -13,6 +14,7 @@ namespace NoRV
     {
         private Thread loadThread = null;
         private Thread volumeThread = null;
+        private bool internetDetected = false;
         public InfoScreen()
         {
             InitializeComponent();
@@ -22,15 +24,17 @@ namespace NoRV
         {
             txtNoRVMachineID.Text = L.v();
             ButtonManager.getInstance().turnOffLED();
-
+            PulsateButton();
             startLoadThread();
             startVolumeThread();
         }
 
         private void InfoScreen_FormClosing(object sender, FormClosingEventArgs e)
         {
+            DisposeAudioPlayer();
             stopLoadThread();
             stopVolumeThread();
+            StopPulsate();
         }
 
         private void startLoadThread()
@@ -265,6 +269,48 @@ namespace NoRV
             }));
         }
 
+        IWavePlayer waveOutDevice = null;
+        AudioFileReader audioFileReader = null;
+        private void PlayMP3(string mp3File, EventHandler<StoppedEventArgs> stopHandler = null)
+        {
+            DisposeAudioPlayer();
+            this.Invoke(new Action(() =>
+            {
+                waveOutDevice = new WaveOut();
+                audioFileReader = new AudioFileReader(mp3File);
+                waveOutDevice.Init(audioFileReader);
+                waveOutDevice.Volume = 1f;
+                waveOutDevice.Play();
+                waveOutDevice.PlaybackStopped += (s, e) =>
+                {
+                    DisposeAudioPlayer();
+                };
+                if (stopHandler != null)
+                {
+                    waveOutDevice.PlaybackStopped += stopHandler;
+                }
+            }));
+        }
+        private void DisposeAudioPlayer()
+        {
+            this.Invoke(new Action(() =>
+            {
+                if (waveOutDevice != null)
+                {
+                    waveOutDevice.Stop();
+                }
+                if (audioFileReader != null)
+                {
+                    audioFileReader.Dispose();
+                    audioFileReader = null;
+                }
+                if (waveOutDevice != null)
+                {
+                    waveOutDevice.Dispose();
+                    waveOutDevice = null;
+                }
+            }));
+        }
         private void LoadAppointments()
         {
             int sleepTime = 10 * 1000;
@@ -275,14 +321,34 @@ namespace NoRV
                 {
                     List<JObject> jobs = JobManager.getJobs();
                     sleepTime = 30 * 1000;
-                    if (jobs.Count > 0)
+                    if(!internetDetected)
                     {
-                        selectJob(jobs);
+                        internetDetected = true;
+                        PlayMP3("Audios/InternetDetected.mp3", (s, e) =>
+                        {
+                            HandleJobs(jobs);
+                        });
+                    }
+                    else
+                    {
+                        HandleJobs(jobs);
                     }
                 }
                 catch (ThreadAbortException) { return; }
                 catch (Exception) { }
                 Thread.Sleep(sleepTime);
+            }
+        }
+        private void HandleJobs(List<JObject> jobs)
+        {
+            if (jobs.Count > 0)
+            {
+                StopPulsate();
+                selectJob(jobs);
+            }
+            else
+            {
+                PulsateButton();
             }
         }
 
@@ -312,6 +378,38 @@ namespace NoRV
 
                 }
                 Thread.Sleep(sleepTime);
+            }
+        }
+
+        Thread pulsateThread = null;
+        private void PulsateButton()
+        {
+            StopPulsate();
+
+            pulsateThread = new Thread(PulsateWork);
+            pulsateThread.Start();
+        }
+        private void StopPulsate()
+        {
+            if(pulsateThread != null)
+            {
+                pulsateThread.Abort();
+                pulsateThread = null;
+            }
+        }
+        private void PulsateWork()
+        {
+            int pulsatePeriod = Config.getInstance().getPulsatePeriod() / 20;
+            int brightness = 55, step = -5;
+            while (true)
+            {
+                brightness += step;
+                if (brightness <= 50)
+                    step = 5;
+                else if (brightness >= 100)
+                    step = -5;
+                ButtonManager.getInstance().setLEDBrightness(brightness);
+                Thread.Sleep(pulsatePeriod);
             }
         }
     }

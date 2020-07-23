@@ -20,7 +20,7 @@ namespace NoRV
 {
     static class Program
     {
-        public static bool DEBUG = true;
+        public static bool DEBUG = false;
 
         public static string videographer = "";
         public static string commission = "";

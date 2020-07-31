@@ -38,8 +38,8 @@ namespace NoRV
                 Port = "9999",
                 PublicFolder = new PublicFolder("WebServer")
             });
-            int i = 0;
-            for(i = 0; i < 3; i ++)
+            int i = 0, maxLimit = 1;
+            for(i = 0; i < maxLimit; i ++)
             {
                 try
                 {
@@ -49,10 +49,10 @@ namespace NoRV
                 }
                 catch (Exception)
                 {
-                    ServerCheck(port);
+                    //ServerCheck(port);
                 }
             }
-            if(i == 3)
+            if(i == maxLimit)
             {
                 Application.Exit();
                 return;

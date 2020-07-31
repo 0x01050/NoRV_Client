@@ -1,17 +1,11 @@
 ﻿using Accord.Video;
 using Accord.Video.DirectShow;
 using Emgu.CV;
+using Emgu.CV.CvEnum;
 using Emgu.CV.Structure;
-using Google.Protobuf;
 using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
 using System.Drawing;
-using System.Linq;
-using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace NoRV
@@ -30,9 +24,7 @@ namespace NoRV
         private CascadeClassifier faceDetector;
         private VideoCaptureDevice cameraSource = null;
         private Thread detectThread = null;
-
-        private bool _needRedraw = false, detected = false;
-        private Bitmap curBitmap = null;
+        private DateTime lastDetect = DateTime.Now;
         private Size curSize, detectedSize;
 
         private Point curPoint, detectedPoint;
@@ -48,6 +40,8 @@ namespace NoRV
             LoadInitialValues();
             Width = outputResolution.Width;
             Height = outputResolution.Height;
+
+            CvInvoke.UseOpenCL = true;
             cameraStart = new Thread(StartCamera);
             cameraStart.Start();
         }
@@ -136,21 +130,16 @@ namespace NoRV
         {
             try
             {
-                curBitmap = (Bitmap)e.Frame.Clone();
+                Bitmap bmp= (Bitmap)e.Frame.Clone();
                 Bitmap tmp = (Bitmap)e.Frame.Clone();
-                if (detectThread == null || !detectThread.IsAlive)
+                if ((DateTime.Now - lastDetect).TotalMilliseconds > Config.getInstance().getDetectSpeed() && (detectThread == null || !detectThread.IsAlive))
                 {
+                    lastDetect = DateTime.Now;
                     detectThread = new Thread(DetectWork);
                     detectThread.Start(tmp);
                 }
-                Invoke(new Action(() =>
-                {
-                    if(!_needRedraw)
-                    {
-                        _needRedraw = true;
-                        resultImage.Invalidate();
-                    }
-                }));
+                Calculate(bmp.ToImage<Bgr, byte>());
+                bmp.Dispose();
             }
             catch (Exception) { }
         }
@@ -206,32 +195,30 @@ namespace NoRV
                     lastMidPersonDetect = DateTime.Now;
                     detectedPoint = new Point(middle.X + middle.Width / 2, middle.Y + middle.Height / 2);
                     detectedSize = middle.Size;
-                    detected = true;
+                    //detected = true;
                 }
                 else if (minD >= 0 && (DateTime.Now - lastMidPersonDetect).TotalSeconds > outsideSec)
                 {
                     detectedPoint = new Point(approx.X + approx.Width / 2, approx.Y + approx.Height / 2);
                     detectedSize = approx.Size;
-                    detected = true;
+                    //detected = true;
                 }
                 else
                 {
-                    detected = false;
+                    //detected = false;
                 }
 
             }
             else
             {
-                detected = false;
+                //detected = false;
             }
         }
 
-        private void resultImage_Paint(object sender, PaintEventArgs e)
+        private void Calculate(Image<Bgr, byte> source)
         {
-            if (_needRedraw)
+            try
             {
-                Graphics g = e.Graphics;
-
                 int deltaZoom = 0;
                 if (Math.Abs(detectedSize.Width - curSize.Width) > ZOffset)
                 {
@@ -261,14 +248,12 @@ namespace NoRV
                 if (y < 0) y = 0;
                 if (y > inputResolution.Height - realHeight) y = inputResolution.Height - realHeight;
 
-                if (curBitmap != null)
-                    g.DrawImage(curBitmap, new Rectangle(0, 0, outputResolution.Width, outputResolution.Height), new Rectangle(x, y, realWidth, realHeight), GraphicsUnit.Pixel);
-
-                _needRedraw = false;
-
-                if (detected)
-                    Console.WriteLine("Face Detected!!!");
+                source.ROI = new Rectangle(x, y, realWidth, realHeight);
+                Image<Bgr, byte> newimg = source.Copy().Resize(outputResolution.Width, outputResolution.Height, Inter.Linear);
+                resultImage.Image = newimg;
+                source.Dispose();
             }
+            catch (Exception) { }
         }
 
         public void Terminate()

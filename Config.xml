@@ -40,6 +40,7 @@
   
     <!-- Face Detect -->
     <Config Key="CameraName" Value="AVerMedia ExtremeCap SDI UVC" />
+    <Config Key="DetectSpeed" Value="800" />
     <Config Key="IgnoreRegion" Top="10" Bottom="25" />
     <Config Key="MainArea" Width="500" Height="400" Outside="60" />
     <Config Key="InputResolution" Width="1920" Height="1080" />

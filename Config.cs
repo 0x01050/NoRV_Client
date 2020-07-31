@@ -265,6 +265,7 @@ namespace NoRV
         private int _switchTime = 5000;
         // Face Detect
         private string _cameraName = "";
+        private int _detectSpeed = 800;
         private int _ignoreTop = 25;
         private int _ignoreBottom = 25;
         private Size _detectMainArea = new Size(400, 400);
@@ -328,6 +329,9 @@ namespace NoRV
 
                     case "CameraName":
                         _cameraName = (string)item.Attribute("Value");
+                        break;
+                    case "DetectSpeed":
+                        _detectSpeed = (int)item.Attribute("Value");
                         break;
                     case "IgnoreRegion":
                         _ignoreTop = (int)item.Attribute("Top");
@@ -410,6 +414,10 @@ namespace NoRV
         public string getCameraName()
         {
             return _cameraName;
+        }
+        public int getDetectSpeed()
+        {
+            return _detectSpeed;
         }
         public int getTopIgnorePercent()
         {

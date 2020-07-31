@@ -28,19 +28,20 @@
         /// </summary>
         private void InitializeComponent()
         {
-            this.resultImage = new System.Windows.Forms.PictureBox();
+            this.components = new System.ComponentModel.Container();
+            this.resultImage = new Emgu.CV.UI.ImageBox();
             ((System.ComponentModel.ISupportInitialize)(this.resultImage)).BeginInit();
             this.SuspendLayout();
             // 
             // resultImage
             // 
             this.resultImage.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.resultImage.FunctionalMode = Emgu.CV.UI.ImageBox.FunctionalModeOption.Minimum;
             this.resultImage.Location = new System.Drawing.Point(0, 0);
             this.resultImage.Name = "resultImage";
             this.resultImage.Size = new System.Drawing.Size(854, 480);
-            this.resultImage.TabIndex = 0;
+            this.resultImage.TabIndex = 2;
             this.resultImage.TabStop = false;
-            this.resultImage.Paint += new System.Windows.Forms.PaintEventHandler(this.resultImage_Paint);
             // 
             // TrackForm
             // 
@@ -61,6 +62,6 @@
 
         #endregion
 
-        private System.Windows.Forms.PictureBox resultImage;
+        private Emgu.CV.UI.ImageBox resultImage;
     }
 }

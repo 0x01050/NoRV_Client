@@ -227,7 +227,7 @@ namespace GoogleTranscribing
             Console.WriteLine("##### Listening Ended #####");
         }
 
-        public static void RecognizeAsync(RecognizedCallback recognized = null, RecognizingCallback recognizing = null)
+        public static void RecognizeAsync(CancellationTokenSource cts, RecognizedCallback recognized = null, RecognizingCallback recognizing = null)
         {
             Recognized = recognized;
             Recognizing = recognizing;
@@ -243,7 +243,6 @@ namespace GoogleTranscribing
                     listener.Listen(10);
 
                     InfiniteStreaming instance = null;
-                    CancellationTokenSource cts = new CancellationTokenSource();
                     while (!cts.IsCancellationRequested)
                     {
                         Socket handler = listener.Accept();

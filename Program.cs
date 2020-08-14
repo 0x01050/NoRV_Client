@@ -71,22 +71,20 @@ namespace NoRV
             Thread detectThread = new Thread(new ThreadStart(DetectWork));
             detectThread.Start();
             Console.WriteLine("##### Mirror Thread Started #####");
-            TrackForm track = new TrackForm();
-            track.Show();
+            StopTrack();
+            StartTrack();
             Thread mirrorThread = new Thread(new ThreadStart(MirrorWork));
             mirrorThread.Start();
-            CancellationTokenSource cts = new CancellationTokenSource();
-            TranscribeManager.Stop();
             Console.WriteLine("##### Transcribing Started #####");
-            Thread transcribeThread = new Thread(() => InfiniteStreaming.RecognizeAsync(TranscribeManager.NewTranscript, TranscribeManager.NewCandidate));
-            transcribeThread.Start();
+            TranscribeManager.Stop();
+            CancellationTokenSource cts = new CancellationTokenSource();
+            Task.Run(new Action(() => InfiniteStreaming.RecognizeAsync(cts, TranscribeManager.NewTranscript, TranscribeManager.NewCandidate)), cts.Token);
             if (!OBSManager.CheckOBSRunning())
                 Application.Run(new WaitScreen());
             OBSManager.StopOBSRecording();
             Console.WriteLine("##### Track Form Started #####");
             Application.Run(new InfoScreen());
-            track.Terminate();
-            track.Close();
+            StopTrack();
             Console.WriteLine("##### Track Form Ended #####");
             mirrorThread.Abort();
             Console.WriteLine("##### Mirror Thread Ended #####");
@@ -105,7 +103,7 @@ namespace NoRV
             }
             Console.WriteLine("##### Adb Processed Killed #####");
 
-            transcribeThread.Abort();
+            cts.Cancel();
             Console.WriteLine("##### Transcribing Ended #####");
 
             Application.Exit();
@@ -126,6 +124,26 @@ namespace NoRV
                 Process.Start(psi).WaitForExit();
             }
             catch(Exception) { }
+        }
+
+        private static void StartTrack()
+        {
+            try
+            {
+                Process.Start("Track");
+            }
+            catch (Exception) { }
+        }
+        private static void StopTrack()
+        {
+            try
+            {
+                foreach (var proc in Process.GetProcessesByName("Track"))
+                {
+                    proc.Kill();
+                }
+            }
+            catch (Exception) { }
         }
 
 

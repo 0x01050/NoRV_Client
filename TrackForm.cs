@@ -4,7 +4,9 @@ using Emgu.CV;
 using Emgu.CV.CvEnum;
 using Emgu.CV.Structure;
 using System;
+using System.Collections.Generic;
 using System.Drawing;
+using System.Linq;
 using System.Threading;
 using System.Windows.Forms;
 
@@ -25,6 +27,7 @@ namespace NoRV
         private VideoCaptureDevice cameraSource = null;
         private Thread detectThread = null;
         private DateTime lastDetect = DateTime.Now;
+        private Thread calcThread = null;
         private Size curSize, detectedSize;
 
         private Point curPoint, detectedPoint;
@@ -80,14 +83,14 @@ namespace NoRV
 
         private void StartCamera()
         {
-            while(true)
+            while (true)
             {
                 try
                 {
                     var videoDevices = new FilterInfoCollection(FilterCategory.VideoInputDevice);
                     foreach (var videoDevice in videoDevices)
                     {
-                        if(videoDevice.Name == cameraName)
+                        if (videoDevice.Name == cameraName)
                         {
                             cameraSource = new VideoCaptureDevice(videoDevice.MonikerString);
                             var resolutions = cameraSource.VideoCapabilities;
@@ -106,7 +109,7 @@ namespace NoRV
                                     cameraSource.VideoResolution = cap;
                                 }
                             }
-                            if(cameraSource.VideoResolution != null)
+                            if (cameraSource.VideoResolution != null)
                             {
                                 inputResolution = cameraSource.VideoResolution.FrameSize;
                             }
@@ -119,7 +122,7 @@ namespace NoRV
                             return;
                         }
                     }
-                    
+
                 }
                 catch (Exception) { }
             }
@@ -130,16 +133,19 @@ namespace NoRV
         {
             try
             {
-                Bitmap bmp= (Bitmap)e.Frame.Clone();
-                Bitmap tmp = (Bitmap)e.Frame.Clone();
                 if ((DateTime.Now - lastDetect).TotalMilliseconds > Config.getInstance().getDetectSpeed() && (detectThread == null || !detectThread.IsAlive))
                 {
+                    Bitmap detectSource = (Bitmap)e.Frame.Clone();
                     lastDetect = DateTime.Now;
                     detectThread = new Thread(DetectWork);
-                    detectThread.Start(tmp);
+                    detectThread.Start(detectSource);
                 }
-                Calculate(bmp.ToImage<Bgr, byte>());
-                bmp.Dispose();
+                if (calcThread == null || !calcThread.IsAlive)
+                {
+                    Bitmap calcSource = (Bitmap)e.Frame.Clone();
+                    calcThread = new Thread(Calculate);
+                    calcThread.Start(calcSource);
+                }
             }
             catch (Exception) { }
         }
@@ -148,7 +154,6 @@ namespace NoRV
             Bitmap frame = (Bitmap)param;
             Bitmap target = new Bitmap(frame.Width, frame.Height * (100 - topIgnore - bottomIgnore) / 100);
             lastMidPersonDetect = DateTime.Now.AddDays(-1);
-
             using (Graphics g = Graphics.FromImage(target))
             {
                 g.DrawImage(frame, new Rectangle(0, 0, target.Width, target.Height),
@@ -156,13 +161,11 @@ namespace NoRV
                                  GraphicsUnit.Pixel);
             }
 
-
-            Rectangle[] faces;
+            Rectangle[] faces = null;
             using (var userPicture = target.ToImage<Gray, byte>())
             {
                 faces = faceDetector.DetectMultiScale(userPicture, 1.3, 6);
             }
-
 
             if (faces != null && faces.Length > 0)
             {
@@ -190,17 +193,19 @@ namespace NoRV
                     }
                 }
 
-                if (midD >= 0)
+                if (midD >= 0
+                    && middle.Size.Width > Config.getInstance().getMinFaceWidth() && middle.Size.Height > Config.getInstance().getMinFaceHeight())
                 {
                     lastMidPersonDetect = DateTime.Now;
-                    detectedPoint = new Point(middle.X + middle.Width / 2, middle.Y + middle.Height / 2);
                     detectedSize = middle.Size;
+                    detectedPoint = new Point(middle.X + detectedSize.Width / 2, middle.Y + detectedSize.Height / 2);
                     //detected = true;
                 }
-                else if (minD >= 0 && (DateTime.Now - lastMidPersonDetect).TotalSeconds > outsideSec)
+                else if (minD >= 0 && (DateTime.Now - lastMidPersonDetect).TotalSeconds > outsideSec
+                    && approx.Size.Width > Config.getInstance().getMinFaceWidth() && approx.Size.Height > Config.getInstance().getMinFaceHeight())
                 {
-                    detectedPoint = new Point(approx.X + approx.Width / 2, approx.Y + approx.Height / 2);
                     detectedSize = approx.Size;
+                    detectedPoint = new Point(approx.X + detectedSize.Width / 2, approx.Y + detectedSize.Height / 2);
                     //detected = true;
                 }
                 else
@@ -213,12 +218,18 @@ namespace NoRV
             {
                 //detected = false;
             }
+
+            target.Dispose();
+            frame.Dispose();
         }
 
-        private void Calculate(Image<Bgr, byte> source)
+        private void Calculate(object frame)
         {
             try
             {
+                Bitmap srcbmp = (Bitmap)frame;
+                Image<Bgr, byte> source = srcbmp.ToImage<Bgr, byte>();
+                srcbmp.Dispose();
                 int deltaZoom = 0;
                 if (Math.Abs(detectedSize.Width - curSize.Width) > ZOffset)
                 {
@@ -269,6 +280,10 @@ namespace NoRV
             if (detectThread != null && !detectThread.IsAlive)
             {
                 detectThread.Abort();
+            }
+            if (calcThread != null && !calcThread.IsAlive)
+            {
+                calcThread.Abort();
             }
         }
     }

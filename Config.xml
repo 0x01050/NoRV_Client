@@ -47,6 +47,7 @@
     <Config Key="OutputResolution" Width="854" Height="480" />
     <Config Key="Zoom" TopPadding="0.3" TotalHeight="2.5" />
     <Config Key="Smoothing" XOffset="70" XSpeed="5" YOffset="30" YSpeed="5" ZOffset="10" ZSpeed="3" />
+    <Config Key="MinFaceSize" Width="100" Height="100" />
   </OBS>
 
   <Keywords>

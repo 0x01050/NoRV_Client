@@ -280,6 +280,7 @@ namespace NoRV
         private int _smoothYSpeed = 5;
         private int _smoothZOffset = 20;
         private int _smoothZSpeed = 2;
+        private Size _minFaceSize = new Size(100, 100);
 
         private void LoadOBSConfig()
         {
@@ -358,6 +359,9 @@ namespace NoRV
                         _smoothYSpeed = (int)item.Attribute("YSpeed");
                         _smoothZOffset = (int)item.Attribute("ZOffset");
                         _smoothZSpeed = (int)item.Attribute("ZSpeed");
+                        break;
+                    case "MinFaceSize":
+                        _minFaceSize = new Size((int)item.Attribute("Width"), (int)item.Attribute("Height"));
                         break;
                 }
             }
@@ -474,6 +478,14 @@ namespace NoRV
         public int getSmoothingZSpeed()
         {
             return _smoothZSpeed;
+        }
+        public int getMinFaceWidth()
+        {
+            return _minFaceSize.Width;
+        }
+        public int getMinFaceHeight()
+        {
+            return _minFaceSize.Height;
         }
 
         public string getTemplate(string template)

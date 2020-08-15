@@ -39,15 +39,15 @@
     <Config Key="SwitchTime" Value="5000" />
   
     <!-- Face Detect -->
-    <Config Key="CameraName" Value="AVerMedia ExtremeCap SDI UVC" />
-    <Config Key="DetectSpeed" Value="800" />
-    <Config Key="IgnoreRegion" Top="10" Bottom="25" />
-    <Config Key="MainArea" Width="500" Height="400" Outside="60" />
-    <Config Key="InputResolution" Width="1920" Height="1080" />
+    <Config Key="CameraName" Value="AVer CAM540" />
+    <Config Key="DetectSpeed" Value="5000" />
+    <Config Key="IgnoreRegion" Top="5" Bottom="25" />
+    <Config Key="MainArea" Width="1500" Height="1200" Outside="60" />
+    <Config Key="InputResolution" Width="3840" Height="2160" />
     <Config Key="OutputResolution" Width="854" Height="480" />
-    <Config Key="Zoom" TopPadding="0.3" TotalHeight="2.5" />
+    <Config Key="Zoom" TopPadding="0.3" TotalHeight="2.3" />
     <Config Key="Smoothing" XOffset="70" XSpeed="5" YOffset="30" YSpeed="5" ZOffset="10" ZSpeed="3" />
-    <Config Key="MinFaceSize" Width="100" Height="100" />
+    <Config Key="MinFaceSize" Width="350" Height="350" />
   </OBS>
 
   <Keywords>

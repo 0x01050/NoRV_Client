@@ -9,7 +9,7 @@
     <Item Key="BreakAlertInterval" Value="100" />
     <Item Key="BreakAlertVolume" Value="40" />
     <Item Key="SelectWitnessAudioTemplate" Value="To start with the #Witness Type# deposition of #Witness# , press the button now." />
-    <Item Key="StartAudioTemplate" Value="We are about to begin the #Witness Type# deposition of #Witness# . Please make sure all the mics are outside the enclosure and within 2 feet of their designated speakers. If this was by error, simply ignore this message and the system will reset back. otherwise press the button within 10 seconds to begin." />
+    <Item Key="StartAudioTemplate" Value="We are about to begin the #Witness Type# deposition of #Witness# . Please make sure the camera is directly pointed at the witness and all the mics are outside the enclosure and within 2 feet of their designated speakers. If this was by error, simply ignore this message and the system will reset back. otherwise press the button within 10 seconds to begin." />
     <Item Key="TotalTimeAudioTemplate" Value="We have been on the record for" />
     <Item Key="EndTimeAudioTemplate" Value="Total running time for this deposition is" />
     <Item Key="AucityAPIUrl" Value="https://acuityscheduling.com/api/v1/appointments?direction=ASC&amp;minDate=%MINDATE%&amp;maxDate=%MAXDATE%" />
@@ -34,20 +34,20 @@
     
     <!-- Mirror -->
     <Config Key="MirrorSource" Process="Mirror" Window="*" />
-    <Config Key="MirrorResolution" Width="854" Height="480" Ignore="20" />
+    <Config Key="MirrorResolution" Width="853" Height="480" Ignore="20" />
     <Config Key="DetectThreashold" Value="0.1" />
     <Config Key="SwitchTime" Value="5000" />
   
     <!-- Face Detect -->
     <Config Key="CameraName" Value="AVer CAM540" />
-    <Config Key="DetectSpeed" Value="5000" />
+    <Config Key="DetectSpeed" Value="2000" />
     <Config Key="IgnoreRegion" Top="5" Bottom="25" />
-    <Config Key="MainArea" Width="1500" Height="1200" Outside="60" />
-    <Config Key="InputResolution" Width="3840" Height="2160" />
-    <Config Key="OutputResolution" Width="854" Height="480" />
-    <Config Key="Zoom" TopPadding="0.3" TotalHeight="2.3" />
+    <Config Key="MainArea" Width="1300" Height="1200" Outside="30" />
+    <Config Key="InputResolution" Width="2560" Height="1440" />
+    <Config Key="OutputResolution" Width="853" Height="480" />
+    <Config Key="Zoom" TopPadding="0.35" TotalHeight="2.3" />
     <Config Key="Smoothing" XOffset="70" XSpeed="5" YOffset="30" YSpeed="5" ZOffset="10" ZSpeed="3" />
-    <Config Key="MinFaceSize" Width="350" Height="350" />
+    <Config Key="MinFaceSize" Width="280" Height="280" />
   </OBS>
 
   <Keywords>

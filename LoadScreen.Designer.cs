@@ -28,6 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(LoadScreen));
             this.picLoading = new System.Windows.Forms.PictureBox();
             this.lstAppointments = new System.Windows.Forms.ListBox();
             this.splitter = new System.Windows.Forms.SplitContainer();
@@ -90,11 +91,12 @@
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(384, 211);
             this.Controls.Add(this.splitter);
+            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.MaximizeBox = false;
             this.MinimizeBox = false;
             this.Name = "LoadScreen";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
-            this.Text = "NoRV TTS - Load Appointments";
+            this.Text = "NoRV Client - Load Appointments";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.LoadScreen_FormClosing);
             this.Load += new System.EventHandler(this.LoadScreen_Load);
             ((System.ComponentModel.ISupportInitialize)(this.picLoading)).EndInit();

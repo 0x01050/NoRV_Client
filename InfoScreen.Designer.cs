@@ -28,6 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(InfoScreen));
             this.lblWitness = new System.Windows.Forms.Label();
             this.lblCaseName = new System.Windows.Forms.Label();
             this.lblAddress = new System.Windows.Forms.Label();
@@ -281,6 +282,7 @@
             this.Controls.Add(this.lblAddress);
             this.Controls.Add(this.lblCaseName);
             this.Controls.Add(this.lblWitness);
+            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.MaximizeBox = false;
             this.MaximumSize = new System.Drawing.Size(500, 300);
             this.MinimizeBox = false;
@@ -288,7 +290,7 @@
             this.Name = "InfoScreen";
             this.Padding = new System.Windows.Forms.Padding(25);
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
-            this.Text = "NoRV TTS - Step 1";
+            this.Text = "NoRV Client - Appointment Details";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.InfoScreen_FormClosing);
             this.Load += new System.EventHandler(this.InfoScreen_Load);
             this.ResumeLayout(false);

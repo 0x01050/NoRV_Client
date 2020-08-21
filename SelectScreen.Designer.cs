@@ -28,6 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(SelectScreen));
             this.picLoading = new System.Windows.Forms.PictureBox();
             this.lstAppointments = new System.Windows.Forms.ListBox();
             this.splitter = new System.Windows.Forms.SplitContainer();
@@ -90,11 +91,12 @@
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(384, 211);
             this.Controls.Add(this.splitter);
+            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.MaximizeBox = false;
             this.MinimizeBox = false;
             this.Name = "SelectScreen";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
-            this.Text = "NoRV TTS - Select Appointments";
+            this.Text = "NoRV Client - Select Appointment";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.SelectScreen_FormClosing);
             this.Load += new System.EventHandler(this.SelectScreen_Load);
             ((System.ComponentModel.ISupportInitialize)(this.picLoading)).EndInit();

@@ -19,7 +19,7 @@
     <Item Key="ServerUrl" Value="http://34.71.127.246" />
     <Item Key="Videographer" Value="Monti Majthoob" />
     <Item Key="Commission" Value="4,1,7,6. 0,6,3,9." />
-    <Item Key="WebServerPort" Value="9999" />
+    <Item Key="WebServerPort" Value="80" />
   </Global>
 
   <OBS>

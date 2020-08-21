@@ -35,7 +35,7 @@ namespace NoRV
             var server = new RestServer(new ServerSettings()
             {
                 Host = "*",
-                Port = "9999",
+                Port = port,
                 PublicFolder = new PublicFolder("WebServer")
             });
             int i = 0, maxLimit = 1;

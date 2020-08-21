@@ -96,7 +96,7 @@ namespace NoRV
         private string _serverUrl = "";
         private string _videographer = "";
         private string _commission = "";
-        private string _webServerPort = "9999";
+        private string _webServerPort = "80";
         private void LoadGlobalConfig()
         {
             var xml = XDocument.Load(xmlFile);

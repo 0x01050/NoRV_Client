@@ -31,11 +31,23 @@ namespace NoRV
         [STAThread]
         static void Main()
         {
-            string port = Config.getInstance().getWebServerPort();
-            var server = new RestServer(new ServerSettings()
+            if(!Config.getInstance().getAutoStart())
+            {
+                Application.Exit();
+                return;
+            }
+
+            var https = new RestServer(new ServerSettings()
             {
                 Host = "*",
-                Port = port,
+                Port = "443",
+                PublicFolder = new PublicFolder("WebServer"),
+                UseHttps = true
+            });
+            var http = new RestServer(new ServerSettings()
+            {
+                Host = "*",
+                Port = "80",
                 PublicFolder = new PublicFolder("WebServer")
             });
             int i = 0, maxLimit = 1;
@@ -43,14 +55,16 @@ namespace NoRV
             {
                 try
                 {
-                    Console.WriteLine("##### WebServer Started #####");
-                    server.Start();
-                    break;
+                    Console.WriteLine("##### HTTPS Server Started #####");
+                    https.Start();
                 }
-                catch (Exception)
+                catch (Exception) { }
+                try
                 {
-                    //ServerCheck(port);
+                    Console.WriteLine("##### HTTP Server Started #####");
+                    http.Start();
                 }
+                catch (Exception) { }
             }
             if(i == maxLimit)
             {
@@ -95,8 +109,18 @@ namespace NoRV
             thread.Abort();
             Console.WriteLine("##### Report Thread Ended #####");
 
-            server.Stop();
+            try
+            {
+                https.Stop();
+            }
+            catch (Exception) { }
+            try
+            {
+                http.Stop();
+            }
+            catch (Exception) { }
             Console.WriteLine("##### WebServer Stopped #####");
+
             foreach (var proc in Process.GetProcessesByName("adb"))
             {
                 proc.Kill();

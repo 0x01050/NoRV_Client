@@ -96,7 +96,7 @@ namespace NoRV
         private string _serverUrl = "";
         private string _videographer = "";
         private string _commission = "";
-        private string _webServerPort = "80";
+        private string _autoStart = "true";
         private void LoadGlobalConfig()
         {
             var xml = XDocument.Load(xmlFile);
@@ -160,8 +160,8 @@ namespace NoRV
                     case "Commission":
                         _commission = (string)item.Attribute("Value");
                         break;
-                    case "WebServerPort":
-                        _webServerPort = (string)item.Attribute("Value");
+                    case "AutoStart":
+                        _autoStart = (string)item.Attribute("Value");
                         break;
                 }
             }
@@ -242,9 +242,16 @@ namespace NoRV
         {
             return _commission;
         }
-        public string getWebServerPort()
+        public bool getAutoStart()
         {
-            return _webServerPort;
+            try
+            {
+                string autostart = _autoStart.ToLower();
+                if (autostart == "true")
+                    return true;
+            }
+            catch(Exception) { }
+            return false;
         }
 
 

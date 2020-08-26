@@ -27,22 +27,27 @@ namespace NoRV
 		[RestRoute(HttpMethod = HttpMethod.GET, PathInfo = "")]
 		public IHttpContext root(IHttpContext context)
 		{
-			var identity = context.User.Identity;
-			if (identity is HttpListenerBasicIdentity)
+			if (!isHttps(context.Request.Url.Scheme))
+				context.Response.SendResponse("");
+			else
 			{
-				HttpListenerBasicIdentity basicId = (HttpListenerBasicIdentity)identity;
-				if (basicId.Name == "norv" && basicId.Password == "norv_2020!")
-					context.Response.SendResponse("");
+				var identity = context.User.Identity;
+				if (identity is HttpListenerBasicIdentity)
+				{
+					HttpListenerBasicIdentity basicId = (HttpListenerBasicIdentity)identity;
+					if (basicId.Name == "norv" && basicId.Password == "norv_2020!")
+						context.Response.SendResponse("");
+					else
+					{
+						context.Response.Redirect("/");
+						context.Response.TrySendResponse(context.Server.Logger, Grapevine.Shared.HttpStatusCode.Unauthorized);
+					}
+				}
 				else
 				{
 					context.Response.Redirect("/");
 					context.Response.TrySendResponse(context.Server.Logger, Grapevine.Shared.HttpStatusCode.Unauthorized);
 				}
-			}
-			else
-			{
-				context.Response.Redirect("/");
-				context.Response.TrySendResponse(context.Server.Logger, Grapevine.Shared.HttpStatusCode.Unauthorized);
 			}
 			return context;
 		}

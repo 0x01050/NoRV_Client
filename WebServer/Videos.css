@@ -1,0 +1,49 @@
+.u-section
+{
+	min-height: 100vh;
+	background-image: url("background.jpg")
+}
+.u-section .u-layout-wrap
+{
+	min-height: 100vh;
+	margin-top: 0;
+	margin-bottom: 0
+}
+.u-section .u-image
+{
+	background-image: url("https://images03.nicepage.io/a1389d7bc73adea1e1c1fb7e/43f231f23305504fb512cbc7/pexels-photo-37567671.jpeg");
+	background-position: 50% 50%;
+	min-height: 340px;
+}
+
+@media (max-width: 1199px)
+{
+	.u-section .u-image
+	{
+		min-height: 280px;
+	}
+}
+
+@media (max-width: 991px)
+{
+	.u-section .u-image
+	{
+		min-height: 484px;
+	}
+}
+
+@media (max-width: 767px)
+{
+	.u-section .u-image
+	{
+		min-height: 726px;
+	}
+}
+
+@media (max-width: 575px)
+{
+	.u-section .u-image
+	{
+		min-height: 457px;
+	}
+}

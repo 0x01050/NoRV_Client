@@ -50,27 +50,19 @@ namespace NoRV
                 Port = "80",
                 PublicFolder = new PublicFolder("WebServer")
             });
-            int i = 0, maxLimit = 1;
-            for(i = 0; i < maxLimit; i ++)
+            
+            try
             {
-                try
-                {
-                    Console.WriteLine("##### HTTPS Server Started #####");
-                    https.Start();
-                }
-                catch (Exception) { }
-                try
-                {
-                    Console.WriteLine("##### HTTP Server Started #####");
-                    http.Start();
-                }
-                catch (Exception) { }
+                Console.WriteLine("##### HTTPS Server Started #####");
+                https.Start();
             }
-            if(i == maxLimit)
+            catch (Exception) { }
+            try
             {
-                Application.Exit();
-                return;
+                Console.WriteLine("##### HTTP Server Started #####");
+                http.Start();
             }
+            catch (Exception) { }
 
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);

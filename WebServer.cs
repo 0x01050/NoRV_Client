@@ -3,6 +3,7 @@ using Grapevine.Server;
 using Grapevine.Server.Attributes;
 using Grapevine.Shared;
 using System;
+using System.Net;
 
 namespace NoRV
 {
@@ -26,9 +27,26 @@ namespace NoRV
 		[RestRoute(HttpMethod = HttpMethod.GET, PathInfo = "")]
 		public IHttpContext root(IHttpContext context)
 		{
-			context.Response.SendResponse("");
+			var identity = context.User.Identity;
+			if (identity is HttpListenerBasicIdentity)
+			{
+				HttpListenerBasicIdentity basicId = (HttpListenerBasicIdentity)identity;
+				if (basicId.Name == "norv" && basicId.Password == "norv_2020!")
+					context.Response.SendResponse("");
+				else
+				{
+					context.Response.Redirect("/");
+					context.Response.TrySendResponse(context.Server.Logger, Grapevine.Shared.HttpStatusCode.Unauthorized);
+				}
+			}
+			else
+			{
+				context.Response.Redirect("/");
+				context.Response.TrySendResponse(context.Server.Logger, Grapevine.Shared.HttpStatusCode.Unauthorized);
+			}
 			return context;
 		}
+
 
 		public static int tzOffset = 0;
 		[RestRoute(HttpMethod = HttpMethod.GET, PathInfo = "/api/time")]

@@ -1,0 +1,154 @@
+<html>
+    <head>
+        <script src="jquery.js"></script>
+        <script>
+                var lastTimestamp = -1, refreshInterval = 100;
+                function hideAllDropdown() {
+                    $(".dropdown-content").removeClass('show');
+                }
+                window.onclick = function (event) {
+                    if (!event.target.matches('.dropbtn')) {
+                        hideAllDropdown();
+                    }
+                }
+                function getTranscripts() {
+                    $.ajax({
+                        url : '/getTranscripts?lastTimestamp=' + lastTimestamp,
+                        type : 'GET',
+                        success: function (data, text) {
+                            try {
+                                var result = JSON.parse(data);
+                                if(result.status == "Offline")
+                                {
+                                    $("#offline").show();
+                                    $("#transcripts").hide();
+                                    $("#candidate").hide();
+
+                                    $("#transcripts").text("");
+                                    $("#candidate").text("");
+                                }
+                                else if(result.status == "Recording")
+                                {
+                                    $("#offline").hide();
+                                    $("#transcripts").show();
+                                    $("#candidate").show();
+                                    for (const transcript of result.transcripts) {
+                                        var words = JSON.parse(transcript.Transcript);
+                                        var div = $('<div></div>');
+                                        for (const word of words) {
+                                            var span = $("<span class='dropdown'></span>");
+                                            if(word.length > 1)
+                                            {
+                                                $("<a class='dropbtn'>" + word[0] + "</a>").appendTo(span);
+                                                $("<sup>" + word.length + "</sup>").appendTo(span);
+                                                var list = $("<div class='dropdown-content'></div>");
+                                                for(const cand of word) {
+                                                    $("<a class='dropdown-item'>" + cand + "</a>").appendTo(list);
+                                                }
+                                                list.appendTo(span);
+                                            }
+                                            else
+                                            {
+                                                $("<a class='nobtn'>" + word[0] + "</a>").appendTo(span);
+                                            }
+                                            span.appendTo(div);
+                                        }
+                                        div.appendTo('#transcripts');
+                                        lastTimestamp = transcript.Timestamp;
+                                    }
+
+                                    $(".dropbtn").click(function() {
+                                        hideAllDropdown();
+                                        $(this).siblings('div').addClass('show');
+                                    });
+                                    $(".dropdown-item").click(function() {
+                                        $(this).parent().siblings('a').text($(this).text());
+                                    });
+
+                                    $("#candidate").text(result.candidate);
+                                    $("html, body").animate({ scrollTop: $(document).height() }, "slow");
+                                }
+                            }
+                            catch(err) { }
+                            setTimeout(getTranscripts, refreshInterval);
+                        },
+                        error: function (request, status, error) {
+                            setTimeout(getTranscripts, refreshInterval);
+                        }
+                    });
+                }
+
+                $(document).ready(function() {
+                    setTimeout(getTranscripts, refreshInterval);
+                });
+
+        </script>
+        <style>
+            .nobtn {
+                color: black;
+                font-size: 16px;
+                cursor: pointer;
+            }
+
+            .dropbtn {
+                color: black;
+                font-size: 16px;
+                cursor: pointer;
+                border-bottom: 2px solid #121212;
+            }
+
+                .dropbtn:hover, .dropbtn:focus {
+                    background-color: #2980B9;
+                }
+
+            .dropdown {
+                position: relative;
+                display: inline-block;
+                padding-right: 1ex;
+            }
+
+            .dropdown-content {
+                display: none;
+                position: absolute;
+                background-color: #f1f1f1;
+                min-width: 160px;
+                overflow: auto;
+                box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+                z-index: 1;
+            }
+
+            .dropdown-content a {
+                color: black;
+                padding: 12px 16px;
+                text-decoration: none;
+                display: block;
+            }
+
+            .dropdown a:hover {
+                background-color: #ddd;
+            }
+
+            .show {
+                display: block;
+            }
+
+            .dropdown-item {
+                cursor: hand;
+            }
+
+            #candidate {
+                font-size: 16px;
+                margin-top: 4px;
+                color: #888888;
+            }
+        </style>
+    </head>
+    <body>
+        <div id="offline">
+            <h1>Recording is stopped<h1>
+        </div>
+        <div id="transcripts">
+        </div>
+        <div id="candidate"></div>
+    </body>
+</html>

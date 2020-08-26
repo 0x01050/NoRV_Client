@@ -54,6 +54,8 @@ namespace NoRV
 
         private static void OBSAction(string action)
         {
+            if (!CheckOBSRunning())
+                return;
             // Using Web Socket
             var _obs = new OBSWebsocket();
             try

@@ -37,26 +37,12 @@ namespace NoRV
                 return;
             }
 
-            var https = new RestServer(new ServerSettings()
-            {
-                Host = "*",
-                Port = "443",
-                PublicFolder = new PublicFolder("WebServer"),
-                UseHttps = true
-            });
             var http = new RestServer(new ServerSettings()
             {
                 Host = "*",
                 Port = "80",
                 PublicFolder = new PublicFolder("WebServer")
             });
-            
-            try
-            {
-                Console.WriteLine("##### HTTPS Server Started #####");
-                https.Start();
-            }
-            catch (Exception) { }
             try
             {
                 Console.WriteLine("##### HTTP Server Started #####");
@@ -101,11 +87,6 @@ namespace NoRV
             thread.Abort();
             Console.WriteLine("##### Report Thread Ended #####");
 
-            try
-            {
-                https.Stop();
-            }
-            catch (Exception) { }
             try
             {
                 http.Stop();

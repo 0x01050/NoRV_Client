@@ -1,6 +1,6 @@
 <html>
 	<head>
-		<script src="jquery.min.js"></script>
+		<script src="jquery.js"></script>
 		<script src="date.format.js"></script>
 		<script>
 			var now = dateFormat(new Date(), "mmm d, yyyy, h:MM:ss TT");
@@ -10,7 +10,7 @@
 					$.ajax({
 				        type: "GET",
 				        crossdomain: true,
-				        url: 'http://localhost:9999/api/time',
+				        url: 'http://localhost/api/time',
 				        timeout: 850
 					}).done(function (data) {
 						now = data;
@@ -23,7 +23,7 @@
 			})
 		</script>
 	</head>
-	<body style="background-color: black; color: white; font-size: 32px; text-align: center; font-family: Arial, Helvetica,sans-serif; display: flex;align-items: center;justify-content: center;">
+	<body style="background-color: black; color: white; font-size: 32px; text-align: center; font-family: Arial, Helvetica,sans-serif; display: flex;align-items: center;justify-content: center; opacity: 0.6;">
 		<span id="now"></span>
 	</body>
 </html>

@@ -15,13 +15,6 @@ namespace NoRV
 			context.Response.Redirect("index.html");
 			return context;
 		}
-		[RestRoute(HttpMethod = HttpMethod.GET, PathInfo = "")]
-		public IHttpContext root(IHttpContext context)
-		{
-			context.Response.SendResponse("");
-			return context;
-		}
-
 
 		public static int tzOffset = 0;
 		[RestRoute(HttpMethod = HttpMethod.GET, PathInfo = "/api/time")]
@@ -39,5 +32,11 @@ namespace NoRV
 			return context;
 		}
 
+		[RestRoute(HttpMethod = HttpMethod.GET, PathInfo = "")]
+		public IHttpContext root(IHttpContext context)
+		{
+			context.Response.SendResponse("");
+			return context;
+		}
 	}
 }

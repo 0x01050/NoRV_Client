@@ -1,10 +1,6 @@
 ﻿using OBSWebsocketDotNet;
 using System;
 using System.Diagnostics;
-using System.Runtime.InteropServices;
-using System.Threading;
-using System.Threading.Tasks;
-using static NoRV.Program;
 
 namespace NoRV
 {
@@ -52,22 +48,34 @@ namespace NoRV
             OBSAction(Config.getInstance().getOBSHotkey("exhibits"));
         }
 
+        private static int defaultTimeout = 300;
         private static void OBSAction(string action)
         {
-            if (!CheckOBSRunning())
-                return;
+            //if (!CheckOBSRunning())
+            //    return;
+
             // Using Web Socket
             var _obs = new OBSWebsocket();
             try
             {
+                _obs.WSTimeout = TimeSpan.FromMilliseconds(defaultTimeout);
                 _obs.Connect("ws://127.0.0.1:4444", "");
-                if (action.Contains("Recording"))
-                    _obs.SendRequest(action);
-                else
-                    _obs.SetCurrentScene(action);
-                _obs.Disconnect();
+                if (_obs.IsConnected)
+                {
+                    if (action.Contains("Recording"))
+                    {
+                        _obs.SendRequest(action);
+                    }
+                    else
+                        _obs.SetCurrentScene(action);
+                    _obs.Disconnect();
+                }
             }
-            catch(Exception) { }
+            catch
+            {
+                Console.WriteLine("*************************** OBS Exception ***************************");
+            }
+
         }
     }
 }

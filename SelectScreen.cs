@@ -154,29 +154,12 @@ namespace NoRV
         }
 
         private TextToSpeechClient client;
-        private string voiceName = "";
 
         private void InitGoogleCredential()
         {
             var builder = new TextToSpeechClientBuilder();
             builder.CredentialsPath = "NoRV TTS-c4a3e2c55a4f.json";
             client = builder.Build();
-
-            ListVoicesRequest voiceReq = new ListVoicesRequest { LanguageCode = "en-US" };
-            ListVoicesResponse voiceResp = this.client.ListVoices(voiceReq);
-
-            int idx = 0;
-            foreach (Voice voice in voiceResp.Voices)
-            {
-                if (voice.LanguageCodes.Contains("en-US") && voice.Name.Contains("Wavenet"))
-                {
-                    if(idx <= 1)
-                    {
-                        voiceName = voice.Name;
-                    }
-                    idx++;
-                }
-            }
         }
 
         private void GenerateGoogleTTS(string witness, string type)
@@ -188,11 +171,13 @@ namespace NoRV
             VoiceSelectionParams voice = new VoiceSelectionParams
             {
                 LanguageCode = "en-US",
-                Name = voiceName
+                Name = Config.getInstance().getGoogleVoiceName()
             };
             AudioConfig config = new AudioConfig
             {
-                AudioEncoding = AudioEncoding.Mp3
+                AudioEncoding = AudioEncoding.Mp3,
+                Pitch = Config.getInstance().getGoogleVoicePitch(),
+                SpeakingRate = Config.getInstance().getGoogleVoiceSpeed()
             };
             var response = client.SynthesizeSpeech(new SynthesizeSpeechRequest
             {

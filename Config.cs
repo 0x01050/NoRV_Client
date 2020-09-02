@@ -97,6 +97,9 @@ namespace NoRV
         private string _videographer = "";
         private string _commission = "";
         private string _autoStart = "true";
+        private string _googleVoiceName = "";
+        private double _googleVoiceSpeed = 0.9;
+        private double _googleVoicePitch = 0;
         private void LoadGlobalConfig()
         {
             var xml = XDocument.Load(xmlFile);
@@ -162,6 +165,11 @@ namespace NoRV
                         break;
                     case "AutoStart":
                         _autoStart = (string)item.Attribute("Value");
+                        break;
+                    case "GoogleVoice":
+                        _googleVoiceName = (string)item.Attribute("Name");
+                        _googleVoiceSpeed = (double)item.Attribute("Speed");
+                        _googleVoicePitch = (double)item.Attribute("Pitch");
                         break;
                 }
             }
@@ -252,6 +260,18 @@ namespace NoRV
             }
             catch(Exception) { }
             return false;
+        }
+        public string getGoogleVoiceName()
+        {
+            return _googleVoiceName;
+        }
+        public double getGoogleVoiceSpeed()
+        {
+            return _googleVoiceSpeed;
+        }
+        public double getGoogleVoicePitch()
+        {
+            return _googleVoicePitch;
         }
 
 
@@ -424,6 +444,8 @@ namespace NoRV
 
         public string getCameraName()
         {
+            if (Program.DEBUG)
+                return "AVerMedia ExtremeCap SDI UVC";
             return _cameraName;
         }
         public int getDetectSpeed()
@@ -440,6 +462,8 @@ namespace NoRV
         }
         public Size getDetectMainArea()
         {
+            if (Program.DEBUG)
+                return new Size(400, 400);
             return _detectMainArea;
         }
         public int getDetectOutsideWaitSeconds()
@@ -448,6 +472,8 @@ namespace NoRV
         }
         public Size getCameraInputResolution()
         {
+            if (Program.DEBUG)
+                return new Size(1920, 1080);
             return _inputResolution;
         }
         public Size getOutputOutputResolution()

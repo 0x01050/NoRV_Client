@@ -5,7 +5,8 @@
     <Item Key="AnnounceTime" Value="" />
     <Item Key="FlashPeriod" Value="100" />
     <Item Key="PulsatePeriod" Value="1000" />
-    <Item Key="LogPath" Value="C:\Users\Master\Desktop\Dropbox\Client Name 00001\" />
+    <Item Key="LogPath" Value="#LogPath#" />
+    <Item Key="VideoPath" Value="#VideoPath#" />
     <Item Key="BreakAlertInterval" Value="100" />
     <Item Key="BreakAlertVolume" Value="40" />
     <Item Key="SelectWitnessAudioTemplate" Value="To start with the #Witness Type# deposition of #Witness# , press the button now." />
@@ -20,6 +21,7 @@
     <Item Key="Videographer" Value="Monti Majthoob" />
     <Item Key="Commission" Value="4,1,7,6. 0,6,3,9." />
     <Item Key="AutoStart" Value="true" />
+    <Item Key="GoogleVoice" Name="en-US-Wavenet-B" Speed="0.9" Pitch="0" />
   </Global>
 
   <OBS>

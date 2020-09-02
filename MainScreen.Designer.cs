@@ -148,7 +148,7 @@
             this.slSpeed.Name = "slSpeed";
             this.slSpeed.Size = new System.Drawing.Size(175, 45);
             this.slSpeed.TabIndex = 5;
-            this.slSpeed.Value = 10;
+            this.slSpeed.Value = 9;
             this.slSpeed.ValueChanged += new System.EventHandler(this.slSpeed_ValueChanged);
             // 
             // slPitch
@@ -172,7 +172,7 @@
             this.lblSpeedValue.Name = "lblSpeedValue";
             this.lblSpeedValue.Size = new System.Drawing.Size(82, 25);
             this.lblSpeedValue.TabIndex = 7;
-            this.lblSpeedValue.Text = "1.00";
+            this.lblSpeedValue.Text = "0.90";
             this.lblSpeedValue.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
             // 
             // lblPitchValue

@@ -21,7 +21,7 @@ namespace NoRV
         private string witness = "";
 
         private string voiceText = "";
-        private double speed = 1.0;
+        private double speed = 0.9;
         private double pitch = 0.0;
         private string lastTime = "#Time#";
         private int tzOffset = 0;
@@ -81,6 +81,9 @@ namespace NoRV
             }
             txtSource.Text = this.voiceText = template;
 
+            slSpeed.Value = Convert.ToInt32(Config.getInstance().getGoogleVoiceSpeed() * 10);
+            slPitch.Value = Convert.ToInt32(Config.getInstance().getGoogleVoicePitch() * 10);
+
             InitGoogleCredential();
             LogInit();
 
@@ -138,7 +141,7 @@ namespace NoRV
             logs.Add(String.Format("total breaks = {0}", logs.Count - 3));
             try
             {
-                File.WriteAllLines(Config.getInstance().getLogPath() + logFile + ".txt", logs);
+                File.WriteAllLines(Config.getInstance().getLogPath() + "\\" + logFile + ".txt", logs);
             }
             catch(DirectoryNotFoundException)
             {
@@ -176,11 +179,15 @@ namespace NoRV
 
             ListVoicesRequest voiceReq = new ListVoicesRequest { LanguageCode = "en-US" };
             ListVoicesResponse voiceResp = this.client.ListVoices(voiceReq);
+            int idx = 0, selected = 0;
             foreach (Voice voice in voiceResp.Voices)
             {
                 if (voice.LanguageCodes.Contains("en-US") && voice.Name.Contains("Wavenet"))
                 {
                     cbVoice.Items.Add(voice.Name);
+                    if (voice.Name == Config.getInstance().getGoogleVoiceName())
+                        selected = idx;
+                    idx++;
                 }
             }
 
@@ -189,7 +196,7 @@ namespace NoRV
                 MessageBox.Show("No available voice", "NoRV", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 this.Close();
             }
-            cbVoice.SelectedIndex = 1;
+            cbVoice.SelectedIndex = selected;
         }
 
 
@@ -640,7 +647,9 @@ namespace NoRV
             };
             AudioConfig config = new AudioConfig
             {
-                AudioEncoding = AudioEncoding.Mp3
+                AudioEncoding = AudioEncoding.Mp3,
+                Pitch = pitch,
+                SpeakingRate = speed
             };
             var response = client.SynthesizeSpeech(new SynthesizeSpeechRequest
             {

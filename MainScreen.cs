@@ -24,7 +24,6 @@ namespace NoRV
         private double speed = 0.9;
         private double pitch = 0.0;
         private string lastTime = "#Time#";
-        private int tzOffset = 0;
         private string source = "";
 
         IWavePlayer waveOutDevice = null;
@@ -36,22 +35,12 @@ namespace NoRV
             {
                 this.InfoList = InfoList;
 
-                Dictionary<string, int> tzAbbrev = new Dictionary<string, int>() {
-                    {"Pacific Time (PDT)", -7},
-                    {"Eastern Time (EDT)", -4},
-                    {"Central Time (CDT)", -5},
-                    {"Mountain Time (MDT)", -6},
-                    {"Mountain Standard Time (MST)", -7},
-                    {"Alaska Time (ADT)", -8},
-                    {"Hawaii-Aleutian Standard Time (HAST)", -10}
-                };
-
                 if (this.InfoList.ContainsKey("TimeZone"))
                 {
                     string tz = this.InfoList["TimeZone"];
                     this.InfoList.Remove("TimeZone");
-                    WebServer.tzOffset = tzOffset = tzAbbrev[tz];
-                    DateTime tzNow = DateTime.UtcNow.AddHours(tzOffset);
+                    Program.setTimezone(tz);
+                    DateTime tzNow = Program.getCurrentTime();
                     this.InfoList.Add("Date", tzNow.ToString("MMM dd, yyyy"));
                     this.InfoList.Add("Time", this.lastTime = tzNow.ToString("h:mm tt"));
                 }
@@ -151,7 +140,7 @@ namespace NoRV
         }
         private void InsertLog(string type)
         {
-            string action = type + DateTime.UtcNow.AddHours(tzOffset).ToString(": h:mmtt");
+            string action = type + Program.getCurrentTime().ToString(": h:mmtt");
             if (type == "Start" || type == "On")
             {
                 lastLog = action;
@@ -164,7 +153,7 @@ namespace NoRV
                 totalSeconds += elapSec;
             }
 
-            string time = DateTime.UtcNow.AddHours(tzOffset).ToString("h:mmtt");
+            string time = Program.getCurrentTime().ToString("h:mmtt");
             if (type == "Start")
                 Program.changeWitness(id, witness, time, 1);
             if (type == "End")
@@ -505,7 +494,7 @@ namespace NoRV
             PlayMP3("Audios/StopAudio.mp3", (s, e) =>
             {
                 ignoreInput = true;
-                DateTime tzNow = DateTime.UtcNow.AddHours(tzOffset);
+                DateTime tzNow = Program.getCurrentTime();
                 SpeechSynthesizer stopAudio = new SpeechSynthesizer();
                 stopAudio.SpeakAsync(Config.getInstance().getAnnounceTime() + tzNow.ToString(" h:mm tt"));
                 stopAudio.SpeakCompleted += (ss, ee) =>
@@ -534,7 +523,7 @@ namespace NoRV
             {
                 ignoreInput = true;
                 DisposeAudioPlayer();
-                DateTime tzNow = DateTime.UtcNow.AddHours(tzOffset);
+                DateTime tzNow = Program.getCurrentTime();
                 SpeechSynthesizer pauseAudio = new SpeechSynthesizer();
                 pauseAudio.SpeakAsync(Config.getInstance().getAnnounceTime() + tzNow.ToString(" h:mm tt"));
                 pauseAudio.SpeakCompleted += (ss, ee) =>
@@ -565,7 +554,7 @@ namespace NoRV
             {
                 ignoreInput = true;
                 DisposeAudioPlayer();
-                DateTime tzNow = DateTime.UtcNow.AddHours(tzOffset);
+                DateTime tzNow = Program.getCurrentTime();
                 SpeechSynthesizer unpauseAudio = new SpeechSynthesizer();
                 unpauseAudio.SpeakAsync(Config.getInstance().getAnnounceTime() + tzNow.ToString(" h:mm tt"));
                 unpauseAudio.SpeakCompleted += (ss, ee) =>
@@ -607,7 +596,7 @@ namespace NoRV
 
         private void GenerateGoogleTTS()
         {
-            DateTime tzNow = DateTime.UtcNow.AddHours(tzOffset);
+            DateTime tzNow = Program.getCurrentTime();
             SynthesisInput input = new SynthesisInput
             {
                 Text = voiceText.Replace(this.lastTime, tzNow.ToString("h:mm tt"))

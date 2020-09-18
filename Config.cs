@@ -258,7 +258,7 @@ namespace NoRV
                 if (autostart == "true")
                     return true;
             }
-            catch(Exception) { }
+            catch (Exception) { }
             return false;
         }
         public string getGoogleVoiceName()
@@ -399,7 +399,7 @@ namespace NoRV
         }
         public string getOBSHotkey(string action)
         {
-            switch(action)
+            switch (action)
             {
                 case "start":
                     return _startHotkey;
@@ -535,6 +535,26 @@ namespace NoRV
                 return item;
             }
             return "";
+        }
+
+        public void getTimezone(string tz, ref string tzId, ref bool daylight, ref int offset)
+        {
+            try
+            {
+                var xml = XDocument.Load(xmlFile);
+                var query = from c in xml.Root.Descendants("Timezone")
+                            where (string)c.Attribute("Name") == tz
+                            select c;
+                foreach (var item in query)
+                {
+                    tzId = (string)item.Attribute("Id");
+                    daylight = (bool)item.Attribute("Daylight");
+                    offset = (int)item.Attribute("Offset");
+                    return;
+                }
+            }
+            catch { }
+            tzId = ""; daylight = false; offset = 0;
         }
     }
 }

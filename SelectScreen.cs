@@ -81,6 +81,13 @@ namespace NoRV
                 Witness.Add(witness);
                 Type.Add(type);
             }
+            if(lstAppointments.Items.Count == 1)
+            {
+                selectedIdx = 0;
+                lstAppointments.SelectedIndex = 0;
+                DialogResult = DialogResult.OK;
+                Close();
+            }
         }
         private void SelectScreen_Load(object sender, EventArgs e)
         {

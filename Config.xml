@@ -63,6 +63,16 @@
     <Keyword Key="Videographer" Name="Videographer (LEAVE BLANK- INTERNAL USE ONLY)" />
     <Keyword Key="Commission" Name="Commission (LEAVE BLANK- INTERNAL USE ONLY)" />
   </Keywords>
+  
+  <Timezones>
+    <Timezone Name="Pacific Time (PDT)" Id="Pacific Standard Time" Daylight="true" Offset="-8" />
+    <Timezone Name="Eastern Time (EDT)" Id="Eastern Standard Time" Daylight="true" Offset="-5" />
+    <Timezone Name="Central Time (CDT)" Id="Central Standard Time" Daylight="true" Offset="-6" />
+    <Timezone Name="Mountain Time (MDT)" Id="Mountain Standard Time" Daylight="true" Offset="-7" />
+    <Timezone Name="Mountain Standard Time (MST)" Id="Mountain Standard Time" Daylight="false" Offset="-7" />
+    <Timezone Name="Alaska Time (ADT)" Id="Alaskan Standard Time" Daylight="true" Offset="-9" />
+    <Timezone Name="Hawaii-Aleutian Standard Time (HAST)" Id="Hawaiian Standard Time" Daylight="false" Offset="-10" />
+  </Timezones>
 
   <Templates>
     <Template Type="Personal">

@@ -89,6 +89,8 @@ namespace NoRV
             {
                 throw new Exception(response.StatusCode.ToString());
             }
+            //if (Program.DEBUG && _jobs.Count > 0)
+            //    return _jobs.GetRange(0, 1);
             return _jobs;
         }
 

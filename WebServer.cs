@@ -16,12 +16,11 @@ namespace NoRV
 			return context;
 		}
 
-		public static int tzOffset = 0;
 		[RestRoute(HttpMethod = HttpMethod.GET, PathInfo = "/api/time")]
 		public IHttpContext Time(IHttpContext context)
 		{
 			context.Response.AddHeader("Access-Control-Allow-Origin", "*");
-			context.Response.SendResponse(DateTime.UtcNow.AddHours(tzOffset).ToString("MMM d,yyyy h:mm:ss tt"));
+			context.Response.SendResponse(Program.getCurrentTime().ToString("MMM d,yyyy h:mm:ss tt"));
 			return context;
 		}
 		[RestRoute(HttpMethod = HttpMethod.GET, PathInfo = "/getTranscripts")]

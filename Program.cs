@@ -1,5 +1,4 @@
-﻿using Accord;
-using GoogleTranscribing;
+﻿using GoogleTranscribing;
 using Grapevine.Server;
 using Newtonsoft.Json;
 using System;
@@ -8,7 +7,6 @@ using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
-using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Runtime.InteropServices;
@@ -495,6 +493,30 @@ namespace NoRV
             public static readonly uint NOMOVE_NOSIZE_SHOW_FLAG = 0x0001 | 0x0002 | 0x0040;
             public static readonly IntPtr HWND_TOP = new IntPtr(0);
             public static readonly IntPtr HWND_BOTTOM = new IntPtr(1);
+        }
+
+        private static string tzId = "";
+        private static bool daylight = false;
+        private static int offset = 0;
+        public static void setTimezone(string tz)
+        {
+            Config.getInstance().getTimezone(tz, ref tzId, ref daylight, ref offset);
+        }
+        public static DateTime getCurrentTime()
+        {
+            if (tzId != "")
+            {
+                try
+                {
+                    TimeZoneInfo tz = TimeZoneInfo.FindSystemTimeZoneById(tzId);
+                    DateTime now = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, tz);
+                    if (tz.IsDaylightSavingTime(now) && !daylight)
+                        now = now.AddHours(-1);
+                    return now;
+                }
+                catch { }
+            }
+            return DateTime.UtcNow.AddHours(offset);
         }
 
     }

@@ -5,11 +5,8 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
-using System.Drawing.Imaging;
-using System.IO;
 using System.Net;
 using System.Net.Http;
-using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -23,18 +20,23 @@ namespace NoRV
         public static string videographer = "";
         public static string commission = "";
 
-        /// <summary>
-        /// The main entry point for the application.
-        /// </summary>
         [STAThread]
         static void Main()
         {
-            if(!Config.getInstance().getAutoStart())
+            Logger.info("Starting NoRV");
+            Application.EnableVisualStyles();
+            Application.SetCompatibleTextRenderingDefault(false);
+
+            bool autoStart = Config.getInstance().getAutoStart();
+            Logger.info("Checking AutoStart is Enabled", autoStart.ToString());
+            if(!autoStart)
             {
+                Logger.info("Exiting from NoRV", "AutoStart is Disabled");
                 Application.Exit();
                 return;
             }
 
+            Logger.info("Startign HTTP Server");
             var http = new RestServer(new ServerSettings()
             {
                 Host = "*",
@@ -43,250 +45,94 @@ namespace NoRV
             });
             try
             {
-                Console.WriteLine("##### HTTP Server Started #####");
                 http.Start();
-            }
-            catch (Exception) { }
-
-            Application.EnableVisualStyles();
-            Application.SetCompatibleTextRenderingDefault(false);
-
-            Console.WriteLine("##### Report Thread Started #####");
-            Thread thread = new Thread(new ThreadStart(reportThread));
-            thread.Start();
-            Console.WriteLine("##### Update Thread Started #####");
-            Thread updateInfo = new Thread(new ThreadStart(updateInfoThread));
-            updateInfo.Start();
-            Console.WriteLine("##### Face Detect Thread Started #####");
-            Thread detectThread = new Thread(new ThreadStart(DetectWork));
-            detectThread.Start();
-            Console.WriteLine("##### Mirror Thread Started #####");
-            StopTrack();
-            StartTrack();
-            Thread mirrorThread = new Thread(new ThreadStart(MirrorWork));
-            mirrorThread.Start();
-            Console.WriteLine("##### Transcribing Started #####");
-            TranscribeManager.Stop();
-            CancellationTokenSource cts = new CancellationTokenSource();
-            Task.Run(new Action(() => InfiniteStreaming.RecognizeAsync(cts, TranscribeManager.NewTranscript, TranscribeManager.NewCandidate)), cts.Token);
-            if (!OBSManager.CheckOBSRunning())
-                Application.Run(new WaitScreen());
-            OBSManager.StopOBSRecording();
-            Console.WriteLine("##### Track Form Started #####");
-            Application.Run(new InfoScreen());
-            StopTrack();
-            Console.WriteLine("##### Track Form Ended #####");
-            mirrorThread.Abort();
-            Console.WriteLine("##### Mirror Thread Ended #####");
-            detectThread.Abort();
-            Console.WriteLine("##### Face Detect Thread Ended #####");
-            updateInfo.Abort();
-            Console.WriteLine("##### Update Thread Ended #####");
-            thread.Abort();
-            Console.WriteLine("##### Report Thread Ended #####");
-
-            try
-            {
-                http.Stop();
-            }
-            catch (Exception) { }
-            Console.WriteLine("##### WebServer Stopped #####");
-
-            foreach (var proc in Process.GetProcessesByName("adb"))
-            {
-                proc.Kill();
-            }
-            Console.WriteLine("##### Adb Processed Killed #####");
-
-            cts.Cancel();
-            Console.WriteLine("##### Transcribing Ended #####");
-
-            Application.Exit();
-        }
-
-        private static void ServerCheck(string port)
-        {
-            try
-            {
-                string args = string.Format(@"http add urlacl url=http://*:{0}/ user=Everyone", port);
-
-                ProcessStartInfo psi = new ProcessStartInfo("netsh", args);
-                psi.Verb = "runas";
-                psi.CreateNoWindow = true;
-                psi.WindowStyle = ProcessWindowStyle.Hidden;
-                psi.UseShellExecute = true;
-
-                Process.Start(psi).WaitForExit();
-            }
-            catch(Exception) { }
-        }
-
-        private static void StartTrack()
-        {
-            try
-            {
-                Process.Start("Track");
-            }
-            catch (Exception) { }
-        }
-        private static void StopTrack()
-        {
-            try
-            {
-                foreach (var proc in Process.GetProcessesByName("Track"))
-                {
-                    proc.Kill();
-                }
-            }
-            catch (Exception) { }
-        }
-
-
-        // App Status
-        private static string usage = "";
-        private static string obs = "Awaiting Recording (Unknown)";
-        private static string button = "";
-        private static string depo = "Awaiting Start (Unknown)";
-        private static List<string[]> witness = new List<string[]>();
- 
-        public static void changeOBS(string newOBS)
-        {
-            if(obs != newOBS)
-            {
-                obs = newOBS;
-                reportStatus();
-            }
-        }
-        public static void changeWitness(string id, string title, string time, int type)
-        {
-            string date = DateTime.Now.ToString("yyyy-MM-dd");
-            string[] found = witness.Find(x => x[0] == id);
-            if (found == null)
-                witness.Add(new string[] { id, title, date, "", "" });
-            else if (type == 1)
-            {
-                found[3] = time;
-                found[4] = "Not concluded";
-            }
-            else if (type == 2)
-            {
-                found[4] = time;
-            }
-            else if (type == 3)
-            {
-                found[3] = "";
-                found[4] = "";
-            }
-            else
-                return;
-            reportStatus();
-        }
-
-        private static void filterWitness()
-        {
-            witness.Sort((l, r) =>
-            {
-                if (l == null || l.Length != 5)
-                    return 1;
-                if (r == null || r.Length != 5)
-                    return -1;
-                if (l[3] == "")
-                    return 1;
-                if (r[3] == "")
-                    return -1;
-                return l[3].CompareTo(r[3]);
-            });
-            witness = witness.FindAll(x =>
-            {
-                if (x == null || x.Length != 5)
-                    return false;
-                string date = DateTime.Now.ToString("yyyy-MM-dd");
-                return x[2] == date;
-            });
-        }
-
-        private static PerformanceCounter theCPUCounter = new PerformanceCounter("Process", "% Processor Time", Process.GetCurrentProcess().ProcessName);
-        private static PerformanceCounter theMemCounter = new PerformanceCounter("Process", "Working Set - Private", Process.GetCurrentProcess().ProcessName);
-        public static void reportStatus()
-        {
-            try
-            {
-                string CPUUsage = Math.Round(theCPUCounter.NextValue(), 1) + "%";
-                string RAMUsage = Math.Round(theMemCounter.NextValue() / 1048576, 1) + "MB";
-                usage = CPUUsage + " / " + RAMUsage;
-                button = ButtonManager.getInstance().getButtonStatus() == ButtonManager.INITIATED ? "Operational" : "Not Operational";
-                string screenshot = CaptureScreen(Screen.PrimaryScreen);
-                string joinedWitness = "";
-                filterWitness();
-                if (witness.Count > 0)
-                    joinedWitness += formatWitness(witness[0]);
-                for(int i = 1; i < witness.Count; i ++)
-                    joinedWitness += ", " + formatWitness(witness[i]);
-                string jobs = witness.FindAll(x => (x != null && x.Length == 5 && x[3] == "")).Count.ToString();
-
-                var httpClient = new HttpClient();
-                string url = Config.getInstance().getServerUrl() + "/status/master";
-
-                MultipartFormDataContent httpContent = new MultipartFormDataContent();
-                httpContent.Add(new StringContent(L.v()), "id");
-                httpContent.Add(new StringContent(usage), "usage");
-                httpContent.Add(new StringContent(obs), "obs");
-                httpContent.Add(new StringContent(button), "button");
-                httpContent.Add(new StringContent(depo), "depo");
-                httpContent.Add(new StringContent(jobs), "jobs");
-                httpContent.Add(new StringContent(joinedWitness), "witness");
-                httpContent.Add(new StringContent(screenshot), "screenshot");
-                httpClient.PostAsync(url, httpContent);
+                Logger.info("HTTP Server Started");
             }
             catch (Exception e)
             {
-                Console.WriteLine(e.StackTrace);
+                Logger.info("HTTP Server Starting Failed", e.Message);
             }
-        }
-        private static string formatWitness(string[] onelog)
-        {
-            string curStr = "";
-            if (onelog.Length > 1)
-                curStr = onelog[1];
-            if (onelog.Length > 3 && onelog[3] != "")
-                curStr += " (" + onelog[3] + "/" + onelog[4] + ")";
-            return curStr;
-        }
-        private static string CaptureScreen(Screen window)
-        {
+
+            //Thread thread = new Thread(new ThreadStart(reportThread));
+            //thread.Start();
+            //Logger.info("Report Thread Started");
+
+            Thread updateInfo = new Thread(new ThreadStart(updateInfoThread));
+            updateInfo.Start();
+            Logger.info("Update Thread Started");
+
+            Thread detectThread = new Thread(new ThreadStart(DetectWork));
+            detectThread.Start();
+            Logger.info("Face Detect Thread Started");
+            
+            Utils.Restart3rdParty("Track");
+            Logger.info("Track Form Started");
+
+            Thread mirrorThread = new Thread(new ThreadStart(MirrorWork));
+            mirrorThread.Start();
+            Logger.info("Mirror Thread Started");
+
+            TranscribeManager.Stop();
+            CancellationTokenSource cts = new CancellationTokenSource();
+            Task.Run(new Action(() => InfiniteStreaming.RecognizeAsync(cts, TranscribeManager.NewTranscript, TranscribeManager.NewCandidate)), cts.Token);
+            Logger.info("Google Transcribing Started");
+
+            if (!OBSManager.CheckOBSRunning())
+            {
+                Logger.info("Wait till OBS starts running");
+                Application.Run(new WaitScreen());
+                Logger.info("OBS Started");
+            }
+            Logger.info("Stop recording on OBS");
+            OBSManager.StopOBSRecording();
+            Logger.info("NoRV Fully Started");
+//  ####################################################################  //
+/**/        Application.Run(NoRVAppContext.getInstance());              /**/
+//  ####################################################################  //
+            Logger.info("Finishing NoRV");
+            Utils.Stop3rdParty("Track");
+            Logger.info("Track Form Ended");
+
+            mirrorThread.Abort();
+            Logger.info("Mirror Thread Ended");
+
+            detectThread.Abort();
+            Logger.info("Face Detect Thread Ended");
+
+            updateInfo.Abort();
+            Logger.info("Update Thread Finished");
+
+            //thread.Abort();
+            //Logger.info("Report Thread Finished");
+
             try
             {
-                Rectangle s_rect = window.Bounds;
-                using (Bitmap bmp = new Bitmap(s_rect.Width, s_rect.Height))
+                if (http.IsListening)
                 {
-                    using (Graphics gScreen = Graphics.FromImage(bmp))
-                        gScreen.CopyFromScreen(s_rect.Location, System.Drawing.Point.Empty, s_rect.Size);
-                    using (Bitmap newBmp = new Bitmap(bmp, new Size(428, 240)))
-                    {
-                        using (MemoryStream ms = new MemoryStream())
-                        {
-                            newBmp.Save(ms, ImageFormat.Png);
-                            byte[] byteImage = ms.ToArray();
-                            return Convert.ToBase64String(ms.ToArray());
-                        }
-                    }
+                    http.Stop();
+                    Logger.info("HTTP Server Stopped");
                 }
+                else
+                    Logger.info("HTTP Server Not Stopped", "Not Started");
             }
-            catch (Exception) { }
-            return "";
-        }
-        private static void reportThread()
-        {
-            while(true)
+            catch (Exception e)
             {
-                reportStatus();
-                Thread.Sleep(30 * 1000);
+                Logger.info("HTTP Server Not Stopped", e.Message);
             }
+
+            Utils.Stop3rdParty("adb");
+            Logger.info("Fully Terminate Mirror");
+
+            cts.Cancel();
+            Logger.info("Google Transcribing Finished");
+
+            Application.Exit();
+            Logger.info("NoRV Existed");
         }
 
         private static async void updateInfoThread()
         {
-            while(true)
+            while (true)
             {
                 try
                 {
@@ -310,12 +156,22 @@ namespace NoRV
                                     break;
                             }
                         }
+                        Logger.info("Videographer and Commission Updated", "Videographer: " + videographer + ", Commission: " + commission);
                     }
                 }
-                catch (Exception)
+                catch (Exception e)
+                {
+                    Logger.info("Videographer and Commission Updating Failed", e.Message);
+                }
+                if (String.IsNullOrEmpty(videographer))
                 {
                     videographer = Config.getInstance().getVideographer();
+                    Logger.info("Videographer Initiated", videographer);
+                }
+                if(String.IsNullOrEmpty(commission))
+                {
                     commission = Config.getInstance().getCommission();
+                    Logger.info("Commission Initiated", commission);
                 }
                 Thread.Sleep(1 * 1000);
             }
@@ -339,7 +195,7 @@ namespace NoRV
                         {
                             if(proc.MainWindowHandle != null)
                             {
-                                User32.SetWindowPos(proc.MainWindowHandle, User32.HWND_BOTTOM, 0, 0, 0, 0, User32.NOMOVE_NOSIZE_SHOW_FLAG);
+                                WinSDK.User32.SetWindowPos(proc.MainWindowHandle, WinSDK.User32.HWND_BOTTOM, 0, 0, 0, 0, WinSDK.User32.NOMOVE_NOSIZE_SHOW_FLAG);
                             }
                         }
                     }
@@ -362,11 +218,11 @@ namespace NoRV
                 {
                     try
                     {
-                        Image capture = CaptureWindow(proc.MainWindowHandle);
+                        Image capture = Utils.CaptureWindow(proc.MainWindowHandle);
                         var cloned = new Bitmap(capture);
                         if (prevBitmap != null)
                         {
-                            var difference = CalculateDifference(prevBitmap, cloned);
+                            var difference = Utils.CalculateDifference(prevBitmap, cloned);
                             if (difference > Config.getInstance().getDetectThreshold())
                             {
                                 OBSManager.SwitchToExhibits();
@@ -387,7 +243,7 @@ namespace NoRV
                     }
                     catch(Exception e)
                     {
-                        Console.WriteLine(e.StackTrace);
+                        Logger.info("Mirror Detect Failed", e.Message);
                     }
                 }
                 if(!found)
@@ -397,127 +253,14 @@ namespace NoRV
                 Thread.Sleep(100);
             }
         }
-        static float CalculateDifference(Bitmap bitmap1, Bitmap bitmap2)
-        {
-            if (bitmap1.Size != bitmap2.Size)
-            {
-                return -1;
-            }
 
-            var rectangle = new Rectangle(0, 0, bitmap1.Width, bitmap1.Height);
-
-            BitmapData bitmapData1 = bitmap1.LockBits(rectangle, ImageLockMode.ReadOnly, bitmap1.PixelFormat);
-            BitmapData bitmapData2 = bitmap2.LockBits(rectangle, ImageLockMode.ReadOnly, bitmap2.PixelFormat);
-            
-            float diff = 0;
-            var byteCount = rectangle.Width * rectangle.Height * 3;
-
-            unsafe
-            {
-                byte* pointer1 = (byte*)bitmapData1.Scan0.ToPointer();
-                byte* pointer2 = (byte*)bitmapData2.Scan0.ToPointer();
-
-                for (int x = 0; x < byteCount; x++)
-                {
-                    diff += (float)Math.Abs(*pointer1 - *pointer2) / 255;
-                    pointer1++;
-                    pointer2++;
-                }
-            }
-
-            bitmap1.UnlockBits(bitmapData1);
-            bitmap2.UnlockBits(bitmapData2);
-
-            return 100 * diff / byteCount;
-        }
-        private static Image CaptureWindow(IntPtr handle)
-        {
-            IntPtr hdcSrc = User32.GetWindowDC(handle);
-            User32.RECT windowRect = new User32.RECT();
-            User32.GetWindowRect(handle, ref windowRect);
-            int width = windowRect.right - windowRect.left;
-            int height = windowRect.bottom - windowRect.top;
-            IntPtr hdcDest = GDI32.CreateCompatibleDC(hdcSrc);
-            IntPtr hBitmap = GDI32.CreateCompatibleBitmap(hdcSrc, width, height - Config.getInstance().getMirrorIgnore());
-            IntPtr hOld = GDI32.SelectObject(hdcDest, hBitmap);
-            GDI32.BitBlt(hdcDest, 0, 0, width, height - Config.getInstance().getMirrorIgnore(), hdcSrc, 0, Config.getInstance().getMirrorIgnore(), GDI32.SRCCOPY);
-            GDI32.SelectObject(hdcDest, hOld);
-            GDI32.DeleteDC(hdcDest);
-            User32.ReleaseDC(handle, hdcSrc);
-            Image img = Image.FromHbitmap(hBitmap);
-            GDI32.DeleteObject(hBitmap);
-            return img;
-        }
-        private class GDI32
-        {
-
-            public const int SRCCOPY = 0x00CC0020;
-            [DllImport("gdi32.dll")]
-            public static extern bool BitBlt(IntPtr hObject, int nXDest, int nYDest,
-                int nWidth, int nHeight, IntPtr hObjectSource,
-                int nXSrc, int nYSrc, int dwRop);
-            [DllImport("gdi32.dll")]
-            public static extern IntPtr CreateCompatibleBitmap(IntPtr hDC, int nWidth,
-                int nHeight);
-            [DllImport("gdi32.dll")]
-            public static extern IntPtr CreateCompatibleDC(IntPtr hDC);
-            [DllImport("gdi32.dll")]
-            public static extern bool DeleteDC(IntPtr hDC);
-            [DllImport("gdi32.dll")]
-            public static extern bool DeleteObject(IntPtr hObject);
-            [DllImport("gdi32.dll")]
-            public static extern IntPtr SelectObject(IntPtr hDC, IntPtr hObject);
-        }
-
-        public class User32
-        {
-            [StructLayout(LayoutKind.Sequential)]
-            public struct RECT
-            {
-                public int left;
-                public int top;
-                public int right;
-                public int bottom;
-            }
-            [DllImport("user32.dll")]
-            public static extern IntPtr GetDesktopWindow();
-            [DllImport("user32.dll")]
-            public static extern IntPtr GetWindowDC(IntPtr hWnd);
-            [DllImport("user32.dll")]
-            public static extern IntPtr ReleaseDC(IntPtr hWnd, IntPtr hDC);
-            [DllImport("user32.dll")]
-            public static extern IntPtr GetWindowRect(IntPtr hWnd, ref RECT rect);
-
-            [DllImport("user32.dll")]
-            public static extern bool SetWindowPos(IntPtr hWnd, IntPtr hWndInsertAfter, int X, int Y, int cx, int cy, uint uFlags);
-            public static readonly uint NOMOVE_NOSIZE_SHOW_FLAG = 0x0001 | 0x0002 | 0x0040;
-            public static readonly IntPtr HWND_TOP = new IntPtr(0);
-            public static readonly IntPtr HWND_BOTTOM = new IntPtr(1);
-        }
-
-        private static string tzId = "";
-        private static bool daylight = false;
-        private static int offset = 0;
-        public static void setTimezone(string tz)
-        {
-            Config.getInstance().getTimezone(tz, ref tzId, ref daylight, ref offset);
-        }
-        public static DateTime getCurrentTime()
-        {
-            if (tzId != "")
-            {
-                try
-                {
-                    TimeZoneInfo tz = TimeZoneInfo.FindSystemTimeZoneById(tzId);
-                    DateTime now = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, tz);
-                    if (tz.IsDaylightSavingTime(now) && !daylight)
-                        now = now.AddHours(-1);
-                    return now;
-                }
-                catch { }
-            }
-            return DateTime.UtcNow.AddHours(offset);
-        }
-
+        //private static void reportThread()
+        //{
+        //    while(true)
+        //    {
+        //        StatusManage.getInstance().reportBase();
+        //        Thread.Sleep(30 * 1000);
+        //    }
+        //}
     }
 }

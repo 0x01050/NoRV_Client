@@ -193,7 +193,7 @@ namespace GoogleTranscribing
         private Task WriteAudioChunk(ByteString chunk) =>
             _rpcStream.WriteAsync(new StreamingRecognizeRequest { AudioContent = chunk });
 
-        private async Task ListenAudio(Socket handler, int number)
+        private void ListenAudio(Socket handler, int number)
         {
             Console.WriteLine("##### Listening Audio Started #####");
             byte[] bytes = null;
@@ -214,7 +214,9 @@ namespace GoogleTranscribing
         private async Task StartListening(CancellationTokenSource cts, Socket handler)
         {
             Console.WriteLine("##### Listening Started #####");
+#pragma warning disable CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
             Task.Run(() => ListenAudio(handler, new Random().Next(0, 100)), cts.Token);
+#pragma warning restore CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
             try
             {
                 await RunAsync(cts);

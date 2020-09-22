@@ -39,8 +39,8 @@ namespace NoRV
                 {
                     string tz = this.InfoList["TimeZone"];
                     this.InfoList.Remove("TimeZone");
-                    Program.setTimezone(tz);
-                    DateTime tzNow = Program.getCurrentTime();
+                    TimeManage.setTimezone(tz);
+                    DateTime tzNow = TimeManage.getCurrentTime();
                     this.InfoList.Add("Date", tzNow.ToString("MMM dd, yyyy"));
                     this.InfoList.Add("Time", this.lastTime = tzNow.ToString("h:mm tt"));
                 }
@@ -48,6 +48,10 @@ namespace NoRV
                     id = this.InfoList["ID"];
                 if (this.InfoList.ContainsKey("Witness"))
                     witness = this.InfoList["Witness"];
+                if (!this.InfoList.ContainsKey("Videographer"))
+                    this.InfoList.Add("Videographer", Program.videographer);
+                if (!this.InfoList.ContainsKey("Commission"))
+                    this.InfoList.Add("Commission", Program.commission);
             }
             this.source = source;
             InitializeComponent();
@@ -103,7 +107,7 @@ namespace NoRV
             }
             else
             {
-                Program.changeWitness(id, witness, "", 3);
+                StatusManage.getInstance().changeWitness(id, witness, "", 3);
             }
         }
 
@@ -140,7 +144,7 @@ namespace NoRV
         }
         private void InsertLog(string type)
         {
-            string action = type + Program.getCurrentTime().ToString(": h:mmtt");
+            string action = type + TimeManage.getCurrentTime().ToString(": h:mmtt");
             if (type == "Start" || type == "On")
             {
                 lastLog = action;
@@ -153,11 +157,11 @@ namespace NoRV
                 totalSeconds += elapSec;
             }
 
-            string time = Program.getCurrentTime().ToString("h:mmtt");
+            string time = TimeManage.getCurrentTime().ToString("h:mmtt");
             if (type == "Start")
-                Program.changeWitness(id, witness, time, 1);
+                StatusManage.getInstance().changeWitness(id, witness, time, 1);
             if (type == "End")
-                Program.changeWitness(id, witness, time, 2);
+                StatusManage.getInstance().changeWitness(id, witness, time, 2);
         }
 
         private void InitGoogleCredential()
@@ -494,7 +498,7 @@ namespace NoRV
             PlayMP3("Audios/StopAudio.mp3", (s, e) =>
             {
                 ignoreInput = true;
-                DateTime tzNow = Program.getCurrentTime();
+                DateTime tzNow = TimeManage.getCurrentTime();
                 SpeechSynthesizer stopAudio = new SpeechSynthesizer();
                 stopAudio.SpeakAsync(Config.getInstance().getAnnounceTime() + tzNow.ToString(" h:mm tt"));
                 stopAudio.SpeakCompleted += (ss, ee) =>
@@ -523,7 +527,7 @@ namespace NoRV
             {
                 ignoreInput = true;
                 DisposeAudioPlayer();
-                DateTime tzNow = Program.getCurrentTime();
+                DateTime tzNow = TimeManage.getCurrentTime();
                 SpeechSynthesizer pauseAudio = new SpeechSynthesizer();
                 pauseAudio.SpeakAsync(Config.getInstance().getAnnounceTime() + tzNow.ToString(" h:mm tt"));
                 pauseAudio.SpeakCompleted += (ss, ee) =>
@@ -554,7 +558,7 @@ namespace NoRV
             {
                 ignoreInput = true;
                 DisposeAudioPlayer();
-                DateTime tzNow = Program.getCurrentTime();
+                DateTime tzNow = TimeManage.getCurrentTime();
                 SpeechSynthesizer unpauseAudio = new SpeechSynthesizer();
                 unpauseAudio.SpeakAsync(Config.getInstance().getAnnounceTime() + tzNow.ToString(" h:mm tt"));
                 unpauseAudio.SpeakCompleted += (ss, ee) =>
@@ -596,7 +600,7 @@ namespace NoRV
 
         private void GenerateGoogleTTS()
         {
-            DateTime tzNow = Program.getCurrentTime();
+            DateTime tzNow = TimeManage.getCurrentTime();
             SynthesisInput input = new SynthesisInput
             {
                 Text = voiceText.Replace(this.lastTime, tzNow.ToString("h:mm tt"))

@@ -8,36 +8,52 @@ namespace NoRV
     {
         public static bool CheckOBSRunning()
         {
-            Process[] obs64 = Process.GetProcessesByName(Config.getInstance().getOBSProcessName());
-            return obs64.Length > 0;
+
+            // Using Web Socket
+            var _obs = new OBSWebsocket();
+            try
+            {
+                _obs.WSTimeout = TimeSpan.FromMilliseconds(defaultTimeout);
+                _obs.Connect("ws://127.0.0.1:4444", "");
+                if (_obs.IsConnected)
+                {
+                    _obs.Disconnect();
+                    return true;
+                }
+            }
+            catch (Exception e)
+            {
+                Logger.info("OBS Connection Failed", e.Message);
+            }
+            return false;
         }
 
         public static void StartOBSRecording(string witness = null)
         {
             OBSAction(Config.getInstance().getOBSHotkey("start"));
 
-            Program.changeOBS("Recording (" + witness + ")");
+            StatusManage.getInstance().changeOBS("Recording (" + witness + ")");
         }
         public static void StopOBSRecording(string witness = null)
         {
             OBSAction(Config.getInstance().getOBSHotkey("stop"));
 
             if (witness != null)
-                Program.changeOBS("Recording Ended (" + witness + ")");
+                StatusManage.getInstance().changeOBS("Recording Ended (" + witness + ")");
             else
-                Program.changeOBS("Awaiting Recording (Unknown)");
+                StatusManage.getInstance().changeOBS("Awaiting Recording (Unknown)");
         }
         public static void PauseOBSRecording(string witness = null)
         {
             OBSAction(Config.getInstance().getOBSHotkey("pause"));
 
-            Program.changeOBS("Recording Paused (" + witness + ")");
+            StatusManage.getInstance().changeOBS("Recording Paused (" + witness + ")");
         }
         public static void UnpauseOBSRecording(string witness = null)
         {
             OBSAction(Config.getInstance().getOBSHotkey("unpause"));
 
-            Program.changeOBS("Recording (" + witness + ")");
+            StatusManage.getInstance().changeOBS("Recording (" + witness + ")");
         }
         public static void SwitchToWitness()
         {
@@ -51,9 +67,6 @@ namespace NoRV
         private static int defaultTimeout = 300;
         private static void OBSAction(string action)
         {
-            //if (!CheckOBSRunning())
-            //    return;
-
             // Using Web Socket
             var _obs = new OBSWebsocket();
             try
@@ -71,9 +84,9 @@ namespace NoRV
                     _obs.Disconnect();
                 }
             }
-            catch
+            catch(Exception e)
             {
-                Console.WriteLine("*************************** OBS Exception ***************************");
+                Logger.info("OBS Action Failed", e.Message);
             }
 
         }

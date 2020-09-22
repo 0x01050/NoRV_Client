@@ -200,6 +200,7 @@
     <Compile Include="InfoScreen.Designer.cs">
       <DependentUpon>InfoScreen.cs</DependentUpon>
     </Compile>
+    <Compile Include="Logger.cs" />
     <Compile Include="MainScreen.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -220,9 +221,12 @@
     </Compile>
     <Compile Include="JobManager.cs" />
     <Compile Include="L.cs" />
+    <Compile Include="NoRVAppContext.cs" />
+    <Compile Include="StatusManage.cs" />
     <Compile Include="OBSManager.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="TimeManage.cs" />
     <Compile Include="TrackForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -230,6 +234,7 @@
       <DependentUpon>TrackForm.cs</DependentUpon>
     </Compile>
     <Compile Include="TranscribeManager.cs" />
+    <Compile Include="Utils.cs" />
     <Compile Include="WaitScreen.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -237,6 +242,7 @@
       <DependentUpon>WaitScreen.cs</DependentUpon>
     </Compile>
     <Compile Include="WebServer.cs" />
+    <Compile Include="WinSDK.cs" />
     <EmbeddedResource Include="InfoScreen.resx">
       <DependentUpon>InfoScreen.cs</DependentUpon>
     </EmbeddedResource>

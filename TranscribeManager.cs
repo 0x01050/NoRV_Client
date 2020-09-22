@@ -137,7 +137,7 @@ namespace NoRV
                     return;
                 if (getStatus(xml) == "Recording")
                 {
-                    Console.WriteLine(transcript);
+                    Logger.info("New Transcript", transcript);
                     Int64 timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
 
                     XElement newElem = new XElement("Transcript");

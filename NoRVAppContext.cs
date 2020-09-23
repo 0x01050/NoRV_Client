@@ -25,19 +25,89 @@ namespace NoRV
         {
             _status = newStatus;
         }
-        public bool startDeposition(Dictionary<string, string> param)
+        private MainScreen _mainForm = null;
+        private void closeMainForm()
+        {
+            if (_mainForm != null)
+            {
+                _mainForm.Close();
+            }
+            _mainForm = null;
+        }
+        public bool loadDeposition(Dictionary<string, string> param)
         {
             try
             {
-                if (getStatus() == AppStatus.STOPPED)
+                if (getStatus() == AppStatus.STOPPED && Utils.MainFormClosed(_mainForm))
                 {
-
+                    _mainForm = new MainScreen(param);
+                    _mainForm.Show();
                     return true;
                 }
             }
             catch(Exception e)
             {
-                Logger.info("Starting Deposition Failed", e.Message);
+                Logger.info("Deposition Loading Failed On Context", e.Message);
+            }
+            return false;
+        }
+        public bool startDeposition()
+        {
+            try
+            {
+                if(getStatus() == AppStatus.LOADED && !Utils.MainFormClosed(_mainForm) && _mainForm.StartRecording())
+                {
+                    return true;
+                }
+            }
+            catch(Exception e)
+            {
+                Logger.info("Deposition Starting Failed On Context", e.Message);
+            }
+            return false;
+        }
+        public bool pauseDeposition()
+        {
+            try
+            {
+                if (getStatus() == AppStatus.STARTED && !Utils.MainFormClosed(_mainForm) && _mainForm.PauseRecording())
+                {
+                    return true;
+                }
+            }
+            catch (Exception e)
+            {
+                Logger.info("Deposition Pausing Failed On Context", e.Message);
+            }
+            return false;
+        }
+        public bool resumeDeposition()
+        {
+            try
+            {
+                if (getStatus() == AppStatus.PAUSED && !Utils.MainFormClosed(_mainForm) && _mainForm.ResumeRecording())
+                {
+                    return true;
+                }
+            }
+            catch (Exception e)
+            {
+                Logger.info("Deposition Resuming Failed On Context", e.Message);
+            }
+            return false;
+        }
+        public bool stopDeposition()
+        {
+            try
+            {
+                if (getStatus() == AppStatus.STARTED && !Utils.MainFormClosed(_mainForm) && _mainForm.StopRecording())
+                {
+                    return true;
+                }
+            }
+            catch (Exception e)
+            {
+                Logger.info("Deposition Stopping Failed On Context", e.Message);
             }
             return false;
         }

@@ -42,30 +42,98 @@ namespace NoRV
 			context.Response.SendResponse(NoRVAppContext.getInstance().getStatus().ToString());
 			return context;
         }
-		[RestRoute(HttpMethod = HttpMethod.POST, PathInfo = "/startDeposition")]
-		public IHttpContext startDeposition(IHttpContext context)
+		[RestRoute(HttpMethod = HttpMethod.POST, PathInfo = "/loadDeposition")]
+		public IHttpContext loadDeposition(IHttpContext context)
 		{
 			try
 			{
 				string payload = context.Request.Payload;
 				Dictionary<string, string> param = JsonConvert.DeserializeObject<Dictionary<string, string>>(payload);
-				if (NoRVAppContext.getInstance().startDeposition(param))
+				if (NoRVAppContext.getInstance().loadDeposition(param))
 				{
-					context.Response.SendResponse("Starting Succeessed");
-				}
-				else
-				{
-					context.Response.SendResponse("Already Started");
+					context.Response.SendResponse("Loading Succeessed");
+					return context;
 				}
 			}
 			catch (Exception e)
             {
-				Logger.info("Deposition not started", e.Message);
-				context.Response.SendResponse("Starting Failed");
-            }
+				Logger.info("Deposition Not Loaded On Webserver", e.Message);
+			}
+			context.Response.SendResponse("Loading Failed");
 			return context;
         }
-
+		[RestRoute(HttpMethod = HttpMethod.POST, PathInfo = "/startDeposition")]
+		public IHttpContext startDeposition(IHttpContext context)
+        {
+			try
+			{
+				if (NoRVAppContext.getInstance().startDeposition())
+				{
+					context.Response.SendResponse("Starting Succeessed");
+					return context;
+				}
+			}
+			catch (Exception e)
+			{
+				Logger.info("Deposition Not Started On Webserver", e.Message);
+			}
+			context.Response.SendResponse("Starting Failed");
+			return context;
+		}
+		[RestRoute(HttpMethod = HttpMethod.POST, PathInfo = "/pauseDeposition")]
+		public IHttpContext pauseDeposition(IHttpContext context)
+		{
+			try
+			{
+				if (NoRVAppContext.getInstance().pauseDeposition())
+				{
+					context.Response.SendResponse("Pausing Succeessed");
+					return context;
+				}
+			}
+			catch (Exception e)
+			{
+				Logger.info("Deposition Not Paused On Webserver", e.Message);
+			}
+			context.Response.SendResponse("Pausing Failed");
+			return context;
+		}
+		[RestRoute(HttpMethod = HttpMethod.POST, PathInfo = "/resumeDeposition")]
+		public IHttpContext resumeDeposition(IHttpContext context)
+		{
+			try
+			{
+				if (NoRVAppContext.getInstance().resumeDeposition())
+				{
+					context.Response.SendResponse("Resuming Succeessed");
+					return context;
+				}
+			}
+			catch (Exception e)
+			{
+				Logger.info("Deposition Not Resumed On Webserver", e.Message);
+			}
+			context.Response.SendResponse("Resuming Failed");
+			return context;
+		}
+		[RestRoute(HttpMethod = HttpMethod.POST, PathInfo = "/stopDeposition")]
+		public IHttpContext stopDeposition(IHttpContext context)
+		{
+			try
+			{
+				if (NoRVAppContext.getInstance().stopDeposition())
+				{
+					context.Response.SendResponse("Stopping Succeessed");
+					return context;
+				}
+			}
+			catch (Exception e)
+			{
+				Logger.info("Deposition Not Stopped On Webserver", e.Message);
+			}
+			context.Response.SendResponse("Stopping Failed");
+			return context;
+		}
 
 
 

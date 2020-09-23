@@ -189,17 +189,8 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ButtonManager.cs" />
-    <Compile Include="ClassAES.cs" />
     <Compile Include="Config.cs" />
-    <Compile Include="DelcomDll.cs" />
     <Compile Include="InfiniteStreaming.cs" />
-    <Compile Include="InfoScreen.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="InfoScreen.Designer.cs">
-      <DependentUpon>InfoScreen.cs</DependentUpon>
-    </Compile>
     <Compile Include="Logger.cs" />
     <Compile Include="MainScreen.cs">
       <SubType>Form</SubType>
@@ -207,32 +198,11 @@
     <Compile Include="MainScreen.Designer.cs">
       <DependentUpon>MainScreen.cs</DependentUpon>
     </Compile>
-    <Compile Include="LoadScreen.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="LoadScreen.Designer.cs">
-      <DependentUpon>LoadScreen.cs</DependentUpon>
-    </Compile>
-    <Compile Include="SelectScreen.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="SelectScreen.Designer.cs">
-      <DependentUpon>SelectScreen.cs</DependentUpon>
-    </Compile>
-    <Compile Include="JobManager.cs" />
-    <Compile Include="L.cs" />
     <Compile Include="NoRVAppContext.cs" />
-    <Compile Include="StatusManage.cs" />
     <Compile Include="OBSManager.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="TimeManage.cs" />
-    <Compile Include="TrackForm.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="TrackForm.Designer.cs">
-      <DependentUpon>TrackForm.cs</DependentUpon>
-    </Compile>
     <Compile Include="TranscribeManager.cs" />
     <Compile Include="Utils.cs" />
     <Compile Include="WaitScreen.cs">
@@ -243,17 +213,8 @@
     </Compile>
     <Compile Include="WebServer.cs" />
     <Compile Include="WinSDK.cs" />
-    <EmbeddedResource Include="InfoScreen.resx">
-      <DependentUpon>InfoScreen.cs</DependentUpon>
-    </EmbeddedResource>
     <EmbeddedResource Include="MainScreen.resx">
       <DependentUpon>MainScreen.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="LoadScreen.resx">
-      <DependentUpon>LoadScreen.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="SelectScreen.resx">
-      <DependentUpon>SelectScreen.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
@@ -265,9 +226,6 @@
       <DependentUpon>Resources.resx</DependentUpon>
       <DesignTime>True</DesignTime>
     </Compile>
-    <EmbeddedResource Include="TrackForm.resx">
-      <DependentUpon>TrackForm.cs</DependentUpon>
-    </EmbeddedResource>
     <EmbeddedResource Include="WaitScreen.resx">
       <DependentUpon>WaitScreen.cs</DependentUpon>
     </EmbeddedResource>
@@ -318,12 +276,6 @@
     <None Include="Resources\loading.gif">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <Content Include="Audios\BreakAlertAudio.mp3">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Audios\InternetDetected.mp3">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
     <Content Include="Audios\LoadingAudio.mp3">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
@@ -334,9 +286,6 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="Audios\UnpauseAudio.mp3">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Audios\UpdatingAudio.mp3">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="Config.xml">
@@ -370,12 +319,6 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="WebServer\jquery.js">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="DelcomDLL.dll">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Log.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="Mirror\adb.exe">

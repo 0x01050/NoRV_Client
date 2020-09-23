@@ -53,10 +53,6 @@ namespace NoRV
                 Logger.info("HTTP Server Starting Failed", e.Message);
             }
 
-            //Thread thread = new Thread(new ThreadStart(reportThread));
-            //thread.Start();
-            //Logger.info("Report Thread Started");
-
             Thread updateInfo = new Thread(new ThreadStart(updateInfoThread));
             updateInfo.Start();
             Logger.info("Update Thread Started");
@@ -101,9 +97,6 @@ namespace NoRV
 
             updateInfo.Abort();
             Logger.info("Update Thread Finished");
-
-            //thread.Abort();
-            //Logger.info("Report Thread Finished");
 
             try
             {
@@ -253,14 +246,5 @@ namespace NoRV
                 Thread.Sleep(100);
             }
         }
-
-        //private static void reportThread()
-        //{
-        //    while(true)
-        //    {
-        //        StatusManage.getInstance().reportBase();
-        //        Thread.Sleep(30 * 1000);
-        //    }
-        //}
     }
 }

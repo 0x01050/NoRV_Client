@@ -54,7 +54,7 @@
             this.MinimizeBox = false;
             this.Name = "WaitScreen";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
-            this.Text = "NoRV Client - Waiting for OBS";
+            this.Text = "NoRV Client";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.WaitScreen_FormClosing);
             this.ResumeLayout(false);
 

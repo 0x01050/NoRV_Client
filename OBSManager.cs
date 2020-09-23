@@ -8,7 +8,6 @@ namespace NoRV
     {
         public static bool CheckOBSRunning()
         {
-
             // Using Web Socket
             var _obs = new OBSWebsocket();
             try
@@ -31,29 +30,18 @@ namespace NoRV
         public static void StartOBSRecording(string witness = null)
         {
             OBSAction(Config.getInstance().getOBSHotkey("start"));
-
-            StatusManage.getInstance().changeOBS("Recording (" + witness + ")");
         }
         public static void StopOBSRecording(string witness = null)
         {
             OBSAction(Config.getInstance().getOBSHotkey("stop"));
-
-            if (witness != null)
-                StatusManage.getInstance().changeOBS("Recording Ended (" + witness + ")");
-            else
-                StatusManage.getInstance().changeOBS("Awaiting Recording (Unknown)");
         }
         public static void PauseOBSRecording(string witness = null)
         {
             OBSAction(Config.getInstance().getOBSHotkey("pause"));
-
-            StatusManage.getInstance().changeOBS("Recording Paused (" + witness + ")");
         }
         public static void UnpauseOBSRecording(string witness = null)
         {
             OBSAction(Config.getInstance().getOBSHotkey("unpause"));
-
-            StatusManage.getInstance().changeOBS("Recording (" + witness + ")");
         }
         public static void SwitchToWitness()
         {

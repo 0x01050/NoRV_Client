@@ -3,20 +3,10 @@
   <Global>
     <Item Key="DefaultVolume" Value="65" />
     <Item Key="AnnounceTime" Value="" />
-    <Item Key="FlashPeriod" Value="100" />
-    <Item Key="PulsatePeriod" Value="1000" />
     <Item Key="LogPath" Value="#LogPath#" />
     <Item Key="VideoPath" Value="#VideoPath#" />
-    <Item Key="BreakAlertInterval" Value="100" />
-    <Item Key="BreakAlertVolume" Value="40" />
-    <Item Key="SelectWitnessAudioTemplate" Value="To start with the #Witness Type# deposition of #Witness# , press the button now." />
-    <Item Key="StartAudioTemplate" Value="We are about to begin the #Witness Type# deposition of #Witness# . Please make sure the camera is directly pointed at the witness and all the mics are outside the enclosure and within 2 feet of their designated speakers. If this was by error, simply ignore this message and the system will reset back. otherwise press the button within 10 seconds to begin." />
     <Item Key="TotalTimeAudioTemplate" Value="We have been on the record for" />
     <Item Key="EndTimeAudioTemplate" Value="Total running time for this deposition is" />
-    <Item Key="AucityAPIUrl" Value="https://acuityscheduling.com/api/v1/appointments?direction=ASC&amp;minDate=%MINDATE%&amp;maxDate=%MAXDATE%" />
-    <Item Key="AucityFetchInterval" Value="60" />
-    <Item Key="AucityAPIUser" Value="19487502" />
-    <Item Key="AucityAPIPass" Value="30fce42b9991bbd32cea500a49c7d3b9" />
     <Item Key="ServerUrl" Value="http://34.71.127.246" />
     <Item Key="Videographer" Value="Monti Majthoob" />
     <Item Key="Commission" Value="4,1,7,6. 0,6,3,9." />
@@ -26,7 +16,6 @@
 
   <OBS>
     <!-- WebSocket -->
-    <Config Key="ProcessName" Value="obs64" />
     <Config Key="StartHotkey" Value="StartRecording" />
     <Config Key="StopHotkey" Value="StopRecording" />
     <Config Key="PauseHotkey" Value="PauseRecording" />
@@ -51,18 +40,6 @@
     <Config Key="Smoothing" XOffset="70" XSpeed="5" YOffset="30" YSpeed="5" ZOffset="10" ZSpeed="3" />
     <Config Key="MinFaceSize" Width="280" Height="280" />
   </OBS>
-
-  <Keywords>
-    <Keyword Key="MachineID" Name="Your NoRV Machine ID" />
-    <Keyword Key="Witness" Name="Enter Name of Witness" />
-    <Keyword Key="Template" Name="Type of Witness" />
-    <Keyword Key="CaseName" Name="Case Name" />
-    <Keyword Key="Counsel" Name="You Represent" />
-    <Keyword Key="Address" Name="Address of Deposition" />
-    <Keyword Key="TimeZone" Name="Time zone where the witness will be" />
-    <Keyword Key="Videographer" Name="Videographer (LEAVE BLANK- INTERNAL USE ONLY)" />
-    <Keyword Key="Commission" Name="Commission (LEAVE BLANK- INTERNAL USE ONLY)" />
-  </Keywords>
   
   <Timezones>
     <Timezone Name="Pacific Time (PDT)" Id="Pacific Standard Time" Daylight="true" Offset="-8" />

@@ -119,12 +119,38 @@ namespace NoRV
                 Logger.info("'" + appName + "' was not started", e.Message);
             }
         }
+        public static bool MainFormClosed(MainScreen _form)
+        {
+            return (_form == null || _form.DialogResult == DialogResult.OK);
+        }
+        public static string buildElapsedTimeString(int totalSec)
+        {
+            string elapse = " ";
+            if (totalSec > 3600)
+            {
+                elapse += String.Format("{0} hours", totalSec / 3600);
+                totalSec %= 3600;
+                if (totalSec > 0)
+                    elapse += ", ";
+            }
+            if (totalSec > 60)
+            {
+                elapse += String.Format("{0} minutes", totalSec / 60);
+                totalSec %= 60;
+                if (totalSec > 0)
+                    elapse += " and ";
+            }
+            if (totalSec > 0)
+                elapse += String.Format("{0} seconds", totalSec);
+            return elapse;
+        }
     }
 
     enum AppStatus
     {
         STOPPED,
-        PLAYING,
+        LOADED,
+        STARTED,
         PAUSED
     }
 }

@@ -50,8 +50,6 @@
             this.pitchTable = new System.Windows.Forms.TableLayoutPanel();
             this.splitContainer2 = new System.Windows.Forms.SplitContainer();
             this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
-            this.lblButtonStatus = new System.Windows.Forms.Label();
-            this.btnSpeak = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.slSpeed)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.slPitch)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.mainSplitter)).BeginInit();
@@ -84,7 +82,6 @@
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer2)).BeginInit();
             this.splitContainer2.Panel2.SuspendLayout();
             this.splitContainer2.SuspendLayout();
-            this.tableLayoutPanel1.SuspendLayout();
             this.SuspendLayout();
             // 
             // txtSource
@@ -212,8 +209,8 @@
             // mainSplitter.Panel2
             // 
             this.mainSplitter.Panel2.Controls.Add(this.splitContainer1);
-            this.mainSplitter.Panel2MinSize = 112;
-            this.mainSplitter.Size = new System.Drawing.Size(544, 471);
+            this.mainSplitter.Panel2MinSize = 72;
+            this.mainSplitter.Size = new System.Drawing.Size(544, 431);
             this.mainSplitter.SplitterDistance = 355;
             this.mainSplitter.TabIndex = 14;
             // 
@@ -253,8 +250,8 @@
             // splitContainer1.Panel2
             // 
             this.splitContainer1.Panel2.Controls.Add(this.splitContainer2);
-            this.splitContainer1.Panel2MinSize = 40;
-            this.splitContainer1.Size = new System.Drawing.Size(544, 112);
+            this.splitContainer1.Panel2MinSize = 0;
+            this.splitContainer1.Size = new System.Drawing.Size(544, 72);
             this.splitContainer1.SplitterDistance = 68;
             this.splitContainer1.TabIndex = 15;
             // 
@@ -381,7 +378,7 @@
             // 
             this.splitContainer2.Panel2.Controls.Add(this.tableLayoutPanel1);
             this.splitContainer2.Panel2MinSize = 304;
-            this.splitContainer2.Size = new System.Drawing.Size(544, 40);
+            this.splitContainer2.Size = new System.Drawing.Size(544, 0);
             this.splitContainer2.SplitterDistance = 236;
             this.splitContainer2.TabIndex = 0;
             // 
@@ -390,49 +387,20 @@
             this.tableLayoutPanel1.ColumnCount = 2;
             this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
             this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
-            this.tableLayoutPanel1.Controls.Add(this.lblButtonStatus, 0, 0);
-            this.tableLayoutPanel1.Controls.Add(this.btnSpeak, 1, 0);
             this.tableLayoutPanel1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tableLayoutPanel1.Location = new System.Drawing.Point(0, 0);
             this.tableLayoutPanel1.Name = "tableLayoutPanel1";
             this.tableLayoutPanel1.RowCount = 1;
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
-            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 20F));
-            this.tableLayoutPanel1.Size = new System.Drawing.Size(304, 40);
+            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 56F));
+            this.tableLayoutPanel1.Size = new System.Drawing.Size(304, 0);
             this.tableLayoutPanel1.TabIndex = 0;
-            // 
-            // lblButtonStatus
-            // 
-            this.lblButtonStatus.BackColor = System.Drawing.SystemColors.ControlDark;
-            this.lblButtonStatus.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.lblButtonStatus.Location = new System.Drawing.Point(3, 0);
-            this.lblButtonStatus.Name = "lblButtonStatus";
-            this.lblButtonStatus.Size = new System.Drawing.Size(146, 40);
-            this.lblButtonStatus.TabIndex = 12;
-            this.lblButtonStatus.Text = "Inititing...";
-            this.lblButtonStatus.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
-            // 
-            // btnSpeak
-            // 
-            this.btnSpeak.BackColor = System.Drawing.SystemColors.Control;
-            this.btnSpeak.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.btnSpeak.Image = global::NoRV.Properties.Resources.play;
-            this.btnSpeak.Location = new System.Drawing.Point(155, 0);
-            this.btnSpeak.Margin = new System.Windows.Forms.Padding(3, 0, 3, 0);
-            this.btnSpeak.Name = "btnSpeak";
-            this.btnSpeak.Size = new System.Drawing.Size(146, 40);
-            this.btnSpeak.TabIndex = 10;
-            this.btnSpeak.Text = "SPEAK IT";
-            this.btnSpeak.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
-            this.btnSpeak.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageBeforeText;
-            this.btnSpeak.UseVisualStyleBackColor = false;
-            this.btnSpeak.Click += new System.EventHandler(this.btnSpeak_Click);
             // 
             // MainScreen
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(584, 511);
+            this.ClientSize = new System.Drawing.Size(584, 471);
             this.Controls.Add(this.mainSplitter);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.MaximizeBox = false;
@@ -441,7 +409,7 @@
             this.Name = "MainScreen";
             this.Padding = new System.Windows.Forms.Padding(20);
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
-            this.Text = "NoRV Client - Main Form";
+            this.Text = "NoRV Client";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.MainScreen_FormClosing);
             this.Load += new System.EventHandler(this.MainScreen_Load);
             ((System.ComponentModel.ISupportInitialize)(this.slSpeed)).EndInit();
@@ -480,7 +448,6 @@
             this.splitContainer2.Panel2.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer2)).EndInit();
             this.splitContainer2.ResumeLayout(false);
-            this.tableLayoutPanel1.ResumeLayout(false);
             this.ResumeLayout(false);
 
         }
@@ -501,8 +468,6 @@
         private System.Windows.Forms.SplitContainer splitter1;
         private System.Windows.Forms.TableLayoutPanel speedTable;
         private System.Windows.Forms.TableLayoutPanel pitchTable;
-        private System.Windows.Forms.Label lblButtonStatus;
-        private System.Windows.Forms.Button btnSpeak;
         private System.Windows.Forms.SplitContainer splitContainer1;
         private System.Windows.Forms.SplitContainer splitContainer2;
         private System.Windows.Forms.TableLayoutPanel tableLayoutPanel1;

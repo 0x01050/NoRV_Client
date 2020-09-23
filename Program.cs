@@ -1,6 +1,7 @@
 ﻿using GoogleTranscribing;
 using Grapevine.Server;
 using Newtonsoft.Json;
+using NoRV.Properties;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -83,7 +84,7 @@ namespace NoRV
             OBSManager.StopOBSRecording();
             Logger.info("NoRV Fully Started");
 //  ####################################################################  //
-/**/        Application.Run(NoRVAppContext.getInstance());              /**/
+            Application.Run(ControlForm.getInstance());
 //  ####################################################################  //
             Logger.info("Finishing NoRV");
             Utils.Stop3rdParty("Track");

@@ -1,7 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Drawing;
 using System.Reflection;
+using System.Threading;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace NoRV
@@ -26,14 +29,7 @@ namespace NoRV
             _status = newStatus;
         }
         private MainScreen _mainForm = null;
-        private void closeMainForm()
-        {
-            if (_mainForm != null)
-            {
-                _mainForm.Close();
-            }
-            _mainForm = null;
-        }
+
         public bool loadDeposition(Dictionary<string, string> param)
         {
             try
@@ -45,7 +41,7 @@ namespace NoRV
                     return true;
                 }
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 Logger.info("Deposition Loading Failed On Context", e.Message);
             }
@@ -55,12 +51,13 @@ namespace NoRV
         {
             try
             {
-                if(getStatus() == AppStatus.LOADED && !Utils.MainFormClosed(_mainForm) && _mainForm.StartRecording())
+                if (getStatus() == AppStatus.LOADED && !Utils.MainFormClosed(_mainForm) && !_mainForm.isIgnoreInput())
                 {
+                    _mainForm.StartRecording();
                     return true;
                 }
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 Logger.info("Deposition Starting Failed On Context", e.Message);
             }
@@ -70,8 +67,9 @@ namespace NoRV
         {
             try
             {
-                if (getStatus() == AppStatus.STARTED && !Utils.MainFormClosed(_mainForm) && _mainForm.PauseRecording())
+                if (getStatus() == AppStatus.STARTED && !Utils.MainFormClosed(_mainForm) && !_mainForm.isIgnoreInput())
                 {
+                    _mainForm.PauseRecording();
                     return true;
                 }
             }
@@ -85,8 +83,9 @@ namespace NoRV
         {
             try
             {
-                if (getStatus() == AppStatus.PAUSED && !Utils.MainFormClosed(_mainForm) && _mainForm.ResumeRecording())
+                if (getStatus() == AppStatus.PAUSED && !Utils.MainFormClosed(_mainForm) && !_mainForm.isIgnoreInput())
                 {
+                    _mainForm.ResumeRecording();
                     return true;
                 }
             }
@@ -100,8 +99,9 @@ namespace NoRV
         {
             try
             {
-                if (getStatus() == AppStatus.STARTED && !Utils.MainFormClosed(_mainForm) && _mainForm.StopRecording())
+                if (getStatus() == AppStatus.STARTED && !Utils.MainFormClosed(_mainForm) && !_mainForm.isIgnoreInput())
                 {
+                    _mainForm.StopRecording();
                     return true;
                 }
             }
@@ -121,7 +121,6 @@ namespace NoRV
             notifyIcon.Icon = Icon.ExtractAssociatedIcon(Assembly.GetExecutingAssembly().Location);
             notifyIcon.ContextMenu = new ContextMenu(new MenuItem[] { exitMenuItem });
             notifyIcon.Visible = true;
-
         }
         void Exit(object sender, EventArgs e)
         {
@@ -131,6 +130,11 @@ namespace NoRV
             notifyIcon.Visible = false;
 
             ExitThread();
+        }
+        public bool temp(Dictionary<string, string> param)
+        {
+            Utils.ExecuteInMainContext(() => loadDeposition(param));
+            return true;
         }
     }
 }

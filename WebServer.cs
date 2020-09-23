@@ -6,6 +6,7 @@ using Grapevine.Shared;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.Web;
 
 namespace NoRV
 {
@@ -39,7 +40,7 @@ namespace NoRV
 		[RestRoute(HttpMethod = HttpMethod.GET, PathInfo = "/getStatus")]
 		public IHttpContext getStatus(IHttpContext context)
         {
-			context.Response.SendResponse(NoRVAppContext.getInstance().getStatus().ToString());
+			context.Response.SendResponse(ControlForm.getInstance().getStatus().ToString());
 			return context;
         }
 		[RestRoute(HttpMethod = HttpMethod.POST, PathInfo = "/loadDeposition")]
@@ -48,10 +49,15 @@ namespace NoRV
 			try
 			{
 				string payload = context.Request.Payload;
-				Dictionary<string, string> param = JsonConvert.DeserializeObject<Dictionary<string, string>>(payload);
-				if (NoRVAppContext.getInstance().loadDeposition(param))
+				var paramCollection = HttpUtility.ParseQueryString(payload);
+				Dictionary<string, string> param = new Dictionary<string, string>();
+				foreach (var k in paramCollection.AllKeys)
 				{
-					context.Response.SendResponse("Loading Succeessed");
+					param.Add(k, paramCollection[k]);
+				}
+				if (ControlForm.getInstance().loadDeposition(param))
+				{
+					context.Response.SendResponse("Loading Successed");
 					return context;
 				}
 			}
@@ -67,9 +73,9 @@ namespace NoRV
         {
 			try
 			{
-				if (NoRVAppContext.getInstance().startDeposition())
+				if (ControlForm.getInstance().startDeposition())
 				{
-					context.Response.SendResponse("Starting Succeessed");
+					context.Response.SendResponse("Starting Successed");
 					return context;
 				}
 			}
@@ -85,9 +91,9 @@ namespace NoRV
 		{
 			try
 			{
-				if (NoRVAppContext.getInstance().pauseDeposition())
+				if (ControlForm.getInstance().pauseDeposition())
 				{
-					context.Response.SendResponse("Pausing Succeessed");
+					context.Response.SendResponse("Pausing Successed");
 					return context;
 				}
 			}
@@ -103,9 +109,9 @@ namespace NoRV
 		{
 			try
 			{
-				if (NoRVAppContext.getInstance().resumeDeposition())
+				if (ControlForm.getInstance().resumeDeposition())
 				{
-					context.Response.SendResponse("Resuming Succeessed");
+					context.Response.SendResponse("Resuming Successed");
 					return context;
 				}
 			}
@@ -121,9 +127,9 @@ namespace NoRV
 		{
 			try
 			{
-				if (NoRVAppContext.getInstance().stopDeposition())
+				if (ControlForm.getInstance().stopDeposition())
 				{
-					context.Response.SendResponse("Stopping Succeessed");
+					context.Response.SendResponse("Stopping Successed");
 					return context;
 				}
 			}

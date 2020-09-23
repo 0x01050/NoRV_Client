@@ -5,7 +5,9 @@ using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
@@ -144,9 +146,21 @@ namespace NoRV
                 elapse += String.Format("{0} seconds", totalSec);
             return elapse;
         }
+
+        public static void ExecuteInMainContext(Action action)
+        {
+            
+            var synchronization = SynchronizationContext.Current;
+            if (synchronization != null)
+            {
+                synchronization.Post(_ => action(), null);
+            }
+            else
+                Task.Factory.StartNew(action);
+        }
     }
 
-    enum AppStatus
+    public enum AppStatus
     {
         STOPPED,
         LOADED,

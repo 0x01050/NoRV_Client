@@ -75,7 +75,7 @@ namespace NoRV
 
             PlayMP3("Audios/LoadingAudio.mp3", (s, e) =>
             {
-                NoRVAppContext.getInstance().setStatus(AppStatus.LOADED);
+                ControlForm.getInstance().setStatus(AppStatus.LOADED);
             });
 
             Application.UseWaitCursor = false;
@@ -90,7 +90,7 @@ namespace NoRV
 
             DisposeAudioPlayer();
 
-            NoRVAppContext.getInstance().setStatus(AppStatus.STOPPED);
+            ControlForm.getInstance().setStatus(AppStatus.STOPPED);
             InsertLog("End");
 
             OBSManager.StopOBSRecording(witness);
@@ -172,82 +172,75 @@ namespace NoRV
 
         private void GenerateGoogleTTS()
         {
-            this.Invoke(new Action(() =>
+            DateTime tzNow = TimeManage.getCurrentTime();
+            SynthesisInput input = new SynthesisInput
             {
-                DateTime tzNow = TimeManage.getCurrentTime();
-                SynthesisInput input = new SynthesisInput
-                {
-                    Text = voiceText.Replace(this.lastTime, tzNow.ToString("h:mm tt"))
-                };
-                VoiceSelectionParams voice = new VoiceSelectionParams
-                {
-                    LanguageCode = "en-US",
-                    Name = cbVoice.SelectedItem.ToString()
-                };
-                AudioConfig config = new AudioConfig
-                {
-                    AudioEncoding = AudioEncoding.Mp3,
-                    Pitch = pitch,
-                    SpeakingRate = speed
-                };
-                var response = client.SynthesizeSpeech(new SynthesizeSpeechRequest
-                {
-                    Input = input,
-                    Voice = voice,
-                    AudioConfig = config
-                });
-                using (Stream output = File.Create("tts.mp3"))
-                {
-                    response.AudioContent.WriteTo(output);
-                }
-            }));
+                Text = voiceText.Replace(this.lastTime, tzNow.ToString("h:mm tt"))
+            };
+            VoiceSelectionParams voice = new VoiceSelectionParams
+            {
+                LanguageCode = "en-US",
+                Name = cbVoice.SelectedItem.ToString()
+            };
+            AudioConfig config = new AudioConfig
+            {
+                AudioEncoding = AudioEncoding.Mp3,
+                Pitch = pitch,
+                SpeakingRate = speed
+            };
+            var response = client.SynthesizeSpeech(new SynthesizeSpeechRequest
+            {
+                Input = input,
+                Voice = voice,
+                AudioConfig = config
+            });
+            using (Stream output = File.Create("tts.mp3"))
+            {
+                response.AudioContent.WriteTo(output);
+            }
         }
         private void PlayMP3(string mp3File, EventHandler<StoppedEventArgs> stopHandler = null, int volume = -1)
         {
+            ignoreInput = true;
+
             DisposeAudioPlayer();
-            this.Invoke(new Action(() =>
+
+            waveOutDevice = new WaveOut();
+            audioFileReader = new AudioFileReader(mp3File);
+            waveOutDevice.Init(audioFileReader);
+
+            if (volume == -1)
+                waveOutDevice.Volume = 1f;
+            else
+                waveOutDevice.Volume = volume * 1f / Config.getInstance().getDefaultVolume();
+
+            waveOutDevice.Play();
+            waveOutDevice.PlaybackStopped += (s, e) =>
             {
-                ignoreInput = true;
-                waveOutDevice = new WaveOut();
-                audioFileReader = new AudioFileReader(mp3File);
-                waveOutDevice.Init(audioFileReader);
-
-                if (volume == -1)
-                    waveOutDevice.Volume = 1f;
-                else
-                    waveOutDevice.Volume = volume * 1f / Config.getInstance().getDefaultVolume();
-
-                waveOutDevice.Play();
-                waveOutDevice.PlaybackStopped += (s, e) =>
-                {
-                    DisposeAudioPlayer();
-                    ignoreInput = false;
-                };
-                if (stopHandler != null)
-                {
-                    waveOutDevice.PlaybackStopped += stopHandler;
-                }
-            }));
+                DisposeAudioPlayer();
+                ignoreInput = false;
+            };
+            if (stopHandler != null)
+            {
+                waveOutDevice.PlaybackStopped += stopHandler;
+            }
         }
         private void DisposeAudioPlayer()
         {
-            this.Invoke(new Action(() =>
+            if (waveOutDevice != null)
             {
-                if (waveOutDevice != null)
-                {
-                    waveOutDevice.Stop();
-                }
-                if (audioFileReader != null)
-                {
-                    audioFileReader.Dispose();
-                    audioFileReader = null;
-                }
-                if (waveOutDevice != null)
-                {
-                    waveOutDevice.Dispose();
-                    waveOutDevice = null;
-                }
-            }));
+                waveOutDevice.Stop();
+            }
+            if (audioFileReader != null)
+            {
+                audioFileReader.Dispose();
+                audioFileReader = null;
+            }
+            if (waveOutDevice != null)
+            {
+                waveOutDevice.Dispose();
+                waveOutDevice = null;
+            }
         }
 
 
@@ -264,13 +257,14 @@ namespace NoRV
             lblPitchValue.Text = String.Format("{0:N2}", this.pitch);
         }
 
-        public bool StartRecording()
+        public bool isIgnoreInput()
         {
-            if (ignoreInput)
-                return false;
-
+            return ignoreInput;
+        }
+        public void StartRecording()
+        {
             ignoreInput = true;
-            NoRVAppContext.getInstance().setStatus(AppStatus.STARTED);
+            ControlForm.getInstance().setStatus(AppStatus.STARTED);
             InsertLog("Start");
 
             Application.UseWaitCursor = true;
@@ -283,13 +277,9 @@ namespace NoRV
             {
                 File.Delete("tts.mp3");
             });
-            return true;
         }
-        public bool StopRecording()
+        public void StopRecording()
         {
-            if (ignoreInput)
-                return false;
-
             ignoreInput = true;
             PlayMP3("Audios/StopAudio.mp3", (s, e) =>
             {
@@ -311,14 +301,9 @@ namespace NoRV
                     };
                 };
             });
-
-            return true;
         }
-        public bool PauseRecording()
+        public void PauseRecording()
         {
-            if (ignoreInput)
-                return false;
-
             PlayMP3("Audios/PauseAudio.mp3", (s, e) =>
             {
                 ignoreInput = true;
@@ -328,7 +313,7 @@ namespace NoRV
                 pauseAudio.SpeakAsync(Config.getInstance().getAnnounceTime() + tzNow.ToString(" h:mm tt"));
                 pauseAudio.SpeakCompleted += (ss, ee) =>
                 {
-                    NoRVAppContext.getInstance().setStatus(AppStatus.PAUSED);
+                    ControlForm.getInstance().setStatus(AppStatus.PAUSED);
                     InsertLog("Off");
 
                     Application.UseWaitCursor = true;
@@ -344,15 +329,10 @@ namespace NoRV
                     };
                 };
             });
-
-            return true;
         }
-        public bool ResumeRecording()
+        public void ResumeRecording()
         {
-            if (ignoreInput)
-                return false;
-
-            NoRVAppContext.getInstance().setStatus(AppStatus.STARTED);
+            ControlForm.getInstance().setStatus(AppStatus.STARTED);
             InsertLog("On");
             
             Application.UseWaitCursor = true;
@@ -372,8 +352,6 @@ namespace NoRV
                     ignoreInput = false;
                 };
             });
-
-            return true;
         }
 
 

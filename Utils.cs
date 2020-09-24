@@ -123,7 +123,7 @@ namespace NoRV
         }
         public static bool MainFormClosed(MainScreen _form)
         {
-            return (_form == null || _form.DialogResult == DialogResult.OK);
+            return (_form == null || _form.DialogResult != DialogResult.None);
         }
         public static string buildElapsedTimeString(int totalSec)
         {

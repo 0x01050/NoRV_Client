@@ -82,7 +82,7 @@ namespace NoRV
         }
         private void MainScreen_FormClosing(object sender, FormClosingEventArgs e)
         {
-            if(DialogResult != DialogResult.OK)
+            if(DialogResult == DialogResult.None)
             {
                 e.Cancel = true;
                 return;
@@ -94,7 +94,9 @@ namespace NoRV
             InsertLog("End");
 
             OBSManager.StopOBSRecording(witness);
-            SaveLog();
+
+            if(DialogResult == DialogResult.OK)
+                SaveLog();
         }
 
         // For Logging
@@ -260,6 +262,11 @@ namespace NoRV
         public bool isIgnoreInput()
         {
             return ignoreInput;
+        }
+        public void CancelRecording()
+        {
+            DialogResult = DialogResult.Cancel;
+            Close();
         }
         public void StartRecording()
         {

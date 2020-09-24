@@ -74,17 +74,14 @@
     <Reference Include="Accord.Video.DirectShow, Version=3.8.0.0, Culture=neutral, PublicKeyToken=fa1a88e29555ccf7, processorArchitecture=MSIL">
       <HintPath>packages\Accord.Video.DirectShow.3.8.0\lib\net462\Accord.Video.DirectShow.dll</HintPath>
     </Reference>
-    <Reference Include="AudioSwitcher.AudioApi, Version=4.0.0.308, Culture=neutral, PublicKeyToken=fda5729e2db3a64f, processorArchitecture=MSIL">
-      <HintPath>packages\AudioSwitcher.AudioApi.4.0.0-alpha5\lib\net45\AudioSwitcher.AudioApi.dll</HintPath>
+    <Reference Include="Emgu.CV.Bitmap, Version=4.4.0.4061, Culture=neutral, PublicKeyToken=7281126722ab4438, processorArchitecture=MSIL">
+      <HintPath>packages\Emgu.CV.Bitmap.4.4.0.4061\lib\netstandard2.0\Emgu.CV.Bitmap.dll</HintPath>
     </Reference>
-    <Reference Include="AudioSwitcher.AudioApi.CoreAudio, Version=4.0.0.308, Culture=neutral, PublicKeyToken=fda5729e2db3a64f, processorArchitecture=MSIL">
-      <HintPath>packages\AudioSwitcher.AudioApi.CoreAudio.4.0.0-alpha5\lib\net45\AudioSwitcher.AudioApi.CoreAudio.dll</HintPath>
+    <Reference Include="Emgu.CV.Platform.NetFramework, Version=4.4.0.4061, Culture=neutral, PublicKeyToken=7281126722ab4438, processorArchitecture=MSIL">
+      <HintPath>packages\Emgu.CV.UI.4.4.0.4061\lib\net461\Emgu.CV.Platform.NetFramework.dll</HintPath>
     </Reference>
-    <Reference Include="Emgu.CV.Platform.NetFramework, Version=4.3.0.3890, Culture=neutral, PublicKeyToken=7281126722ab4438, processorArchitecture=MSIL">
-      <HintPath>packages\Emgu.CV.4.3.0.3890\lib\net461\Emgu.CV.Platform.NetFramework.dll</HintPath>
-    </Reference>
-    <Reference Include="Emgu.CV.Platform.NetStandard, Version=4.3.0.3890, Culture=neutral, PublicKeyToken=7281126722ab4438, processorArchitecture=MSIL">
-      <HintPath>packages\Emgu.CV.4.3.0.3890\lib\net461\Emgu.CV.Platform.NetStandard.dll</HintPath>
+    <Reference Include="Emgu.CV.Platform.NetStandard, Version=4.4.0.4061, Culture=neutral, PublicKeyToken=7281126722ab4438, processorArchitecture=MSIL">
+      <HintPath>packages\Emgu.CV.4.4.0.4061\lib\netstandard2.0\Emgu.CV.Platform.NetStandard.dll</HintPath>
     </Reference>
     <Reference Include="Google.Api.CommonProtos, Version=2.1.0.0, Culture=neutral, PublicKeyToken=3ec5ea7f18953e47, processorArchitecture=MSIL">
       <HintPath>packages\Google.Api.CommonProtos.2.1.0\lib\net461\Google.Api.CommonProtos.dll</HintPath>
@@ -153,7 +150,16 @@
     <Reference Include="System.Buffers, Version=4.0.3.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
       <HintPath>packages\System.Buffers.4.5.1\lib\net461\System.Buffers.dll</HintPath>
     </Reference>
+    <Reference Include="System.ComponentModel.Composition" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Drawing.Common, Version=4.0.0.1, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>packages\System.Drawing.Common.4.7.0\lib\net461\System.Drawing.Common.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Drawing.Primitives, Version=4.0.1.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>packages\System.Drawing.Primitives.4.3.0\lib\net45\System.Drawing.Primitives.dll</HintPath>
+      <Private>True</Private>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="System.Interactive.Async, Version=4.1.0.0, Culture=neutral, PublicKeyToken=94bc3704cddfc263, processorArchitecture=MSIL">
       <HintPath>packages\System.Interactive.Async.4.1.1\lib\net461\System.Interactive.Async.dll</HintPath>
     </Reference>
@@ -168,8 +174,18 @@
     <Reference Include="System.Numerics.Vectors, Version=4.1.4.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
       <HintPath>packages\System.Numerics.Vectors.4.5.0\lib\net46\System.Numerics.Vectors.dll</HintPath>
     </Reference>
+    <Reference Include="System.Runtime, Version=4.1.1.1, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>packages\System.Runtime.4.3.1\lib\net462\System.Runtime.dll</HintPath>
+      <Private>True</Private>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="System.Runtime.CompilerServices.Unsafe, Version=4.0.6.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
       <HintPath>packages\System.Runtime.CompilerServices.Unsafe.4.7.1\lib\net461\System.Runtime.CompilerServices.Unsafe.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Runtime.InteropServices.RuntimeInformation, Version=4.0.1.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>packages\System.Runtime.InteropServices.RuntimeInformation.4.3.0\lib\net45\System.Runtime.InteropServices.RuntimeInformation.dll</HintPath>
+      <Private>True</Private>
+      <Private>True</Private>
     </Reference>
     <Reference Include="System.Speech" />
     <Reference Include="System.Threading.Tasks.Extensions, Version=4.2.0.1, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
@@ -390,13 +406,13 @@
     </PropertyGroup>
     <Error Condition="!Exists('packages\Accord.3.8.0\build\Accord.targets')" Text="$([System.String]::Format('$(ErrorText)', 'packages\Accord.3.8.0\build\Accord.targets'))" />
     <Error Condition="!Exists('packages\Grpc.Core.2.30.0\build\net45\Grpc.Core.targets')" Text="$([System.String]::Format('$(ErrorText)', 'packages\Grpc.Core.2.30.0\build\net45\Grpc.Core.targets'))" />
-    <Error Condition="!Exists('packages\Emgu.CV.runtime.windows.4.3.0.3890\build\Emgu.CV.runtime.windows.targets')" Text="$([System.String]::Format('$(ErrorText)', 'packages\Emgu.CV.runtime.windows.4.3.0.3890\build\Emgu.CV.runtime.windows.targets'))" />
+    <Error Condition="!Exists('packages\Emgu.CV.runtime.windows.4.4.0.4061\build\Emgu.CV.runtime.windows.targets')" Text="$([System.String]::Format('$(ErrorText)', 'packages\Emgu.CV.runtime.windows.4.4.0.4061\build\Emgu.CV.runtime.windows.targets'))" />
   </Target>
   <Import Project="packages\Accord.3.8.0\build\Accord.targets" Condition="Exists('packages\Accord.3.8.0\build\Accord.targets')" />
   <Import Project="packages\Grpc.Core.2.30.0\build\net45\Grpc.Core.targets" Condition="Exists('packages\Grpc.Core.2.30.0\build\net45\Grpc.Core.targets')" />
-  <Import Project="packages\Emgu.CV.runtime.windows.4.3.0.3890\build\Emgu.CV.runtime.windows.targets" Condition="Exists('packages\Emgu.CV.runtime.windows.4.3.0.3890\build\Emgu.CV.runtime.windows.targets')" />
   <PropertyGroup>
     <PreBuildEvent>
     </PreBuildEvent>
   </PropertyGroup>
+  <Import Project="packages\Emgu.CV.runtime.windows.4.4.0.4061\build\Emgu.CV.runtime.windows.targets" Condition="Exists('packages\Emgu.CV.runtime.windows.4.4.0.4061\build\Emgu.CV.runtime.windows.targets')" />
 </Project>

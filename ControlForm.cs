@@ -76,6 +76,25 @@ namespace NoRV
             }
             return false;
         }
+        public bool cancelDeposition()
+        {
+            try
+            {
+                if (getStatus() == AppStatus.LOADED && !Utils.MainFormClosed(_mainForm) && !_mainForm.isIgnoreInput())
+                {
+                    Invoke(new Action(() =>
+                    {
+                        _mainForm.CancelRecording();
+                    }));
+                    return true;
+                }
+            }
+            catch (Exception e)
+            {
+                Logger.info("Deposition Starting Failed On Context", e.Message);
+            }
+            return false;
+        }
         public bool startDeposition()
         {
             try

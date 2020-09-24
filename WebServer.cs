@@ -86,6 +86,24 @@ namespace NoRV
 			context.Response.SendResponse("Starting Failed");
 			return context;
 		}
+		[RestRoute(HttpMethod = HttpMethod.POST, PathInfo = "/cancelDeposition")]
+		public IHttpContext cancelDeposition(IHttpContext context)
+		{
+			try
+			{
+				if (ControlForm.getInstance().cancelDeposition())
+				{
+					context.Response.SendResponse("Starting Successed");
+					return context;
+				}
+			}
+			catch (Exception e)
+			{
+				Logger.info("Deposition Not Started On Webserver", e.Message);
+			}
+			context.Response.SendResponse("Starting Failed");
+			return context;
+		}
 		[RestRoute(HttpMethod = HttpMethod.POST, PathInfo = "/pauseDeposition")]
 		public IHttpContext pauseDeposition(IHttpContext context)
 		{

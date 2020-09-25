@@ -132,6 +132,10 @@ namespace NoRV
                 {
                     HttpClient client = new HttpClient();
                     HttpResponseMessage response = await client.GetAsync(Config.getInstance().getServerUrl() + "/info");
+
+                    string prev_videographer = videographer;
+                    string prev_commission = commission;
+
                     videographer = Config.getInstance().getVideographer();
                     commission = Config.getInstance().getCommission();
                     if (response.StatusCode == HttpStatusCode.OK)
@@ -150,7 +154,8 @@ namespace NoRV
                                     break;
                             }
                         }
-                        Logger.info("Videographer and Commission Updated", "Videographer: " + videographer + ", Commission: " + commission);
+                        if(videographer != prev_videographer || commission != prev_commission)
+                            Logger.info("Videographer and Commission Updated", "Videographer: " + videographer + ", Commission: " + commission);
                     }
                 }
                 catch (Exception e)

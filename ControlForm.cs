@@ -43,6 +43,10 @@ namespace NoRV
         private void ControlForm_FormClosing(object sender, FormClosingEventArgs e)
         {
             notifyIcon.Visible = false;
+            if(!Utils.MainFormClosed(_mainForm))
+            {
+                _mainForm.CancelRecording();
+            }
         }
 
 

@@ -396,11 +396,16 @@ namespace NoRV
                 while (true)
                 {
                     Thread.Sleep(Config.getInstance().getAlertInterval() * 1000);
-                    PlayMP3("Audios/BreakAlertAudio.mp3", null, Config.getInstance().getAlertVolume());
+                    Invoke(new Action(() =>
+                    {
+                        PlayMP3("Audios/BreakAlertAudio.mp3", null, Config.getInstance().getAlertVolume());
+                    }));
                 }
             }
-            catch (ThreadAbortException) { }
-            catch (Exception) { }
+            catch (Exception e)
+            {
+                Logger.info("BreakAlert Exception", e.Message);
+            }
         }
 
     }

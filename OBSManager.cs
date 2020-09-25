@@ -74,7 +74,7 @@ namespace NoRV
             }
             catch(Exception e)
             {
-                Logger.info("OBS Action Failed", e.Message);
+                Logger.info("OBS Action '" + action + "' Failed", e.Message);
             }
 
         }

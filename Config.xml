@@ -5,6 +5,8 @@
     <Item Key="AnnounceTime" Value="" />
     <Item Key="LogPath" Value="#LogPath#" />
     <Item Key="VideoPath" Value="#VideoPath#" />
+    <Item Key="BreakAlertInterval" Value="100" />
+    <Item Key="BreakAlertVolume" Value="40" />
     <Item Key="TotalTimeAudioTemplate" Value="We have been on the record for" />
     <Item Key="EndTimeAudioTemplate" Value="Total running time for this deposition is" />
     <Item Key="ServerUrl" Value="http://34.71.127.246" />

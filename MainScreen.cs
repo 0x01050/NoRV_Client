@@ -90,6 +90,8 @@ namespace NoRV
 
             DisposeAudioPlayer();
 
+            stopAlertThread();
+
             ControlForm.getInstance().setStatus(AppStatus.STOPPED);
             InsertLog("End");
 
@@ -142,6 +144,14 @@ namespace NoRV
                 logs.Add(lastLog + " - " + action + " =" + Utils.buildElapsedTimeString(elapSec));
                 totalSeconds += elapSec;
             }
+        }
+        public int getBreaksNumber()
+        {
+            return logs.Count - 2;
+        }
+        public string getRunningTime()
+        {
+            return Utils.buildSimpleElapsedTimeString(totalSeconds);
         }
 
         private void InitGoogleCredential()
@@ -326,6 +336,7 @@ namespace NoRV
                     Application.UseWaitCursor = true;
                     Thread.Sleep(1000);
                     OBSManager.PauseOBSRecording(witness);
+                    startAlertThread();
                     Application.UseWaitCursor = false;
 
                     SpeechSynthesizer totalAudio = new SpeechSynthesizer();
@@ -344,6 +355,7 @@ namespace NoRV
             
             Application.UseWaitCursor = true;
             OBSManager.UnpauseOBSRecording(witness);
+            stopAlertThread();
             Thread.Sleep(1000);
             Application.UseWaitCursor = false;
 
@@ -362,6 +374,34 @@ namespace NoRV
         }
 
 
+        private Thread alertThread = null;
+        private void startAlertThread()
+        {
+            stopAlertThread();
+            alertThread = new Thread(new ThreadStart(AlertProc));
+            alertThread.Start();
+        }
+        private void stopAlertThread()
+        {
+            if (alertThread != null)
+            {
+                alertThread.Abort();
+                alertThread = null;
+            }
+        }
+        private void AlertProc()
+        {
+            try
+            {
+                while (true)
+                {
+                    Thread.Sleep(Config.getInstance().getAlertInterval() * 1000);
+                    PlayMP3("Audios/BreakAlertAudio.mp3", null, Config.getInstance().getAlertVolume());
+                }
+            }
+            catch (ThreadAbortException) { }
+            catch (Exception) { }
+        }
 
     }
 }

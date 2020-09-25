@@ -33,6 +33,8 @@ namespace NoRV
         private int _defaultVolume = 65;
         private string _announceTime = "";
         private string _logPath = "";
+        private int _alertInterval = 100;
+        private int _alertVolume = 40;
         private string _totalTimeTemplate = "";
         private string _endTimeTemplate = "";
         private string _serverUrl = "";
@@ -59,6 +61,12 @@ namespace NoRV
                         break;
                     case "LogPath":
                         _logPath = (string)item.Attribute("Value");
+                        break;
+                    case "BreakAlertInterval":
+                        _alertInterval = (int)item.Attribute("Value");
+                        break;
+                    case "BreakAlertVolume":
+                        _alertVolume = (int)item.Attribute("Value");
                         break;
                     case "TotalTimeAudioTemplate":
                         _totalTimeTemplate = (string)item.Attribute("Value");
@@ -97,6 +105,14 @@ namespace NoRV
         public string getLogPath()
         {
             return _logPath;
+        }
+        public int getAlertInterval()
+        {
+            return _alertInterval;
+        }
+        public int getAlertVolume()
+        {
+            return _alertVolume;
         }
         public string getTotalTimeTemplate()
         {

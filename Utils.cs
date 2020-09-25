@@ -146,7 +146,19 @@ namespace NoRV
                 elapse += String.Format("{0} seconds", totalSec);
             return elapse;
         }
-
+        public static string buildSimpleElapsedTimeString(int totalSec)
+        {
+            string elapse = "";
+            if (totalSec > 3600)
+            {
+                elapse += String.Format("{0}:", totalSec / 3600);
+                totalSec %= 3600;
+            }
+            elapse += String.Format("{0}:", totalSec / 60);
+            totalSec %= 60;
+            elapse += String.Format("{0}", totalSec);
+            return elapse;
+        }
         public static void ExecuteInMainContext(Action action)
         {
             

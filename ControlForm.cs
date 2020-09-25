@@ -56,6 +56,30 @@ namespace NoRV
             _status = newStatus;
         }
         private MainScreen _mainForm = null;
+        public bool getIgnorable()
+        {
+            if(!Utils.MainFormClosed(_mainForm))
+            {
+                return _mainForm.isIgnoreInput();
+            }
+            return false;
+        }
+        public string getRunningTime()
+        {
+            if (!Utils.MainFormClosed(_mainForm))
+            {
+                return _mainForm.getRunningTime();
+            }
+            return "?";
+        }
+        public string getBreaksNumber()
+        {
+            if (!Utils.MainFormClosed(_mainForm))
+            {
+                return _mainForm.getBreaksNumber().ToString();
+            }
+            return "";
+        }
 
         public bool loadDeposition(Dictionary<string, string> param)
         {

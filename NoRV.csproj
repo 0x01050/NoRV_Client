@@ -281,6 +281,9 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Audios\BreakAlertAudio.mp3">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="WebServer\nicepage.css">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>

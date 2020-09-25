@@ -1,16 +1,14 @@
-﻿using Emgu.CV.Aruco;
-using Grapevine.Interfaces.Server;
+﻿using Grapevine.Interfaces.Server;
 using Grapevine.Server;
 using Grapevine.Server.Attributes;
 using Grapevine.Shared;
-using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Web;
 
 namespace NoRV
 {
-	[RestResource]
+    [RestResource]
 	public class WebServer
 	{
 		[RestRoute(HttpMethod = HttpMethod.GET, PathInfo = "/")]
@@ -40,7 +38,22 @@ namespace NoRV
 		[RestRoute(HttpMethod = HttpMethod.GET, PathInfo = "/getStatus")]
 		public IHttpContext getStatus(IHttpContext context)
         {
-			context.Response.SendResponse(ControlForm.getInstance().getStatus().ToString());
+			AppStatus status = ControlForm.getInstance().getStatus();
+			bool reading = false;
+			string totaltime = "?";
+			string breaks = "?";
+
+			if(status != AppStatus.STOPPED)
+            {
+				reading = ControlForm.getInstance().getIgnorable();
+				if(status == AppStatus.PAUSED)
+                {
+					totaltime = ControlForm.getInstance().getRunningTime();
+					breaks = ControlForm.getInstance().getBreaksNumber();
+                }
+            }
+
+			context.Response.SendResponse(status + "," + reading + "," + totaltime + "," + breaks);
 			return context;
         }
 		[RestRoute(HttpMethod = HttpMethod.POST, PathInfo = "/loadDeposition")]
@@ -57,7 +70,7 @@ namespace NoRV
 				}
 				if (ControlForm.getInstance().loadDeposition(param))
 				{
-					context.Response.SendResponse("Loading Successed");
+					context.Response.SendResponse("Loading Succeed");
 					return context;
 				}
 			}
@@ -75,7 +88,7 @@ namespace NoRV
 			{
 				if (ControlForm.getInstance().startDeposition())
 				{
-					context.Response.SendResponse("Starting Successed");
+					context.Response.SendResponse("Starting Succeed");
 					return context;
 				}
 			}
@@ -93,7 +106,7 @@ namespace NoRV
 			{
 				if (ControlForm.getInstance().cancelDeposition())
 				{
-					context.Response.SendResponse("Starting Successed");
+					context.Response.SendResponse("Starting Succeed");
 					return context;
 				}
 			}
@@ -111,7 +124,7 @@ namespace NoRV
 			{
 				if (ControlForm.getInstance().pauseDeposition())
 				{
-					context.Response.SendResponse("Pausing Successed");
+					context.Response.SendResponse("Pausing Succeed");
 					return context;
 				}
 			}
@@ -129,7 +142,7 @@ namespace NoRV
 			{
 				if (ControlForm.getInstance().resumeDeposition())
 				{
-					context.Response.SendResponse("Resuming Successed");
+					context.Response.SendResponse("Resuming Succeed");
 					return context;
 				}
 			}
@@ -147,7 +160,7 @@ namespace NoRV
 			{
 				if (ControlForm.getInstance().stopDeposition())
 				{
-					context.Response.SendResponse("Stopping Successed");
+					context.Response.SendResponse("Stopping Succeed");
 					return context;
 				}
 			}

@@ -1,4 +1,5 @@
-﻿using GoogleTranscribing;
+﻿using AudioSwitcher.AudioApi.CoreAudio;
+using GoogleTranscribing;
 using Grapevine.Server;
 using Newtonsoft.Json;
 using NoRV.Properties;
@@ -30,7 +31,7 @@ namespace NoRV
 
             bool autoStart = Config.getInstance().getAutoStart();
             Logger.info("Checking AutoStart is Enabled", autoStart.ToString());
-            if(!autoStart)
+            if (!autoStart)
             {
                 Logger.info("Exiting from NoRV", "AutoStart is Disabled");
                 Application.Exit();
@@ -46,6 +47,10 @@ namespace NoRV
             });
             try
             {
+                http.Router.BeforeRouting += context =>
+                {
+                    context.Response.AddHeader("Access-Control-Allow-Origin", "*");
+                };
                 http.Start();
                 Logger.info("HTTP Server Started");
             }
@@ -61,7 +66,7 @@ namespace NoRV
             Thread detectThread = new Thread(new ThreadStart(DetectWork));
             detectThread.Start();
             Logger.info("Face Detect Thread Started");
-            
+
             Utils.Restart3rdParty("Track");
             Logger.info("Track Form Started");
 
@@ -82,11 +87,20 @@ namespace NoRV
             }
             Logger.info("Stop recording on OBS");
             OBSManager.StopOBSRecording();
+
+            Thread volumeThread = new Thread(new ThreadStart(CheckVolume));
+            volumeThread.Start();
+            Logger.info("Volume Thread Started");
+
             Logger.info("NoRV Fully Started");
-//  ####################################################################  //
+            //  ####################################################################  //
             Application.Run(ControlForm.getInstance());
-//  ####################################################################  //
+            //  ####################################################################  //
             Logger.info("Finishing NoRV");
+
+            volumeThread.Abort();
+            Logger.info("Volume Thread Ended");
+
             Utils.Stop3rdParty("Track");
             Logger.info("Track Form Ended");
 
@@ -154,7 +168,7 @@ namespace NoRV
                                     break;
                             }
                         }
-                        if(videographer != prev_videographer || commission != prev_commission)
+                        if (videographer != prev_videographer || commission != prev_commission)
                             Logger.info("Videographer and Commission Updated", "Videographer: " + videographer + ", Commission: " + commission);
                     }
                 }
@@ -167,7 +181,7 @@ namespace NoRV
                     videographer = Config.getInstance().getVideographer();
                     Logger.info("Videographer Initiated", videographer);
                 }
-                if(String.IsNullOrEmpty(commission))
+                if (String.IsNullOrEmpty(commission))
                 {
                     commission = Config.getInstance().getCommission();
                     Logger.info("Commission Initiated", commission);
@@ -178,21 +192,21 @@ namespace NoRV
 
         private static void MirrorWork()
         {
-            while(true)
+            while (true)
             {
                 try
                 {
                     Process[] procs = Process.GetProcessesByName(Config.getInstance().getMirrorSourceProcess());
                     if (procs.Length == 0)
                     {
-                        Process proc = Process.Start("Mirror\\" + Config.getInstance().getMirrorSourceProcess() + ".exe", 
+                        Process proc = Process.Start("Mirror\\" + Config.getInstance().getMirrorSourceProcess() + ".exe",
                             "--fullscreen --max-size 1024 --window-borderless --window-title '" + Config.getInstance().getMirrorSourceWindow() + "'");
                     }
                     else
                     {
-                        foreach(var proc in procs)
+                        foreach (var proc in procs)
                         {
-                            if(proc.MainWindowHandle != null)
+                            if (proc.MainWindowHandle != null)
                             {
                                 WinSDK.User32.SetWindowPos(proc.MainWindowHandle, WinSDK.User32.HWND_BOTTOM, 0, 0, 0, 0, WinSDK.User32.NOMOVE_NOSIZE_SHOW_FLAG);
                             }
@@ -240,16 +254,41 @@ namespace NoRV
                         found = true;
                         break;
                     }
-                    catch(Exception e)
+                    catch (Exception e)
                     {
                         Logger.info("Mirror Detect Failed", e.Message);
                     }
                 }
-                if(!found)
+                if (!found)
                 {
                     OBSManager.SwitchToWitness();
                 }
                 Thread.Sleep(100);
+            }
+        }
+
+        private static async void CheckVolume()
+        {
+            CoreAudioController controller = new CoreAudioController();
+            while (true)
+            {
+                try
+                {
+                    if (controller.DefaultPlaybackDevice != null)
+                    {
+                        double vol = controller.DefaultPlaybackDevice.Volume;
+                        if (vol != Config.getInstance().getDefaultVolume())
+                        {
+                            await controller.DefaultPlaybackDevice.SetVolumeAsync(Config.getInstance().getDefaultVolume());
+                        }
+                    }
+                }
+                catch (ThreadAbortException)
+                {
+                    return;
+                }
+                catch (Exception) { }
+                Thread.Sleep(1000);
             }
         }
     }

@@ -2,9 +2,12 @@
 using Grapevine.Server;
 using Grapevine.Server.Attributes;
 using Grapevine.Shared;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Web;
+using System.Web.UI.WebControls;
 
 namespace NoRV
 {
@@ -21,7 +24,6 @@ namespace NoRV
 		[RestRoute(HttpMethod = HttpMethod.GET, PathInfo = "/api/time")]
 		public IHttpContext Time(IHttpContext context)
 		{
-			context.Response.AddHeader("Access-Control-Allow-Origin", "*");
 			context.Response.SendResponse(TimeManage.getCurrentTime().ToString("MMM d,yyyy h:mm:ss tt"));
 			return context;
 		}
@@ -171,7 +173,67 @@ namespace NoRV
 			context.Response.SendResponse("Stopping Failed");
 			return context;
 		}
+		
+		[RestRoute(HttpMethod = HttpMethod.GET, PathInfo = "/getHistory")]
+		public IHttpContext getHistory(IHttpContext context)
+        {
+			int limit, page, pages = 0;
 
+			try
+            {
+				limit = Int32.Parse(context.Request.QueryString["rows"]);
+            }
+			catch(Exception)
+            {
+				limit = 20;
+            }
+			if (limit <= 0)
+				limit = 20;
+
+			int total = HistoryManager.getInstance().getTotalCount();
+			if (total > 0)
+				pages = (total + limit - 1) / limit;
+
+			try
+			{
+				page = Int32.Parse(context.Request.QueryString["page"]);
+			}
+			catch (Exception)
+			{
+				page = 1;
+			}
+			if (page > pages)
+				page = pages;
+			if (page < 1)
+				page = 1;
+
+			object list = HistoryManager.getInstance().getHistory(page, limit);
+
+			context.Response.SendResponse(JsonConvert.SerializeObject(new Dictionary<string, object>
+			{
+				{ "records", total },
+				{ "total", pages },
+				{ "page", page },
+				{ "rows", list }
+			}));
+			return context;
+		}
+
+		[RestRoute(HttpMethod = HttpMethod.GET, PathInfo = "/download")]
+		public IHttpContext download(IHttpContext context)
+		{
+			string type = context.Request.QueryString["type"];
+			string id = context.Request.QueryString["id"];
+
+			string path = HistoryManager.getInstance().getByID(type, id);
+			context.Response.ContentType = ContentType.CUSTOM_BINARY;
+			context.Response.AddHeader("Content-Disposition", "inline; filename=" + type + (type == "video" ? ".mkv" : ".txt"));
+			byte[] fileContent = new byte[0];
+			if(!String.IsNullOrEmpty(path))
+				fileContent = File.ReadAllBytes(path);
+			context.Response.SendResponse(fileContent);
+			return context;
+		}
 
 
 		[RestRoute(HttpMethod = HttpMethod.GET, PathInfo = "")]

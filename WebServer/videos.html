@@ -1,52 +1,54 @@
 ﻿<!DOCTYPE html>
 <html style="font-size: 16px;" lang="en-US">
-  <head>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta charset="utf-8">
-    <meta name="keywords" content="">
-    <meta name="description" content="">
-    <meta name="page_type" content="np-template-header-footer-from-plugin">
+<head>
     <title>Videos</title>
-    <link rel="stylesheet" href="nicepage.css" media="screen">
-<link rel="stylesheet" href="Videos.css" media="screen">
-    <script class="u-script" type="text/javascript" src="jquery.js" defer=""></script>
-    <script class="u-script" type="text/javascript" src="nicepage.js" defer=""></script>
-    <meta name="generator" content="Nicepage 2.23.0, nicepage.com">
     <link rel="icon" href="favicon.png">
-    
-    
-    <link id="u-theme-google-font" rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:100,100i,300,300i,400,400i,500,500i,700,700i,900,900i|Open+Sans:300,300i,400,400i,600,600i,700,700i,800,800i">
-    <script type="application/ld+json">{
-		"@context": "http://schema.org",
-		"@type": "Organization",
-		"name": "NoRV",
-		"url": "index.html"
-}</script>
-    <meta property="og:title" content="Videos">
-    <meta property="og:type" content="website">
-    <meta name="theme-color" content="#478ac9">
-    <link rel="canonical" href="index.html">
-    <meta property="og:url" content="index.html">
-  </head>
-  <body class="u-body">
-    <section class="skrollable u-align-center u-clearfix u-image u-lightbox u-section" id="carousel_fe52" data-image-width="2000" data-image-height="1333">
-      <div class="u-clearfix u-expanded-width u-gutter-10 u-layout-wrap">
-        <div class="u-gutter-0 u-layout">
-          <div class="u-layout-col">
-            <!--<div class="u-size-20">
-              <div class="u-layout-row">
-                <div class="u-align-left u-container-style u-image u-layout-cell u-left-cell u-size-30 u-image">
-                </div>
-                <div class="u-align-left u-container-style u-image u-layout-cell u-right-cell u-size-30 u-image">
-                </div>
-              </div>
-            </div>-->
-          </div>
-        </div>
-      </div>
-    </section>
-    
-    
-    
-  </body>
+    <script type="text/javascript" src="jquery.js"></script>
+    <link rel="stylesheet" type="text/css" href="jquery-ui.css">
+    <link rel="stylesheet" type="text/css" href="ui.jqgrid.css">
+    <script type="text/javascript" src="grid.locale-en.js"></script>
+    <script type="text/javascript" src="jquery.jqGrid.min.js"></script>
+
+</head>
+<body>
+    <div style="width: 100vw; height: 100vh; display: flex; justify-content: center; align-items: center;">
+        <table id="historyGrid"></table>
+        <div id="historyPager"></div>
+    </div>
+
+    <script>
+        var historyData = [];
+        for (var i = 11; i <= 31; i++) {
+            historyData.push({
+                'depo_id': 'depo_' + i,
+                'case_name': 'case ' + i,
+                'witness_name': 'witness ' + i
+            });
+        }
+        var download_link = function (cellvalue, options, rowObject) {
+            return '<a target="_blank" href="download?type=' + options['colModel']['name'] + '&id=' + rowObject['depo_id'] + '">Download</a>'
+        }
+        $(document).ready(function () {
+            $('#historyGrid').jqGrid({
+                url: 'getHistory',
+                datatype: "json",
+                jsonReader: { id: "depo_id" },
+                colNames: ["Depo ID", 'Case Name', 'Witness Name', 'Video', 'Log'],
+                colModel: [
+                    { name: 'depo_id', id: 'depo_id', hidden: true },
+                    { name: 'case_name', id: 'case_name', width: 150, sortable: false, align: 'center' },
+                    { name: 'witness_name', id: 'witness_name', width: 150, sortable: false, align: 'center' },
+                    { name: 'video', id: 'video', width: 100, sortable: false, align: 'center', formatter: download_link },
+                    { name: 'log', id: 'log', width: 100, sortable: false, align: 'center', formatter: download_link }
+                ],
+                height: '460px',
+                rownum: 20,
+                pager: '#historyPager',
+                beforeSelectRow: function (rowid, e) {
+                    return false;
+                }
+            });
+        });
+    </script>
+</body>
 </html>

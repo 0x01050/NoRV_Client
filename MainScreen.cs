@@ -15,6 +15,7 @@ namespace NoRV
 
         private Dictionary<string, string> InfoList = new Dictionary<string, string>();
         private string witness = "";
+        private string casename = "";
 
         private string voiceText = "";
         private double speed = 0.9;
@@ -43,6 +44,8 @@ namespace NoRV
                 }
                 if (this.InfoList.ContainsKey("Witness"))
                     witness = this.InfoList["Witness"];
+                if (this.InfoList.ContainsKey("CaseName"))
+                    casename = this.InfoList["CaseName"];
                 if (!this.InfoList.ContainsKey("Videographer"))
                     this.InfoList.Add("Videographer", Program.videographer);
                 if (!this.InfoList.ContainsKey("Commission"))
@@ -102,7 +105,6 @@ namespace NoRV
         }
 
         // For Logging
-        private string logFile = "";
         private List<string> logs = new List<string>();
         private string lastLog = "";
         private DateTime lastLogTime = DateTime.Now;
@@ -112,23 +114,40 @@ namespace NoRV
             string date = "";
             if (InfoList.ContainsKey("Date"))
                 date = InfoList["Date"];
-            logFile = witness + " - " + date;
             logs.Add(witness + ". " + date);
             logs.Add("");
         }
         private void SaveLog()
         {
+            string depoid = HistoryManager.getInstance().generateID();
+
             logs.Add("total running time =" + Utils.buildElapsedTimeString(totalSeconds));
             logs.Add(String.Format("total breaks = {0}", logs.Count - 3));
+
+            string logpath = Path.GetFullPath(Config.getInstance().getLogPath() + "\\" + depoid + ".txt");
             try
             {
-                File.WriteAllLines(Config.getInstance().getLogPath() + "\\" + logFile + ".txt", logs);
-            }
-            catch(DirectoryNotFoundException)
-            {
-                File.WriteAllLines(logFile + ".txt", logs);
+                File.WriteAllLines(Config.getInstance().getLogPath() + "\\" + depoid + ".txt", logs);
             }
             catch(Exception) { }
+
+            string videopath = Path.GetFullPath(Config.getInstance().getVideoPath() + "\\" + depoid + ".mkv");
+            while(true)
+            {
+
+                try
+                {
+                    File.Move(Config.getInstance().getVideoPath() + "\\Video.mkv", Config.getInstance().getVideoPath() + "\\" + depoid + ".mkv");
+                }
+                catch(IOException)
+                {
+                    continue;
+                }
+                catch (Exception) { }
+                break;
+            }
+
+            HistoryManager.getInstance().saveDepo(depoid, witness, casename, videopath, logpath);
         }
         private void InsertLog(string type)
         {

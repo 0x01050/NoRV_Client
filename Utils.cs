@@ -154,9 +154,12 @@ namespace NoRV
                 elapse += String.Format("{0}:", totalSec / 3600);
                 totalSec %= 3600;
             }
-            elapse += String.Format("{0}:", totalSec / 60);
+            if(String.IsNullOrEmpty(elapse))
+                elapse += String.Format("{0:00}:", totalSec / 60);
+            else
+                elapse += String.Format("{0}:", totalSec / 60);
             totalSec %= 60;
-            elapse += String.Format("{0}", totalSec);
+            elapse += String.Format("{0:00}", totalSec);
             return elapse;
         }
         public static void ExecuteInMainContext(Action action)

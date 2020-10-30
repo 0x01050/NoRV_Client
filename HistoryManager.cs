@@ -112,15 +112,38 @@ namespace NoRV
             return "";
         }
 
-        public int getTotalCount()
+        private string addQuery(string key, bool whereStarted)
+        {
+            string result = " ";
+            if (whereStarted)
+                result += "AND ";
+            else
+                result += "WHERE ";
+            result += (key + " LIKE @" + key + " ");
+            return result;
+        }
+
+        public int getTotalCount(string case_name, string witness_name)
         {
             if (!isOpen())
                 return 0;
             try
             {
-
-                string countSql = "SELECT COUNT(*) FROM History";
                 SqliteCommand coundCommand = sqlite_conn.CreateCommand();
+                string countSql = "SELECT COUNT(*) FROM History";
+                bool whereStarted = false;
+                if(!String.IsNullOrEmpty(case_name))
+                {
+                    countSql += addQuery("case_name", whereStarted);
+                    coundCommand.Parameters.Add(new SqliteParameter("@case_name", '%' + case_name + '%'));
+                    whereStarted = true;
+                }
+                if (!String.IsNullOrEmpty(witness_name))
+                {
+                    countSql += addQuery("witness_name", whereStarted);
+                    coundCommand.Parameters.Add(new SqliteParameter("@witness_name", '%' + witness_name + '%'));
+                    whereStarted = true;
+                }
                 coundCommand.CommandText = countSql;
                 long countResult = (long)coundCommand.ExecuteScalar();
                 return Convert.ToInt32(countResult);
@@ -129,16 +152,29 @@ namespace NoRV
             return 0;
         }
 
-        public object getHistory(int page, int limit)
+        public object getHistory(int page, int limit, string case_name, string witness_name)
         {
             List<Dictionary<string, object>> getResult = new List<Dictionary<string, object>>();
             if (!isOpen())
                 return getResult;
             try
             {
-
-                string getSql = "SELECT * FROM History ORDER BY depo_id LIMIT @offset, @limit";
                 SqliteCommand getCommand = sqlite_conn.CreateCommand();
+                string getSql = "SELECT * FROM History";
+                bool whereStarted = false;
+                if (!String.IsNullOrEmpty(case_name))
+                {
+                    getSql += addQuery("case_name", whereStarted);
+                    getCommand.Parameters.Add(new SqliteParameter("@case_name", '%' + case_name + '%'));
+                    whereStarted = true;
+                }
+                if (!String.IsNullOrEmpty(witness_name))
+                {
+                    getSql += addQuery("witness_name", whereStarted);
+                    getCommand.Parameters.Add(new SqliteParameter("@witness_name", '%' + witness_name + '%'));
+                    whereStarted = true;
+                }
+                getSql += " ORDER BY depo_id LIMIT @offset, @limit";
                 getCommand.CommandText = getSql;
                 getCommand.Parameters.Add(new SqliteParameter("@offset", (page - 1) * limit));
                 getCommand.Parameters.Add(new SqliteParameter("@limit", limit));

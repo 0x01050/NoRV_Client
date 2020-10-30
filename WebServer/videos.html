@@ -11,22 +11,19 @@
 
 </head>
 <body>
-    <div style="width: 100vw; height: 100vh; display: flex; justify-content: center; align-items: center;">
+    <div style="width: calc(100vw - 20px); height: calc(100vh - 20px); display: flex; justify-content: center; align-items: center;">
         <table id="historyGrid"></table>
         <div id="historyPager"></div>
     </div>
 
     <script>
-        var historyData = [];
-        for (var i = 11; i <= 31; i++) {
-            historyData.push({
-                'depo_id': 'depo_' + i,
-                'case_name': 'case ' + i,
-                'witness_name': 'witness ' + i
-            });
-        }
         var download_link = function (cellvalue, options, rowObject) {
             return '<a target="_blank" href="download?type=' + options['colModel']['name'] + '&id=' + rowObject['depo_id'] + '">Download</a>'
+        }
+        var resizeGrid = function () {
+            var $grid = $("#historyGrid");
+            var newWidth = $grid.closest(".ui-jqgrid").parent().width();
+            $grid.jqGrid("setGridWidth", newWidth, true);
         }
         $(document).ready(function () {
             $('#historyGrid').jqGrid({
@@ -38,8 +35,8 @@
                     { name: 'depo_id', id: 'depo_id', hidden: true },
                     { name: 'case_name', id: 'case_name', width: 150, sortable: false, align: 'center' },
                     { name: 'witness_name', id: 'witness_name', width: 150, sortable: false, align: 'center' },
-                    { name: 'video', id: 'video', width: 100, sortable: false, align: 'center', formatter: download_link },
-                    { name: 'log', id: 'log', width: 100, sortable: false, align: 'center', formatter: download_link }
+                    { name: 'video', id: 'video', width: 100, sortable: false, align: 'center', formatter: download_link, search: false },
+                    { name: 'log', id: 'log', width: 100, sortable: false, align: 'center', formatter: download_link, search: false }
                 ],
                 height: '460px',
                 rownum: 20,
@@ -48,6 +45,10 @@
                     return false;
                 }
             });
+            $('#historyGrid').jqGrid('filterToolbar', { searchOnEnter: true, enableClear: false });
+
+            window.onresize = resizeGrid;
+            resizeGrid();
         });
     </script>
 </body>

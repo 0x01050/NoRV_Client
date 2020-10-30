@@ -177,6 +177,24 @@ namespace NoRV
 		[RestRoute(HttpMethod = HttpMethod.GET, PathInfo = "/getHistory")]
 		public IHttpContext getHistory(IHttpContext context)
         {
+			string case_name = "", witness_name = "";
+			try
+            {
+				case_name = context.Request.QueryString["case_name"];
+            }
+			catch(Exception)
+            {
+				case_name = "";
+			}
+			try
+			{
+				witness_name = context.Request.QueryString["witness_name"];
+			}
+			catch (Exception)
+			{
+				witness_name = "";
+			}
+
 			int limit, page, pages = 0;
 
 			try
@@ -190,7 +208,7 @@ namespace NoRV
 			if (limit <= 0)
 				limit = 20;
 
-			int total = HistoryManager.getInstance().getTotalCount();
+			int total = HistoryManager.getInstance().getTotalCount(case_name, witness_name);
 			if (total > 0)
 				pages = (total + limit - 1) / limit;
 
@@ -207,7 +225,7 @@ namespace NoRV
 			if (page < 1)
 				page = 1;
 
-			object list = HistoryManager.getInstance().getHistory(page, limit);
+			object list = HistoryManager.getInstance().getHistory(page, limit, case_name, witness_name);
 
 			context.Response.SendResponse(JsonConvert.SerializeObject(new Dictionary<string, object>
 			{

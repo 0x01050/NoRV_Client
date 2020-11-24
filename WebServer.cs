@@ -6,8 +6,8 @@ using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Net.Sockets;
 using System.Web;
-using System.Web.UI.WebControls;
 
 namespace NoRV
 {
@@ -42,14 +42,12 @@ namespace NoRV
         {
 			AppStatus status = ControlForm.getInstance().getStatus();
 			bool reading = false;
-			bool readon = false;
 			string totaltime = "?";
 			string breaks = "?";
 
 			if(status != AppStatus.STOPPED)
             {
 				reading = ControlForm.getInstance().getIgnorable();
-				readon = ControlForm.getInstance().getReadonFinished();
 				if(status == AppStatus.PAUSED)
                 {
 					totaltime = ControlForm.getInstance().getRunningTime();
@@ -57,9 +55,41 @@ namespace NoRV
                 }
             }
 
-			context.Response.SendResponse(status + "," + reading + "," + readon + "," + totaltime + "," + breaks);
+			context.Response.SendResponse(status + "," + reading + "," + totaltime + "," + breaks);
 			return context;
-        }
+		}
+		[RestRoute(HttpMethod = HttpMethod.GET, PathInfo = "/getInternet")]
+		public IHttpContext getInternet(IHttpContext context)
+		{
+			AppStatus status = ControlForm.getInstance().getStatus();
+			bool internet = false;
+
+			if (status != AppStatus.STOPPED && ControlForm.getInstance().getReadonFinished())
+			{
+				internet = true;
+			}
+
+			if(internet == false)
+			{
+				try
+				{
+					using (TcpClient client = new TcpClient())
+					{
+						var result = client.BeginConnect("google.com", 80, null, null);
+						var success = result.AsyncWaitHandle.WaitOne(TimeSpan.FromSeconds(1));
+						if (success)
+						{
+							client.EndConnect(result);
+							internet = true;
+						}
+					}
+				}
+				catch(Exception) { }
+			}
+
+			context.Response.SendResponse(internet.ToString());
+			return context;
+		}
 		[RestRoute(HttpMethod = HttpMethod.POST, PathInfo = "/loadDeposition")]
 		public IHttpContext loadDeposition(IHttpContext context)
 		{

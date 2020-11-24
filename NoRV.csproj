@@ -358,7 +358,7 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="Config.xml">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="Detect\haarcascade_frontalface.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>

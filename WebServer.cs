@@ -42,12 +42,14 @@ namespace NoRV
         {
 			AppStatus status = ControlForm.getInstance().getStatus();
 			bool reading = false;
+			bool readon = false;
 			string totaltime = "?";
 			string breaks = "?";
 
 			if(status != AppStatus.STOPPED)
             {
 				reading = ControlForm.getInstance().getIgnorable();
+				readon = ControlForm.getInstance().getReadonFinished();
 				if(status == AppStatus.PAUSED)
                 {
 					totaltime = ControlForm.getInstance().getRunningTime();
@@ -55,7 +57,7 @@ namespace NoRV
                 }
             }
 
-			context.Response.SendResponse(status + "," + reading + "," + totaltime + "," + breaks);
+			context.Response.SendResponse(status + "," + reading + "," + readon + "," + totaltime + "," + breaks);
 			return context;
         }
 		[RestRoute(HttpMethod = HttpMethod.POST, PathInfo = "/loadDeposition")]

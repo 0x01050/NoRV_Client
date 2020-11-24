@@ -68,6 +68,14 @@ namespace NoRV
             }
             return false;
         }
+        public bool getReadonFinished()
+        {
+            if(!Utils.MainFormClosed(_mainForm))
+            {
+                return _mainForm.isReadonFinished();
+            }
+            return false;
+        }
         public string getRunningTime()
         {
             if (!Utils.MainFormClosed(_mainForm))

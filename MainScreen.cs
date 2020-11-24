@@ -26,6 +26,7 @@ namespace NoRV
         AudioFileReader audioFileReader = null;
 
         private bool ignoreInput = false;
+        private bool readonFinished = false;
 
         public MainScreen(Dictionary<string, string> InfoList = null)
         {
@@ -132,9 +133,12 @@ namespace NoRV
             catch(Exception) { }
 
             string videopath = Path.GetFullPath(Config.getInstance().getVideoPath() + "\\" + depoid + ".mkv");
+            DateTime waitForFinish = DateTime.Now;
             while(true)
             {
-
+                // Wait for 30s for video file to be saved completely.
+                if ((DateTime.Now - waitForFinish).TotalSeconds > 30)
+                    break;
                 try
                 {
                     File.Move(Config.getInstance().getVideoPath() + "\\Video.mkv", Config.getInstance().getVideoPath() + "\\" + depoid + ".mkv");
@@ -292,6 +296,10 @@ namespace NoRV
         {
             return ignoreInput;
         }
+        public bool isReadonFinished()
+        {
+            return readonFinished;
+        }
         public void CancelRecording()
         {
             DialogResult = DialogResult.Cancel;
@@ -312,6 +320,7 @@ namespace NoRV
             PlayMP3("tts.mp3", (s, e) =>
             {
                 File.Delete("tts.mp3");
+                readonFinished = true;
             });
         }
         public void StopRecording()
